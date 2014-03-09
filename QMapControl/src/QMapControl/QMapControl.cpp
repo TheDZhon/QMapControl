@@ -84,6 +84,9 @@ namespace qmapcontrol
         // Allow the map to gain click focus.
         setFocusPolicy(Qt::ClickFocus);
 
+        // Enable mouse tracking (all mouse events received - not just clicks).
+        setMouseTracking(true);
+
         // Default projection/tile size.
         setProjection(projection::EPSG::SphericalMercator, 256);
 
