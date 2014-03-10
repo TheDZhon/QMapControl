@@ -612,7 +612,7 @@ namespace qmapcontrol
 
         // Default mouse mode.
         QMapControl::MouseButtonMode mouse_mode = QMapControl::MouseButtonMode::None;
-        bool origin_center = false;
+        bool mouse_origin_center = false;
 
         // Left button released?
         if(mouse_event->button() == Qt::MouseButton::LeftButton)
@@ -622,7 +622,7 @@ namespace qmapcontrol
 
             // Capture the left mouse mode.
             mouse_mode = m_mouse_left_mode;
-            origin_center = m_mouse_left_origin_center;
+            mouse_origin_center = m_mouse_left_origin_center;
         }
         // Right button released?
         else if(mouse_event->button() == Qt::MouseButton::RightButton)
@@ -632,7 +632,7 @@ namespace qmapcontrol
 
             // Capture the right mouse mode.
             mouse_mode = m_mouse_right_mode;
-            origin_center = m_mouse_right_origin_center;
+            mouse_origin_center = m_mouse_right_origin_center;
         }
 
         // Are we in pan ... mode?
@@ -644,7 +644,7 @@ namespace qmapcontrol
             std::vector<QPointF> coords;
 
             // Origin at center?
-            if(origin_center)
+            if(mouse_origin_center)
             {
                 // From mouse pressed with offsets applied.
                 const QPointF mouse_diff = m_mouse_position_pressed_px - m_mouse_position_current_px;
@@ -671,7 +671,7 @@ namespace qmapcontrol
             QPointF bottom_right_px(toPointPx(m_mouse_position_current_px));
 
             // Origin at center?
-            if(origin_center)
+            if(mouse_origin_center)
             {
                 // From mouse pressed with offsets applied.
                 const QPointF mouse_diff = m_mouse_position_pressed_px - m_mouse_position_current_px;
