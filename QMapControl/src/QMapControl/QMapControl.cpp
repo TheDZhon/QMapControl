@@ -1235,13 +1235,27 @@ namespace qmapcontrol
                              m_viewport_center_px.x() + 10.0, m_viewport_center_px.y());
         }
 
-        // Is the mouse currently pressed and mode set to draw/pan a box.
-        if((m_mouse_left_pressed && (m_mouse_left_mode == QMapControl::MouseButtonMode::DrawBox || m_mouse_left_mode == QMapControl::MouseButtonMode::PanBox || m_mouse_left_mode == QMapControl::MouseButtonMode::SelectBox)) ||
-           (m_mouse_right_pressed && (m_mouse_right_mode == QMapControl::MouseButtonMode::DrawBox || m_mouse_right_mode == QMapControl::MouseButtonMode::PanBox || m_mouse_right_mode == QMapControl::MouseButtonMode::SelectBox)))
+        // Is the mouse pressed?
+        if(m_mouse_left_pressed || m_mouse_right_pressed)
         {
-            // Draw at center?
-            if((m_mouse_left_pressed && m_mouse_left_origin_center) ||
-               (m_mouse_right_pressed && m_mouse_right_origin_center))
+            // Default to the left mouse button options.
+            MouseButtonMode mouse_mode = m_mouse_left_mode;
+            bool mouse_origin_center = m_mouse_left_origin_center;
+
+            // Has the right mouse button been pressed?
+            if(m_mouse_right_pressed)
+            {
+                // Set to the right mouse button options.
+                mouse_mode = m_mouse_right_mode;
+                mouse_origin_center = m_mouse_right_origin_center;
+            }
+
+            // Capture the start and end points.
+            QPointF start_point_px = m_mouse_position_pressed_px;
+            QPointF end_point_px = m_mouse_position_current_px;
+
+            // Draw at center of mouse pressed?
+            if(mouse_origin_center)
             {
                 // Draw the crosshair at the mouse start point.
                 // |
@@ -1251,143 +1265,49 @@ namespace qmapcontrol
                 painter.drawLine(m_mouse_position_pressed_px.x() - 1.0, m_mouse_position_pressed_px.y(),
                                  m_mouse_position_pressed_px.x() + 1.0, m_mouse_position_pressed_px.y());
 
-                // Save the current painter's state.
-                painter.save();
-
-                // Set the pen and brush colours.
-                painter.setPen(QPen(QColor(66, 132, 253)));
-                painter.setBrush(QBrush(QColor(66, 132, 253)));
-                painter.setOpacity(0.4);
-
-                // Draw rect with center positioned at start mouse point.
-                const QPointF mouse_diff = m_mouse_position_pressed_px - m_mouse_position_current_px;
-                painter.drawRect(QRectF(m_mouse_position_pressed_px - mouse_diff, m_mouse_position_pressed_px + mouse_diff));
-
-                // Restore the painter's state.
-                painter.restore();
+                // Update the start and end points.
+                const QPointF mouse_diff_px = m_mouse_position_pressed_px - m_mouse_position_current_px;
+                start_point_px = m_mouse_position_pressed_px - mouse_diff_px;
+                end_point_px = m_mouse_position_pressed_px + mouse_diff_px;
             }
-            else
+
+            // Save the current painter's state.
+            painter.save();
+
+            // Set the pen and brush colours.
+            painter.setPen(QPen(QColor(66, 132, 253)));
+            painter.setBrush(QBrush(QColor(66, 132, 253)));
+            painter.setOpacity(0.4);
+
+            // Is the mouse mode set to draw/pan/select a box.
+            if(mouse_mode == QMapControl::MouseButtonMode::DrawBox || mouse_mode == QMapControl::MouseButtonMode::PanBox || mouse_mode == QMapControl::MouseButtonMode::SelectBox)
             {
-                // Save the current painter's state.
-                painter.save();
-
-                // Set the pen and brush colours.
-                painter.setPen(QPen(QColor(66, 132, 253)));
-                painter.setBrush(QBrush(QColor(66, 132, 253)));
-                painter.setOpacity(0.4);
-
-                // Draw rect from start to current mouse point.
-                painter.drawRect(QRectF(m_mouse_position_pressed_px, m_mouse_position_current_px));
-
-                // Restore the painter's state.
-                painter.restore();
+                // Draw rect.
+                painter.drawRect(QRectF(start_point_px, end_point_px));
             }
-        }
-
-        // Is the mouse currently pressed and mode set to draw/pan a line.
-        if((m_mouse_left_pressed && (m_mouse_left_mode == QMapControl::MouseButtonMode::DrawLine || m_mouse_left_mode == QMapControl::MouseButtonMode::PanLine || m_mouse_left_mode == QMapControl::MouseButtonMode::SelectLine)) ||
-           (m_mouse_right_pressed && (m_mouse_right_mode == QMapControl::MouseButtonMode::DrawLine || m_mouse_right_mode == QMapControl::MouseButtonMode::PanLine || m_mouse_right_mode == QMapControl::MouseButtonMode::SelectLine)))
-        {
-            // Draw at center?
-            if((m_mouse_left_pressed && m_mouse_left_origin_center) ||
-               (m_mouse_right_pressed && m_mouse_right_origin_center))
+            // Is the mouse mode set to draw/pan/select a line.
+            else if(mouse_mode == QMapControl::MouseButtonMode::DrawLine || mouse_mode == QMapControl::MouseButtonMode::PanLine || mouse_mode == QMapControl::MouseButtonMode::SelectLine)
             {
-                // Draw the crosshair at the mouse start point.
-                // |
-                painter.drawLine(m_mouse_position_pressed_px.x(), m_mouse_position_pressed_px.y() - 1.0,
-                                 m_mouse_position_pressed_px.x(), m_mouse_position_pressed_px.y() + 1.0);
-                // -
-                painter.drawLine(m_mouse_position_pressed_px.x() - 1.0, m_mouse_position_pressed_px.y(),
-                                 m_mouse_position_pressed_px.x() + 1.0, m_mouse_position_pressed_px.y());
+                // Capture the pen.
+                QPen line_pen(painter.pen());
 
-                // Save the current painter's state.
-                painter.save();
-
-                // Set the pen and brush colours.
                 /// @todo expose the fuzzy factor as a setting.
                 const qreal fuzzy_factor_px = 5.0;
-                QPen line_pen(QColor(66, 132, 253));
                 line_pen.setWidthF(fuzzy_factor_px);
                 painter.setPen(line_pen);
-                painter.setBrush(QBrush(QColor(66, 132, 253)));
-                painter.setOpacity(0.4);
 
-                // Draw line with center positioned at start mouse point.
-                const QPointF mouse_diff = m_mouse_position_pressed_px - m_mouse_position_current_px;
-                painter.drawLine(m_mouse_position_pressed_px - mouse_diff, m_mouse_position_pressed_px + mouse_diff);
-
-                // Restore the painter's state.
-                painter.restore();
+                // Draw line.
+                painter.drawLine(start_point_px, end_point_px);
             }
-            else
+            // Is the mouse mode set to draw/pan/select a ellipse.
+            else if(mouse_mode == QMapControl::MouseButtonMode::DrawEllipse || mouse_mode == QMapControl::MouseButtonMode::PanEllipse || mouse_mode == QMapControl::MouseButtonMode::SelectEllipse)
             {
-                // Save the current painter's state.
-                painter.save();
-
-                // Set the pen and brush colours.
-                /// @todo expose the fuzzy factor as a setting.
-                const qreal fuzzy_factor_px = 5.0;
-                QPen line_pen(QColor(66, 132, 253));
-                line_pen.setWidthF(fuzzy_factor_px);
-                painter.setPen(line_pen);
-                painter.setBrush(QBrush(QColor(66, 132, 253)));
-                painter.setOpacity(0.4);
-
-                // Draw line from start to current mouse point.
-                painter.drawLine(m_mouse_position_pressed_px, m_mouse_position_current_px);
-
-                // Restore the painter's state.
-                painter.restore();
-            }
-        }
-
-        // Is the mouse currently pressed and mode set to draw/pan a ellipse.
-        if((m_mouse_left_pressed && (m_mouse_left_mode == QMapControl::MouseButtonMode::DrawEllipse || m_mouse_left_mode == QMapControl::MouseButtonMode::PanEllipse || m_mouse_left_mode == QMapControl::MouseButtonMode::SelectEllipse)) ||
-           (m_mouse_right_pressed && (m_mouse_right_mode == QMapControl::MouseButtonMode::DrawEllipse || m_mouse_right_mode == QMapControl::MouseButtonMode::PanEllipse || m_mouse_right_mode == QMapControl::MouseButtonMode::SelectEllipse)))
-        {
-            // Draw at center?
-            if((m_mouse_left_pressed && m_mouse_left_origin_center) ||
-               (m_mouse_right_pressed && m_mouse_right_origin_center))
-            {
-                // Draw the crosshair at the mouse start point.
-                // |
-                painter.drawLine(m_mouse_position_pressed_px.x(), m_mouse_position_pressed_px.y() - 1.0,
-                                 m_mouse_position_pressed_px.x(), m_mouse_position_pressed_px.y() + 1.0);
-                // -
-                painter.drawLine(m_mouse_position_pressed_px.x() - 1.0, m_mouse_position_pressed_px.y(),
-                                 m_mouse_position_pressed_px.x() + 1.0, m_mouse_position_pressed_px.y());
-
-                // Save the current painter's state.
-                painter.save();
-
-                // Set the pen and brush colours.
-                painter.setPen(QPen(QColor(66, 132, 253)));
-                painter.setBrush(QBrush(QColor(66, 132, 253)));
-                painter.setOpacity(0.4);
-
-                // Draw ellipse with center positioned at start mouse point.
-                const QPointF mouse_diff = m_mouse_position_pressed_px - m_mouse_position_current_px;
-                painter.drawEllipse(m_mouse_position_pressed_px, mouse_diff.x(), mouse_diff.y());
-
-                // Restore the painter's state.
-                painter.restore();
-            }
-            else
-            {
-                // Save the current painter's state.
-                painter.save();
-
-                // Set the pen and brush colours.
-                painter.setPen(QPen(QColor(66, 132, 253)));
-                painter.setBrush(QBrush(QColor(66, 132, 253)));
-                painter.setOpacity(0.4);
-
                 // Draw ellipse from start to current mouse point.
-                painter.drawEllipse(QRectF(m_mouse_position_pressed_px, m_mouse_position_current_px));
-
-                // Restore the painter's state.
-                painter.restore();
+                painter.drawEllipse(QRectF(start_point_px, end_point_px));
             }
+
+            // Restore the painter's state.
+            painter.restore();
         }
     }
 
