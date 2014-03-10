@@ -75,7 +75,9 @@ void Multidemo::setupMaps()
 
     // Disable any zoom/mouse interaction.
     m_mini_map_control->enableZoomControls(false);
-    m_mini_map_control->enableMouseEvents(false);
+    m_mini_map_control->enableLayerMouseEvents(false);
+    m_mini_map_control->setMouseButtonLeft(QMapControl::MouseButtonMode::None, false);
+    m_mini_map_control->setMouseButtonRight(QMapControl::MouseButtonMode::None, false);
 
     // Create a layer for the map adapter and add it to the "mini" QMapControl.
     std::shared_ptr<Layer> layer_mini_map(std::make_shared<Layer>("Mini Map Layer"));
@@ -372,7 +374,7 @@ void Multidemo::geometryClickEvent(Geometry* geometry)
     }
 }
 
-void Multidemo::main_mouseEventPressCoordinate(QMouseEvent* mouse_event, QPointF coordinate)
+void Multidemo::main_mouseEventPressCoordinate(QMouseEvent* mouse_event, QPointF press_coordinate)
 {
     // Was there a left mouse button press?
     if(mouse_event->button() == Qt::MouseButton::LeftButton)
@@ -380,32 +382,33 @@ void Multidemo::main_mouseEventPressCoordinate(QMouseEvent* mouse_event, QPointF
         // Is the "Move to click" button checked?
         if(m_button_move_click->isChecked())
         {
-            // Move the map to the click coordinate.
-            m_map_control->setMapFocusPointAnimated(coordinate);
+            // Move both the "mini" and main map controls to the click coordinate.
+            m_mini_map_control->setMapFocusPointAnimated(press_coordinate);
+            m_map_control->setMapFocusPointAnimated(press_coordinate);
         }
 
         // Is the "Add point" button checked?
         if(m_button_add_point->isChecked())
         {
             // Add a GeometryPointCircle with a radius of 10.0 pixels.
-            m_map_control->getLayer("Geometry Layer")->addGeometry(std::make_shared<GeometryPointCircle>(coordinate, 10.0));
+            m_map_control->getLayer("Geometry Layer")->addGeometry(std::make_shared<GeometryPointCircle>(press_coordinate, 10.0));
         }
     }
 }
 
-void Multidemo::main_mouseEventReleaseCoordinate(QMouseEvent* /*mouse_event*/, QPointF /*coordinate*/)
+void Multidemo::main_mouseEventReleaseCoordinate(QMouseEvent* /*mouse_event*/, QPointF /*press_coordinate*/, QPointF /*release_coordinate*/)
 {
     // Update the location of the "mini" map control.
     m_mini_map_control->setMapFocusPoint(m_map_control->mapFocusPointCoord());
 }
 
-void Multidemo::mini_mouseEventPressCoordinate(QMouseEvent* mouse_event, QPointF coordinate)
+void Multidemo::mini_mouseEventPressCoordinate(QMouseEvent* mouse_event, QPointF press_coordinate)
 {
     // Was there a left mouse button press?
     if(mouse_event->button() == Qt::MouseButton::LeftButton)
     {
         // Move both the "mini" and main map controls to the click coordinate.
-        m_mini_map_control->setMapFocusPointAnimated(coordinate);
-        m_map_control->setMapFocusPoint(coordinate);
+        m_mini_map_control->setMapFocusPointAnimated(press_coordinate);
+        m_map_control->setMapFocusPointAnimated(press_coordinate);
     }
 }

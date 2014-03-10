@@ -352,13 +352,12 @@ void Citymap::createMenus()
 void Citymap::addNote()
 {
     addingNote = true;
-    connect(mc, SIGNAL(mouseEventPressCoordinate(QMouseEvent*, QPointF)),
-              this, SLOT(writeNote(QMouseEvent*, QPointF)));
+    QObject::connect(mc, &QMapControl::mouseEventPressCoordinate, this, &Citymap::writeNote);
 }
 
-void Citymap::writeNote(QMouseEvent*, QPointF coord)
+void Citymap::writeNote(QMouseEvent*, QPointF press_coordinate)
 {
-    std::shared_ptr<GeometryPoint> p(std::make_shared<GeometryPoint>(coord, *notepixmap, GeometryPoint::AlignmentType::BottomLeft));
+    std::shared_ptr<GeometryPoint> p(std::make_shared<GeometryPoint>(press_coordinate, *notepixmap, GeometryPoint::AlignmentType::BottomLeft));
     p->setMetadata("name", ++noteID);
     currentnoteID = noteID;
     p->setBaseZoom(16);
@@ -368,19 +367,17 @@ void Citymap::writeNote(QMouseEvent*, QPointF coord)
 
     notetextedit->clear();
 
-    notepoint->setCoordinate(coord);
+    notepoint->setCoordinate(press_coordinate);
     notepoint->setVisible(true);
 
     mc->requestRedraw();
 
-    disconnect(mc, SIGNAL(mouseEventPressCoordinate(QMouseEvent*, QPointF)),
-              this, SLOT(writeNote(QMouseEvent*, QPointF)));
+    QObject::disconnect(mc, &QMapControl::mouseEventPressCoordinate, this, &Citymap::writeNote);
 
-    connect(mc, SIGNAL(mouseEventPressCoordinate(QMouseEvent*, QPointF)),
-              this, SLOT(hideNote(QMouseEvent*, QPointF)));
+    QObject::connect(mc, &QMapControl::mouseEventPressCoordinate, this, &Citymap::hideNote);
 }
 
-void Citymap::hideNote(QMouseEvent* evnt, QPointF)
+void Citymap::hideNote(QMouseEvent* evnt, QPointF /*press_coordinate*/)
 {
     if (addingNote && evnt->type() == QEvent::MouseButtonDblClick)
     {
@@ -392,8 +389,7 @@ void Citymap::hideNote(QMouseEvent* evnt, QPointF)
         // save text
         notestext[currentnoteID] = notetextedit->toPlainText();
 
-        disconnect(mc, SIGNAL(mouseEventPressCoordinate(QMouseEvent*, QPointF)),
-                  this, SLOT(hideNote(QMouseEvent*, QPointF)));
+        QObject::disconnect(mc, &QMapControl::mouseEventPressCoordinate, this, &Citymap::hideNote);
     }
 }
 
@@ -406,27 +402,25 @@ void Citymap::editNote(Geometry* geom)
     notepoint->setVisible(true);
 
     mc->requestRedraw();
-    connect(mc, SIGNAL(mouseEventReleaseCoordinate(QMouseEvent*, QPointF)),
-              this, SLOT(hideNote(QMouseEvent*, QPointF)));
+    QObject::connect(mc, &QMapControl::mouseEventReleaseCoordinate, this, &Citymap::hideNote);
 }
 
 void Citymap::calcDistance()
 {
     ignoreClicks = true;
-    connect(mc, SIGNAL(mouseEventPressCoordinate(QMouseEvent*, QPointF)),
-              this, SLOT(calcDistanceClick(QMouseEvent*, QPointF)));
+    QObject::connect(mc, &QMapControl::mouseEventPressCoordinate, this, &Citymap::calcDistanceClick);
 }
-void Citymap::calcDistanceClick(QMouseEvent* evnt, QPointF coord)
+void Citymap::calcDistanceClick(QMouseEvent* evnt, QPointF press_coordinate)
 {
     if (coord1 == QPointF() && evnt->type() == QEvent::MouseButtonPress)
     {
-        coord1 = coord;
+        coord1 = press_coordinate;
         l->addGeometry(std::make_shared<GeometryPointImage>(coord1, QCoreApplication::applicationDirPath() + "/images/flag.png", GeometryPoint::AlignmentType::BottomRight));
         mc->requestRedraw();
     }
     else if (coord2 == QPointF() && evnt->type() == QEvent::MouseButtonPress)
     {
-        coord2 = coord;
+        coord2 = press_coordinate;
         double PI = acos(-1.0);
         double a1 = coord1.x()* (PI/180.0);;
         double b1 = coord1.y()* (PI/180.0);;
@@ -451,8 +445,7 @@ void Citymap::calcDistanceClick(QMouseEvent* evnt, QPointF coord)
         coord1 = QPointF();
         coord2 = QPointF();
         ignoreClicks = false;
-        disconnect(mc, SIGNAL(mouseEventPressCoordinate(QMouseEvent*, QPointF)),
-                      this, SLOT(calcDistanceClick(QMouseEvent*, QPointF)));
+        QObject::disconnect(mc, &QMapControl::mouseEventPressCoordinate, this, &Citymap::calcDistanceClick);
 
     }
 }

@@ -158,12 +158,12 @@ namespace qmapcontrol
         void clearGeometries();
 
         /*!
-         * Handles mouse events (such as left-clicking an item on the layer).
-         * @param viewport_event The event that occured in the viewport (contains position in pixels).
+         * Handles mouse press events (such as left-clicking an item on the layer).
+         * @param mouse_event The mouse event.
          * @param mouse_point_px The mouse point on the map in pixels.
          * @param controller_zoom The current controller zoom.
          */
-        void mouseEvent(const QMouseEvent* viewport_event, const QPointF& mouse_point_px, const int& controller_zoom);
+        void mousePressEvent(const QMouseEvent* mouse_event, const QPointF& mouse_point_px, const int& controller_zoom);
 
         /*!
          * Draws each map adapter and geometry to a pixmap using the provided painter.

@@ -359,13 +359,13 @@ namespace qmapcontrol
         m_geometry_widgets.clear();
     }
 
-    void Layer::mouseEvent(const QMouseEvent* viewport_event, const QPointF& mouse_point_px, const int& controller_zoom)
+    void Layer::mousePressEvent(const QMouseEvent* mouse_event, const QPointF& mouse_point_px, const int& controller_zoom)
     {
-        // Are mouse events enabled for this layer and is it visible?
-        if(m_mouse_events_enabled && isVisible(controller_zoom))
+        // Are mouse events enabled, is the layer visible and is it a mouse press event?
+        if(m_mouse_events_enabled && isVisible(controller_zoom) && mouse_event->type() == QEvent::MouseButtonPress)
         {
             // Is this a left-click event?
-            if(viewport_event->button() == Qt::LeftButton && viewport_event->type() == QEvent::MouseButtonPress)
+            if(mouse_event->button() == Qt::LeftButton)
             {
                 /// @todo expose the fuzzy factor as a setting.
                 const qreal fuzzy_factor_px = 5.0;

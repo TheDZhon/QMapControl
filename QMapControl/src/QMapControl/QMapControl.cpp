@@ -50,6 +50,7 @@ namespace qmapcontrol
           m_background_colour(Qt::transparent),
           m_scalebar_enabled(false),
           m_crosshairs_enabled(true),
+          m_layer_mouse_events_enabled(true),
           m_viewport_size_px(size_px),
           m_viewport_center_px(size_px.width() / 2.0, size_px.height() / 2.0),
           m_limited_viewport_rect_coord(0.0, 0.0, 0.0, 0.0),
@@ -60,7 +61,6 @@ namespace qmapcontrol
           m_zoom_minimum(0),
           m_zoom_maximum(17),
           m_current_zoom(m_zoom_minimum),
-          m_mouse_events_enabled(true),
           m_mouse_left_pressed(false),
           m_mouse_left_mode(MouseButtonMode::Pan),
           m_mouse_left_origin_center(false),
@@ -539,10 +539,10 @@ namespace qmapcontrol
     }
 
     // Mouse management.
-    void QMapControl::enableMouseEvents(const bool& enable)
+    void QMapControl::enableLayerMouseEvents(const bool& enable)
     {
-        // Set whether to enable mouse events.
-        m_mouse_events_enabled = enable;
+        // Set whether to enable mouse events for layers.
+        m_layer_mouse_events_enabled = enable;
     }
 
     QMapControl::MouseButtonMode QMapControl::getMouseButtonLeftMode()
@@ -573,283 +573,273 @@ namespace qmapcontrol
 
     void QMapControl::mousePressEvent(QMouseEvent* mouse_event)
     {
-        // Loop through each layer and pass the mouse event on.
-        for(const auto& layer : getLayers())
+        // Store the mouse location of the current/starting mouse click.
+        m_mouse_position_current_px = mouse_event->localPos();
+        m_mouse_position_pressed_px = m_mouse_position_current_px;
+
+        // Are mouse events enabled for all layers?
+        if(m_layer_mouse_events_enabled)
         {
-            // Send the event to the layer.
-            layer->mouseEvent(mouse_event, toPointPx(mouse_event->localPos()), m_current_zoom);
+            // Loop through each layer and pass the mouse event on.
+            for(const auto& layer : getLayers())
+            {
+                // Send the mouse press event to the layer.
+                layer->mousePressEvent(mouse_event, toPointPx(m_mouse_position_current_px), m_current_zoom);
+            }
         }
 
-        // Are mouse events enabled?
-        if(m_mouse_events_enabled)
+        // Left button pressed?
+        if(mouse_event->button() == Qt::MouseButton::LeftButton)
         {
-            // Store the mouse location of the starting/current mouse click.
-            m_mouse_position_pressed_px = mouse_event->localPos();
-            m_mouse_position_current_px = mouse_event->localPos();
-
-            // Left button pressed?
-            if(mouse_event->button() == Qt::MouseButton::LeftButton)
-            {
-                // Capture the left mouse press.
-                m_mouse_left_pressed = true;
-            }
-            // Right button pressed?
-            else if(mouse_event->button() == Qt::MouseButton::RightButton)
-            {
-                // Capture the right mouse press.
-                m_mouse_right_pressed = true;
-            }
-
-            // Emit the pressed mouse coordinates.
-            emit mouseEventPressCoordinate(mouse_event, toPointCoord(mouse_event->localPos()));
+            // Capture the left mouse press.
+            m_mouse_left_pressed = true;
         }
+        // Right button pressed?
+        else if(mouse_event->button() == Qt::MouseButton::RightButton)
+        {
+            // Capture the right mouse press.
+            m_mouse_right_pressed = true;
+        }
+
+        // Emit the pressed mouse event with the current mouse coordinate.
+        emit mouseEventPressCoordinate(mouse_event, toPointCoord(m_mouse_position_current_px));
     }
 
     void QMapControl::mouseReleaseEvent(QMouseEvent* mouse_event)
     {
-        // Are mouse events enabled?
-        if(m_mouse_events_enabled)
+        // Store the mouse location of the current mouse click.
+        m_mouse_position_current_px = mouse_event->localPos();
+
+        // Default mouse mode.
+        QMapControl::MouseButtonMode mouse_mode = QMapControl::MouseButtonMode::None;
+        bool origin_center = false;
+
+        // Left button released?
+        if(mouse_event->button() == Qt::MouseButton::LeftButton)
         {
-            // Default mouse mode.
-            QMapControl::MouseButtonMode mouse_mode = QMapControl::MouseButtonMode::None;
-            bool origin_center = false;
+            // Capture the left mouse button release.
+            m_mouse_left_pressed = false;
 
-            // Left button depressed?
-            if(mouse_event->button() == Qt::MouseButton::LeftButton)
+            // Capture the left mouse mode.
+            mouse_mode = m_mouse_left_mode;
+            origin_center = m_mouse_left_origin_center;
+        }
+        // Right button released?
+        else if(mouse_event->button() == Qt::MouseButton::RightButton)
+        {
+            // Capture the right mouse button release.
+            m_mouse_right_pressed = false;
+
+            // Capture the right mouse mode.
+            mouse_mode = m_mouse_right_mode;
+            origin_center = m_mouse_right_origin_center;
+        }
+
+        // Are we in pan ... mode?
+        if(mouse_mode == QMapControl::MouseButtonMode::PanBox ||
+                mouse_mode == QMapControl::MouseButtonMode::PanLine ||
+                mouse_mode == QMapControl::MouseButtonMode::PanEllipse)
+        {
+            // Capture coords to move/zoom with.
+            std::vector<QPointF> coords;
+
+            // Origin at center?
+            if(origin_center)
             {
-                // Capture the left mouse press.
-                m_mouse_left_pressed = false;
-
-                // Capture the left mouse mode.
-                mouse_mode = m_mouse_left_mode;
-                origin_center = m_mouse_left_origin_center;
+                // From mouse pressed with offsets applied.
+                const QPointF mouse_diff = m_mouse_position_pressed_px - m_mouse_position_current_px;
+                coords.push_back(toPointCoord(m_mouse_position_pressed_px - mouse_diff));
+                coords.push_back(toPointCoord(m_mouse_position_pressed_px + mouse_diff));
             }
-            // Right button depressed?
-            else if(mouse_event->button() == Qt::MouseButton::RightButton)
-            {
-                // Capture the right mouse press.
-                m_mouse_right_pressed = false;
-
-                // Capture the right mouse mode.
-                mouse_mode = m_mouse_right_mode;
-                origin_center = m_mouse_right_origin_center;
-            }
-
-            // Are we in pan ... mode?
-            if(mouse_mode == QMapControl::MouseButtonMode::PanBox ||
-                    mouse_mode == QMapControl::MouseButtonMode::PanLine ||
-                    mouse_mode == QMapControl::MouseButtonMode::PanEllipse)
-            {
-                // Capture coords to move/zoom with.
-                std::vector<QPointF> coords;
-
-                // Origin at center?
-                if(origin_center)
-                {
-                    // From mouse pressed with offsets applied.
-                    const QPointF mouse_diff = m_mouse_position_pressed_px - m_mouse_position_current_px;
-                    coords.push_back(toPointCoord(m_mouse_position_pressed_px - mouse_diff));
-                    coords.push_back(toPointCoord(m_mouse_position_pressed_px + mouse_diff));
-                }
-                else
-                {
-                    // From mouse pressed to mouse released.
-                    coords.push_back(toPointCoord(m_mouse_position_pressed_px));
-                    coords.push_back(toPointCoord(m_mouse_position_current_px));
-                }
-
-                // Tell the map control to move and zoom as required by pan ... mode.
-                setMapFocusPoint(coords, true);
-
-                // Emit that the rect of where the mouse was dragged from and to.
-                emit mouseDragged(QRectF(toPointCoord(m_mouse_position_pressed_px), toPointCoord(m_mouse_position_current_px)));
-            }
-            // Else, are we in select ... mode?
-            else if(mouse_mode == QMapControl::MouseButtonMode::SelectBox ||
-                    mouse_mode == QMapControl::MouseButtonMode::SelectLine ||
-                    mouse_mode == QMapControl::MouseButtonMode::SelectEllipse)
+            else
             {
                 // From mouse pressed to mouse released.
-                QPointF top_left_px(toPointPx(m_mouse_position_pressed_px));
-                QPointF bottom_right_px(toPointPx(m_mouse_position_current_px));
+                coords.push_back(toPointCoord(m_mouse_position_pressed_px));
+                coords.push_back(toPointCoord(m_mouse_position_current_px));
+            }
 
-                // Origin at center?
-                if(origin_center)
+            // Tell the map control to move and zoom as required by pan ... mode.
+            setMapFocusPoint(coords, true);
+        }
+        // Else, are we in select ... mode?
+        else if(mouse_mode == QMapControl::MouseButtonMode::SelectBox ||
+                mouse_mode == QMapControl::MouseButtonMode::SelectLine ||
+                mouse_mode == QMapControl::MouseButtonMode::SelectEllipse)
+        {
+            // From mouse pressed to mouse released.
+            QPointF top_left_px(toPointPx(m_mouse_position_pressed_px));
+            QPointF bottom_right_px(toPointPx(m_mouse_position_current_px));
+
+            // Origin at center?
+            if(origin_center)
+            {
+                // From mouse pressed with offsets applied.
+                const QPointF mouse_diff = m_mouse_position_pressed_px - m_mouse_position_current_px;
+                top_left_px = toPointPx(m_mouse_position_pressed_px - mouse_diff);
+                bottom_right_px = toPointPx(m_mouse_position_pressed_px + mouse_diff);
+            }
+
+            // Construct area to check.
+            // Default to rect.
+            std::unique_ptr<QGraphicsItem> area_px(new QGraphicsRectItem(QRectF(top_left_px, bottom_right_px)));
+            if(mouse_mode == QMapControl::MouseButtonMode::SelectLine)
+            {
+                // Line check.
+                area_px.reset(new QGraphicsLineItem(top_left_px.x(), top_left_px.y(), bottom_right_px.x(), bottom_right_px.y()));
+
+                // Set the line with a 'fuzzy-factor' around it using the pen.
+                /// @todo expose the fuzzy factor as a setting.
+                const qreal fuzzy_factor_px = 5.0;
+                QPen line_pen(static_cast<QGraphicsLineItem*>(area_px.get())->pen());
+                line_pen.setWidthF(fuzzy_factor_px);
+                static_cast<QGraphicsLineItem*>(area_px.get())->setPen(line_pen);
+            }
+            else if(mouse_mode == QMapControl::MouseButtonMode::SelectEllipse)
+            {
+                // Ellipse check.
+                area_px.reset(new QGraphicsEllipseItem(QRectF(top_left_px, bottom_right_px)));
+            }
+
+            // Collection of selected geometries.
+            std::map<std::string, std::vector<std::shared_ptr<Geometry>>> selected_geometries;
+
+            // Loop through each layer to check geometries touches.
+            for(const auto& layer : getLayers())
+            {
+                // Is the layer visible?
+                if(layer->isVisible(m_current_zoom))
                 {
-                    // From mouse pressed with offsets applied.
-                    const QPointF mouse_diff = m_mouse_position_pressed_px - m_mouse_position_current_px;
-                    top_left_px = toPointPx(m_mouse_position_pressed_px - mouse_diff);
-                    bottom_right_px = toPointPx(m_mouse_position_pressed_px + mouse_diff);
-                }
-
-                // Construct area to check.
-                // Default to rect.
-                std::unique_ptr<QGraphicsItem> area_px(new QGraphicsRectItem(QRectF(top_left_px, bottom_right_px)));
-                if(mouse_mode == QMapControl::MouseButtonMode::SelectLine)
-                {
-                    // Line check.
-                    area_px.reset(new QGraphicsLineItem(top_left_px.x(), top_left_px.y(), bottom_right_px.x(), bottom_right_px.y()));
-
-                    // Set the line with a 'fuzzy-factor' around it using the pen.
-                    /// @todo expose the fuzzy factor as a setting.
-                    const qreal fuzzy_factor_px = 5.0;
-                    QPen line_pen(static_cast<QGraphicsLineItem*>(area_px.get())->pen());
-                    line_pen.setWidthF(fuzzy_factor_px);
-                    static_cast<QGraphicsLineItem*>(area_px.get())->setPen(line_pen);
-                }
-                else if(mouse_mode == QMapControl::MouseButtonMode::SelectEllipse)
-                {
-                    // Ellipse check.
-                    area_px.reset(new QGraphicsEllipseItem(QRectF(top_left_px, bottom_right_px)));
-                }
-
-                // Collection of selected geometries.
-                std::map<std::string, std::vector<std::shared_ptr<Geometry>>> selected_geometries;
-
-                // Loop through each layer to check geometries touches.
-                for(const auto& layer : getLayers())
-                {
-                    // Is the layer visible?
-                    if(layer->isVisible(m_current_zoom))
+                    // Loop through each geometry for the layer.
+                    for(const auto& geometry : layer->getGeometries(QRectF(projection::get().toCoordinatePoint(top_left_px, m_current_zoom), projection::get().toCoordinatePoint(bottom_right_px, m_current_zoom))))
                     {
-                        // Loop through each geometry for the layer.
-                        for(const auto& geometry : layer->getGeometries(QRectF(projection::get().toCoordinatePoint(top_left_px, m_current_zoom), projection::get().toCoordinatePoint(bottom_right_px, m_current_zoom))))
+                        // Does the geometry touch our area rect?
+                        /// @todo look at using coordinates instead of pixel areas?
+                        if(geometry->touches(*(area_px.get()), m_current_zoom))
                         {
-                            // Does the geometry touch our area rect?
-                            if(geometry->touches(*(area_px.get()), m_current_zoom))
-                            {
-                                // Add the geometry to the selected collection.
-                                selected_geometries[layer->getName()].push_back(geometry);
-                            }
+                            // Add the geometry to the selected collection.
+                            selected_geometries[layer->getName()].push_back(geometry);
                         }
                     }
                 }
-
-                // Emit the geometries selected.
-                emit geometriesSelected(selected_geometries);
-
-                // Emit that the rect of where the mouse was dragged from and to.
-                emit mouseDragged(QRectF(toPointCoord(m_mouse_position_pressed_px), toPointCoord(m_mouse_position_current_px)));
             }
 
-            // Schedule a repaint to remove any potential screen artifacts.
-            QWidget::update();
-
-            // Emit the released mouse coordinates.
-            emit mouseEventReleaseCoordinate(mouse_event, toPointCoord(mouse_event->localPos()));
+            // Emit the geometries selected.
+            emit geometriesSelected(selected_geometries);
         }
+
+        // Schedule a repaint to remove any potential screen artifacts.
+        QWidget::update();
+
+        // Emit the released mouse event with the press and release mouse coordinates.
+        emit mouseEventReleaseCoordinate(mouse_event, toPointCoord(m_mouse_position_pressed_px), toPointCoord(m_mouse_position_current_px));
+    }
+
+    void QMapControl::mouseDoubleClickEvent(QMouseEvent* mouse_event)
+    {
+        // Store the mouse location of the current mouse click.
+        m_mouse_position_current_px = mouse_event->localPos();
+
+        // Emit the double click mouse event with the press and current mouse coordinate.
+        emit mouseEventDoubleClickCoordinate(mouse_event, toPointCoord(m_mouse_position_pressed_px), toPointCoord(m_mouse_position_current_px));
     }
 
     void QMapControl::mouseMoveEvent(QMouseEvent* mouse_event)
     {
-        // Are mouse events enabled?
-        if(m_mouse_events_enabled)
+        // Update the current mouse position.
+        m_mouse_position_current_px = mouse_event->localPos();
+
+        // Default mouse mode.
+        QMapControl::MouseButtonMode mouse_mode = QMapControl::MouseButtonMode::None;
+
+        // Left button still pressed?
+        if(mouse_event->buttons() & Qt::MouseButton::LeftButton)
         {
-            // Update the current mouse position.
-            m_mouse_position_current_px = mouse_event->localPos();
-
-            // Default mouse mode.
-            QMapControl::MouseButtonMode mouse_mode = QMapControl::MouseButtonMode::None;
-
-            // Left button still pressed?
-            if(mouse_event->buttons() & Qt::MouseButton::LeftButton)
-            {
-                // Capture the left mouse mode.
-                mouse_mode = m_mouse_left_mode;
-            }
-            // Right button still pressed?
-            else if(mouse_event->buttons() & Qt::MouseButton::RightButton)
-            {
-                // Capture the right mouse mode.
-                mouse_mode = m_mouse_right_mode;
-            }
-
-            // Are we in panning mode?
-            if(mouse_mode == QMapControl::MouseButtonMode::Pan)
-            {
-                // Move the map by the offset between the last mouse pressed position and the current position.
-                scrollView(m_mouse_position_pressed_px - mouse_event->localPos());
-
-                // Update the left mouse pressed location.
-                m_mouse_position_pressed_px = mouse_event->localPos();
-            }
-
-            // Schedule a repaint to remove any potential screen artifacts.
-            QWidget::update();
-
-            // Emit the moved mouse coordinates.
-            emit mouseEventMoveCoordinate(mouse_event, toPointCoord(mouse_event->localPos()));
+            // Capture the left mouse mode.
+            mouse_mode = m_mouse_left_mode;
         }
+        // Right button still pressed?
+        else if(mouse_event->buttons() & Qt::MouseButton::RightButton)
+        {
+            // Capture the right mouse mode.
+            mouse_mode = m_mouse_right_mode;
+        }
+
+        // Are we in panning mode?
+        if(mouse_mode == QMapControl::MouseButtonMode::Pan)
+        {
+            // Move the map by the offset between the last mouse pressed position and the current position.
+            scrollView(m_mouse_position_pressed_px - m_mouse_position_current_px);
+
+            // Update the left mouse pressed location.
+            m_mouse_position_pressed_px = m_mouse_position_current_px;
+        }
+
+        // Schedule a repaint to remove any potential screen artifacts.
+        QWidget::update();
+
+        // Emit the moved mouse event with the press and current mouse coordinates.
+        emit mouseEventMoveCoordinate(mouse_event, toPointCoord(m_mouse_position_pressed_px), toPointCoord(m_mouse_position_current_px));
     }
 
     void QMapControl::wheelEvent(QWheelEvent* wheel_event)
     {
-        // Are mouse events enabled?
-        if(m_mouse_events_enabled)
+        // Is the vertical angle delta positive?
+        if(wheel_event->angleDelta().y() > 0)
         {
-            // Is the vertical angle delta positive?
-            if(wheel_event->angleDelta().y() > 0)
+            // Check the current zoom is less than maximum zoom (as we change the location of the map focus point before we zoom in).
+            if(m_current_zoom < m_zoom_maximum)
             {
-                // Check the current zoom is less than maximum zoom (as we change the location of the map focus point before we zoom in).
-                if(m_current_zoom < m_zoom_maximum)
-                {
-                    // Capture the current wheel point at the current zoom level.
-                    const QPointF wheel_coord = toPointCoord(wheel_event->posF());
-                    const QPointF wheel_delta = mapFocusPointPx() - toPointPx(wheel_event->posF());
+                // Capture the current wheel point at the current zoom level.
+                const QPointF wheel_coord = toPointCoord(wheel_event->posF());
+                const QPointF wheel_delta = mapFocusPointPx() - toPointPx(wheel_event->posF());
 
-                    // Update the scaled offset with the current wheel_delta.
-                    /// @todo should this add to the offset?
-                    m_primary_screen_scaled_offset = wheel_delta;
+                // Update the scaled offset with the current wheel_delta.
+                /// @todo should this add to the offset?
+                m_primary_screen_scaled_offset = wheel_delta;
 
-                    // Zoom in.
-                    zoomIn();
+                // Zoom in.
+                zoomIn();
 
-                    // Google-style zoom...
-                    setMapFocusPoint(projection::get().toCoordinatePoint(projection::get().toPixelPoint(wheel_coord, m_current_zoom) + wheel_delta, m_current_zoom));
+                // Google-style zoom...
+                setMapFocusPoint(projection::get().toCoordinatePoint(projection::get().toPixelPoint(wheel_coord, m_current_zoom) + wheel_delta, m_current_zoom));
 
-                    // Tell parents we have accepted this events.
-                    wheel_event->accept();
-                }
-                else
-                {
-                    // Tell parents we have ignored this events.
-                    wheel_event->ignore();
-                }
+                // Tell parents we have accepted this events.
+                wheel_event->accept();
             }
-            else if(wheel_event->angleDelta().y() < 0)
+            else
             {
-                // Check the current zoom is greater than minimum zoom (as we change the location of the map focus point before we zoom in).
-                if(m_current_zoom > m_zoom_minimum)
-                {
-                    // Capture the current wheel point at the current zoom level.
-                    const QPointF wheel_coord = toPointCoord(wheel_event->posF());
-                    const QPointF wheel_delta = mapFocusPointPx() - toPointPx(wheel_event->posF());
-
-                    // Update the scaled offset with the current wheel_delta.
-                    /// @todo should this add to the offset?
-                    /// @todo not sure if this is correct delta to apply on zoom out!
-                    m_primary_screen_scaled_offset = wheel_delta;
-
-                    // Zoom out.
-                    zoomOut();
-
-                    // Google-style zoom...
-                    setMapFocusPoint(projection::get().toCoordinatePoint(projection::get().toPixelPoint(wheel_coord, m_current_zoom) + wheel_delta, m_current_zoom));
-
-                    // Tell parents we have accepted this events.
-                    wheel_event->accept();
-                }
-                else
-                {
-                    // Tell parents we have ignored this events.
-                    wheel_event->ignore();
-                }
+                // Tell parents we have ignored this events.
+                wheel_event->ignore();
             }
         }
-        else
+        else if(wheel_event->angleDelta().y() < 0)
         {
-            // Tell parents we have ignored this events.
-            wheel_event->ignore();
+            // Check the current zoom is greater than minimum zoom (as we change the location of the map focus point before we zoom in).
+            if(m_current_zoom > m_zoom_minimum)
+            {
+                // Capture the current wheel point at the current zoom level.
+                const QPointF wheel_coord = toPointCoord(wheel_event->posF());
+                const QPointF wheel_delta = mapFocusPointPx() - toPointPx(wheel_event->posF());
+
+                // Update the scaled offset with the current wheel_delta.
+                /// @todo should this add to the offset?
+                /// @todo not sure if this is correct delta to apply on zoom out!
+                m_primary_screen_scaled_offset = wheel_delta;
+
+                // Zoom out.
+                zoomOut();
+
+                // Google-style zoom...
+                setMapFocusPoint(projection::get().toCoordinatePoint(projection::get().toPixelPoint(wheel_coord, m_current_zoom) + wheel_delta, m_current_zoom));
+
+                // Tell parents we have accepted this events.
+                wheel_event->accept();
+            }
+            else
+            {
+                // Tell parents we have ignored this events.
+                wheel_event->ignore();
+            }
         }
     }
 
@@ -1245,162 +1235,158 @@ namespace qmapcontrol
                              m_viewport_center_px.x() + 10.0, m_viewport_center_px.y());
         }
 
-        // Are mouse events enabled?
-        if(m_mouse_events_enabled)
+        // Is the mouse currently pressed and mode set to draw/pan a box.
+        if((m_mouse_left_pressed && (m_mouse_left_mode == QMapControl::MouseButtonMode::DrawBox || m_mouse_left_mode == QMapControl::MouseButtonMode::PanBox || m_mouse_left_mode == QMapControl::MouseButtonMode::SelectBox)) ||
+           (m_mouse_right_pressed && (m_mouse_right_mode == QMapControl::MouseButtonMode::DrawBox || m_mouse_right_mode == QMapControl::MouseButtonMode::PanBox || m_mouse_right_mode == QMapControl::MouseButtonMode::SelectBox)))
         {
-            // Is the mouse currently pressed and mode set to draw/pan a box.
-            if((m_mouse_left_pressed && (m_mouse_left_mode == QMapControl::MouseButtonMode::DrawBox || m_mouse_left_mode == QMapControl::MouseButtonMode::PanBox || m_mouse_left_mode == QMapControl::MouseButtonMode::SelectBox)) ||
-               (m_mouse_right_pressed && (m_mouse_right_mode == QMapControl::MouseButtonMode::DrawBox || m_mouse_right_mode == QMapControl::MouseButtonMode::PanBox || m_mouse_right_mode == QMapControl::MouseButtonMode::SelectBox)))
+            // Draw at center?
+            if((m_mouse_left_pressed && m_mouse_left_origin_center) ||
+               (m_mouse_right_pressed && m_mouse_right_origin_center))
             {
-                // Draw at center?
-                if((m_mouse_left_pressed && m_mouse_left_origin_center) ||
-                   (m_mouse_right_pressed && m_mouse_right_origin_center))
-                {
-                    // Draw the crosshair at the mouse start point.
-                    // |
-                    painter.drawLine(m_mouse_position_pressed_px.x(), m_mouse_position_pressed_px.y() - 1.0,
-                                     m_mouse_position_pressed_px.x(), m_mouse_position_pressed_px.y() + 1.0);
-                    // -
-                    painter.drawLine(m_mouse_position_pressed_px.x() - 1.0, m_mouse_position_pressed_px.y(),
-                                     m_mouse_position_pressed_px.x() + 1.0, m_mouse_position_pressed_px.y());
+                // Draw the crosshair at the mouse start point.
+                // |
+                painter.drawLine(m_mouse_position_pressed_px.x(), m_mouse_position_pressed_px.y() - 1.0,
+                                 m_mouse_position_pressed_px.x(), m_mouse_position_pressed_px.y() + 1.0);
+                // -
+                painter.drawLine(m_mouse_position_pressed_px.x() - 1.0, m_mouse_position_pressed_px.y(),
+                                 m_mouse_position_pressed_px.x() + 1.0, m_mouse_position_pressed_px.y());
 
-                    // Save the current painter's state.
-                    painter.save();
+                // Save the current painter's state.
+                painter.save();
 
-                    // Set the pen and brush colours.
-                    painter.setPen(QPen(QColor(66, 132, 253)));
-                    painter.setBrush(QBrush(QColor(66, 132, 253)));
-                    painter.setOpacity(0.4);
+                // Set the pen and brush colours.
+                painter.setPen(QPen(QColor(66, 132, 253)));
+                painter.setBrush(QBrush(QColor(66, 132, 253)));
+                painter.setOpacity(0.4);
 
-                    // Draw rect with center positioned at start mouse point.
-                    const QPointF mouse_diff = m_mouse_position_pressed_px - m_mouse_position_current_px;
-                    painter.drawRect(QRectF(m_mouse_position_pressed_px - mouse_diff, m_mouse_position_pressed_px + mouse_diff));
+                // Draw rect with center positioned at start mouse point.
+                const QPointF mouse_diff = m_mouse_position_pressed_px - m_mouse_position_current_px;
+                painter.drawRect(QRectF(m_mouse_position_pressed_px - mouse_diff, m_mouse_position_pressed_px + mouse_diff));
 
-                    // Restore the painter's state.
-                    painter.restore();
-                }
-                else
-                {
-                    // Save the current painter's state.
-                    painter.save();
-
-                    // Set the pen and brush colours.
-                    painter.setPen(QPen(QColor(66, 132, 253)));
-                    painter.setBrush(QBrush(QColor(66, 132, 253)));
-                    painter.setOpacity(0.4);
-
-                    // Draw rect from start to current mouse point.
-                    painter.drawRect(QRectF(m_mouse_position_pressed_px, m_mouse_position_current_px));
-
-                    // Restore the painter's state.
-                    painter.restore();
-                }
+                // Restore the painter's state.
+                painter.restore();
             }
-
-            // Is the mouse currently pressed and mode set to draw/pan a line.
-            if((m_mouse_left_pressed && (m_mouse_left_mode == QMapControl::MouseButtonMode::DrawLine || m_mouse_left_mode == QMapControl::MouseButtonMode::PanLine || m_mouse_left_mode == QMapControl::MouseButtonMode::SelectLine)) ||
-               (m_mouse_right_pressed && (m_mouse_right_mode == QMapControl::MouseButtonMode::DrawLine || m_mouse_right_mode == QMapControl::MouseButtonMode::PanLine || m_mouse_right_mode == QMapControl::MouseButtonMode::SelectLine)))
+            else
             {
-                // Draw at center?
-                if((m_mouse_left_pressed && m_mouse_left_origin_center) ||
-                   (m_mouse_right_pressed && m_mouse_right_origin_center))
-                {
-                    // Draw the crosshair at the mouse start point.
-                    // |
-                    painter.drawLine(m_mouse_position_pressed_px.x(), m_mouse_position_pressed_px.y() - 1.0,
-                                     m_mouse_position_pressed_px.x(), m_mouse_position_pressed_px.y() + 1.0);
-                    // -
-                    painter.drawLine(m_mouse_position_pressed_px.x() - 1.0, m_mouse_position_pressed_px.y(),
-                                     m_mouse_position_pressed_px.x() + 1.0, m_mouse_position_pressed_px.y());
+                // Save the current painter's state.
+                painter.save();
 
-                    // Save the current painter's state.
-                    painter.save();
+                // Set the pen and brush colours.
+                painter.setPen(QPen(QColor(66, 132, 253)));
+                painter.setBrush(QBrush(QColor(66, 132, 253)));
+                painter.setOpacity(0.4);
 
-                    // Set the pen and brush colours.
-                    /// @todo expose the fuzzy factor as a setting.
-                    const qreal fuzzy_factor_px = 5.0;
-                    QPen line_pen(QColor(66, 132, 253));
-                    line_pen.setWidthF(fuzzy_factor_px);
-                    painter.setPen(line_pen);
-                    painter.setBrush(QBrush(QColor(66, 132, 253)));
-                    painter.setOpacity(0.4);
+                // Draw rect from start to current mouse point.
+                painter.drawRect(QRectF(m_mouse_position_pressed_px, m_mouse_position_current_px));
 
-                    // Draw line with center positioned at start mouse point.
-                    const QPointF mouse_diff = m_mouse_position_pressed_px - m_mouse_position_current_px;
-                    painter.drawLine(m_mouse_position_pressed_px - mouse_diff, m_mouse_position_pressed_px + mouse_diff);
-
-                    // Restore the painter's state.
-                    painter.restore();
-                }
-                else
-                {
-                    // Save the current painter's state.
-                    painter.save();
-
-                    // Set the pen and brush colours.
-                    /// @todo expose the fuzzy factor as a setting.
-                    const qreal fuzzy_factor_px = 5.0;
-                    QPen line_pen(QColor(66, 132, 253));
-                    line_pen.setWidthF(fuzzy_factor_px);
-                    painter.setPen(line_pen);
-                    painter.setBrush(QBrush(QColor(66, 132, 253)));
-                    painter.setOpacity(0.4);
-
-                    // Draw line from start to current mouse point.
-                    painter.drawLine(m_mouse_position_pressed_px, m_mouse_position_current_px);
-
-                    // Restore the painter's state.
-                    painter.restore();
-                }
+                // Restore the painter's state.
+                painter.restore();
             }
+        }
 
-            // Is the mouse currently pressed and mode set to draw/pan a ellipse.
-            if((m_mouse_left_pressed && (m_mouse_left_mode == QMapControl::MouseButtonMode::DrawEllipse || m_mouse_left_mode == QMapControl::MouseButtonMode::PanEllipse || m_mouse_left_mode == QMapControl::MouseButtonMode::SelectEllipse)) ||
-               (m_mouse_right_pressed && (m_mouse_right_mode == QMapControl::MouseButtonMode::DrawEllipse || m_mouse_right_mode == QMapControl::MouseButtonMode::PanEllipse || m_mouse_right_mode == QMapControl::MouseButtonMode::SelectEllipse)))
+        // Is the mouse currently pressed and mode set to draw/pan a line.
+        if((m_mouse_left_pressed && (m_mouse_left_mode == QMapControl::MouseButtonMode::DrawLine || m_mouse_left_mode == QMapControl::MouseButtonMode::PanLine || m_mouse_left_mode == QMapControl::MouseButtonMode::SelectLine)) ||
+           (m_mouse_right_pressed && (m_mouse_right_mode == QMapControl::MouseButtonMode::DrawLine || m_mouse_right_mode == QMapControl::MouseButtonMode::PanLine || m_mouse_right_mode == QMapControl::MouseButtonMode::SelectLine)))
+        {
+            // Draw at center?
+            if((m_mouse_left_pressed && m_mouse_left_origin_center) ||
+               (m_mouse_right_pressed && m_mouse_right_origin_center))
             {
-                // Draw at center?
-                if((m_mouse_left_pressed && m_mouse_left_origin_center) ||
-                   (m_mouse_right_pressed && m_mouse_right_origin_center))
-                {
-                    // Draw the crosshair at the mouse start point.
-                    // |
-                    painter.drawLine(m_mouse_position_pressed_px.x(), m_mouse_position_pressed_px.y() - 1.0,
-                                     m_mouse_position_pressed_px.x(), m_mouse_position_pressed_px.y() + 1.0);
-                    // -
-                    painter.drawLine(m_mouse_position_pressed_px.x() - 1.0, m_mouse_position_pressed_px.y(),
-                                     m_mouse_position_pressed_px.x() + 1.0, m_mouse_position_pressed_px.y());
+                // Draw the crosshair at the mouse start point.
+                // |
+                painter.drawLine(m_mouse_position_pressed_px.x(), m_mouse_position_pressed_px.y() - 1.0,
+                                 m_mouse_position_pressed_px.x(), m_mouse_position_pressed_px.y() + 1.0);
+                // -
+                painter.drawLine(m_mouse_position_pressed_px.x() - 1.0, m_mouse_position_pressed_px.y(),
+                                 m_mouse_position_pressed_px.x() + 1.0, m_mouse_position_pressed_px.y());
 
-                    // Save the current painter's state.
-                    painter.save();
+                // Save the current painter's state.
+                painter.save();
 
-                    // Set the pen and brush colours.
-                    painter.setPen(QPen(QColor(66, 132, 253)));
-                    painter.setBrush(QBrush(QColor(66, 132, 253)));
-                    painter.setOpacity(0.4);
+                // Set the pen and brush colours.
+                /// @todo expose the fuzzy factor as a setting.
+                const qreal fuzzy_factor_px = 5.0;
+                QPen line_pen(QColor(66, 132, 253));
+                line_pen.setWidthF(fuzzy_factor_px);
+                painter.setPen(line_pen);
+                painter.setBrush(QBrush(QColor(66, 132, 253)));
+                painter.setOpacity(0.4);
 
-                    // Draw ellipse with center positioned at start mouse point.
-                    const QPointF mouse_diff = m_mouse_position_pressed_px - m_mouse_position_current_px;
-                    painter.drawEllipse(m_mouse_position_pressed_px, mouse_diff.x(), mouse_diff.y());
+                // Draw line with center positioned at start mouse point.
+                const QPointF mouse_diff = m_mouse_position_pressed_px - m_mouse_position_current_px;
+                painter.drawLine(m_mouse_position_pressed_px - mouse_diff, m_mouse_position_pressed_px + mouse_diff);
 
-                    // Restore the painter's state.
-                    painter.restore();
-                }
-                else
-                {
-                    // Save the current painter's state.
-                    painter.save();
+                // Restore the painter's state.
+                painter.restore();
+            }
+            else
+            {
+                // Save the current painter's state.
+                painter.save();
 
-                    // Set the pen and brush colours.
-                    painter.setPen(QPen(QColor(66, 132, 253)));
-                    painter.setBrush(QBrush(QColor(66, 132, 253)));
-                    painter.setOpacity(0.4);
+                // Set the pen and brush colours.
+                /// @todo expose the fuzzy factor as a setting.
+                const qreal fuzzy_factor_px = 5.0;
+                QPen line_pen(QColor(66, 132, 253));
+                line_pen.setWidthF(fuzzy_factor_px);
+                painter.setPen(line_pen);
+                painter.setBrush(QBrush(QColor(66, 132, 253)));
+                painter.setOpacity(0.4);
 
-                    // Draw ellipse from start to current mouse point.
-                    painter.drawEllipse(QRectF(m_mouse_position_pressed_px, m_mouse_position_current_px));
+                // Draw line from start to current mouse point.
+                painter.drawLine(m_mouse_position_pressed_px, m_mouse_position_current_px);
 
-                    // Restore the painter's state.
-                    painter.restore();
-                }
+                // Restore the painter's state.
+                painter.restore();
+            }
+        }
+
+        // Is the mouse currently pressed and mode set to draw/pan a ellipse.
+        if((m_mouse_left_pressed && (m_mouse_left_mode == QMapControl::MouseButtonMode::DrawEllipse || m_mouse_left_mode == QMapControl::MouseButtonMode::PanEllipse || m_mouse_left_mode == QMapControl::MouseButtonMode::SelectEllipse)) ||
+           (m_mouse_right_pressed && (m_mouse_right_mode == QMapControl::MouseButtonMode::DrawEllipse || m_mouse_right_mode == QMapControl::MouseButtonMode::PanEllipse || m_mouse_right_mode == QMapControl::MouseButtonMode::SelectEllipse)))
+        {
+            // Draw at center?
+            if((m_mouse_left_pressed && m_mouse_left_origin_center) ||
+               (m_mouse_right_pressed && m_mouse_right_origin_center))
+            {
+                // Draw the crosshair at the mouse start point.
+                // |
+                painter.drawLine(m_mouse_position_pressed_px.x(), m_mouse_position_pressed_px.y() - 1.0,
+                                 m_mouse_position_pressed_px.x(), m_mouse_position_pressed_px.y() + 1.0);
+                // -
+                painter.drawLine(m_mouse_position_pressed_px.x() - 1.0, m_mouse_position_pressed_px.y(),
+                                 m_mouse_position_pressed_px.x() + 1.0, m_mouse_position_pressed_px.y());
+
+                // Save the current painter's state.
+                painter.save();
+
+                // Set the pen and brush colours.
+                painter.setPen(QPen(QColor(66, 132, 253)));
+                painter.setBrush(QBrush(QColor(66, 132, 253)));
+                painter.setOpacity(0.4);
+
+                // Draw ellipse with center positioned at start mouse point.
+                const QPointF mouse_diff = m_mouse_position_pressed_px - m_mouse_position_current_px;
+                painter.drawEllipse(m_mouse_position_pressed_px, mouse_diff.x(), mouse_diff.y());
+
+                // Restore the painter's state.
+                painter.restore();
+            }
+            else
+            {
+                // Save the current painter's state.
+                painter.save();
+
+                // Set the pen and brush colours.
+                painter.setPen(QPen(QColor(66, 132, 253)));
+                painter.setBrush(QBrush(QColor(66, 132, 253)));
+                painter.setOpacity(0.4);
+
+                // Draw ellipse from start to current mouse point.
+                painter.drawEllipse(QRectF(m_mouse_position_pressed_px, m_mouse_position_current_px));
+
+                // Restore the painter's state.
+                painter.restore();
             }
         }
     }

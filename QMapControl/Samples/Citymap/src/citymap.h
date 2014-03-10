@@ -85,13 +85,13 @@ class Citymap: public QMainWindow
                 QHash<int, QString> notestext;
 
         public slots:
-                void hideNote(QMouseEvent* evnt, QPointF coordinate);
+                void hideNote(QMouseEvent* evnt, QPointF press_coordinate);
                 void geometryClicked(Geometry* geometry);
                 void geometryClickEventKneipe(Geometry* geometry);
                 void addNote();
-                void writeNote(QMouseEvent*, QPointF);
+                void writeNote(QMouseEvent*, QPointF press_coordinate);
                 void calcDistance();
-                void calcDistanceClick(QMouseEvent*, QPointF);
+                void calcDistanceClick(QMouseEvent*, QPointF press_coordinate);
 
                 void mapproviderSelected(QAction*);
                 void editNote(Geometry* geom);

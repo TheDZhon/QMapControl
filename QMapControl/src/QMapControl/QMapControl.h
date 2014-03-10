@@ -342,10 +342,10 @@ namespace qmapcontrol
 
         // Mouse management.
         /*!
-         * Set whether the layer manager should handle mouse events.
-         * @param enable Whether the layer manager should handle mouse events.
+         * Set whether the layers should handle mouse events.
+         * @param enable Whether the layers should handle mouse events.
          */
-        void enableMouseEvents(const bool& enable);
+        void enableLayerMouseEvents(const bool& enable);
 
         /*!
          * Fetches the left mouse button mode.
@@ -384,6 +384,12 @@ namespace qmapcontrol
          * @param mouse_event The mouse event.
          */
         void mouseReleaseEvent(QMouseEvent* mouse_event);
+
+        /*!
+         * Called when a mouse button is double clicked.
+         * @param mouse_event The mouse event.
+         */
+        void mouseDoubleClickEvent(QMouseEvent* mouse_event);
 
         /*!
          * Called when a mouse is moved.
@@ -573,29 +579,33 @@ namespace qmapcontrol
         /*!
          * Signal emitted on MousePressEvents with the additional map coordinates of the mouse press.
          * @param mouse_event The QMouseEvent that occured.
-         * @param coordinate The corresponding world coordinate.
+         * @param press_coordinate The corresponding world coordinate of the mouse press.
          */
-        void mouseEventPressCoordinate(QMouseEvent* mouse_event, QPointF coordinate);
+        void mouseEventPressCoordinate(QMouseEvent* mouse_event, QPointF press_coordinate);
 
         /*!
-         * Signal emitted on MouseReleaseEvents with the additional map coordinates of the mouse press.
+         * Signal emitted on MouseReleaseEvents with the additional map coordinates of the mouse press/release.
          * @param mouse_event The QMouseEvent that occured.
-         * @param coordinate The corresponding world coordinate.
+         * @param press_coordinate The corresponding world coordinate of the mouse press.
+         * @param release_coordinate The corresponding world coordinate of the mouse release.
          */
-        void mouseEventReleaseCoordinate(QMouseEvent* mouse_event, QPointF coordinate);
+        void mouseEventReleaseCoordinate(QMouseEvent* mouse_event, QPointF press_coordinate, QPointF release_coordinate);
 
         /*!
-         * Signal emitted on MouseMoveEvents with the additional map coordinates of the mouse press.
+         * Signal emitted on MouseDoubleClickEvents with the additional map coordinates of the mouse press/double press.
          * @param mouse_event The QMouseEvent that occured.
-         * @param coordinate The corresponding world coordinate.
+         * @param press_coordinate The corresponding world coordinate of the mouse press.
+         * @param double_press_coordinate The corresponding world coordinate of the mouse double press.
          */
-        void mouseEventMoveCoordinate(QMouseEvent* mouse_event, QPointF coordinate);
+        void mouseEventDoubleClickCoordinate(QMouseEvent* mouse_event, QPointF press_coordinate, QPointF double_press_coordinate);
 
         /*!
-         * Signal emitted on mouse release, only when dragging is enabled on a mouse pressed.
-         * @param box_rect The dragged box rect.
+         * Signal emitted on MouseMoveEvents with the additional map coordinates of the mouse press/current.
+         * @param mouse_event The QMouseEvent that occured.
+         * @param press_coordinate The corresponding world coordinate of the mouse press.
+         * @param current_coordinate The corresponding world coordinate of the current mouse.
          */
-        void mouseDragged(QRectF box_rect);
+        void mouseEventMoveCoordinate(QMouseEvent* mouse_event, QPointF press_coordinate, QPointF current_coordinate);
 
         // Drawing management.
         /*!
@@ -627,6 +637,9 @@ namespace qmapcontrol
 
         /// Mutex to protect layers.
         mutable QReadWriteLock m_layers_mutex;
+
+        /// Whether layer mouse events are enabled.
+        bool m_layer_mouse_events_enabled;
 
         /// The current following geometry signal/slot connection.
         QMetaObject::Connection m_following_geometry;
@@ -663,9 +676,6 @@ namespace qmapcontrol
 
         /// The current zoom.
         int m_current_zoom;
-
-        /// Whether mouse events are enabled.
-        bool m_mouse_events_enabled;
 
         /// Whether the left mouse button is currently pressed.
         bool m_mouse_left_pressed;
