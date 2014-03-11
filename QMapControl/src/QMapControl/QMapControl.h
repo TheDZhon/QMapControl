@@ -48,7 +48,7 @@
 #include "qmapcontrol_global.h"
 #include "Geometry.h"
 #include "Layer.h"
-#include "QProgressIndicator/QProgressIndicator.h"
+#include "QProgressIndicator.h"
 
 //! QMapControl namespace
 namespace qmapcontrol

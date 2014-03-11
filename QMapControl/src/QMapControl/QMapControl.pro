@@ -41,7 +41,8 @@ HEADERS +=                                      \
     ProjectionSphericalMercator.h               \
     QMapControl.h                               \
     QuadTreeContainer.h                         \
-    QProgressIndicator\QProgressIndicator.h     \
+# Third-party headers: QProgressIndicator
+    QProgressIndicator.h                        \
 
 # Add source files.
 SOURCES +=                                      \
@@ -69,7 +70,8 @@ SOURCES +=                                      \
     ProjectionEquirectangular.cpp               \
     ProjectionSphericalMercator.cpp             \
     QMapControl.cpp                             \
-    QProgressIndicator\QProgressIndicator.cpp   \
+# Third-party sources: QProgressIndicator
+    QProgressIndicator.cpp                      \
 
 # Install details.
 # Has a prefix been specified?
