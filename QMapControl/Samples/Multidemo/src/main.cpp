@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     // Create a Multidemo widget.
     Multidemo multidemo;
     multidemo.resize(480, 640);
-    multidemo.setWindowTitle("QMapControl Demo");
+    multidemo.setWindowTitle("QMapControl: Multidemo");
 
     // Show the widget.
     multidemo.show();

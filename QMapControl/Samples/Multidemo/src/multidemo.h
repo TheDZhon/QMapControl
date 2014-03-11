@@ -1,7 +1,6 @@
 #pragma once
 
 // Qt includes.
-#include <QtCore/QCoreApplication>
 #include <QtWidgets/QPushButton>
 
 // QMapControl includes.

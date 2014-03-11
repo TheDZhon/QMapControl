@@ -1,6 +1,7 @@
 #include "multidemo.h"
 
 // Qt includes.
+#include <QtCore/QCoreApplication>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QVBoxLayout>
@@ -224,9 +225,7 @@ void Multidemo::setupLayout()
 
 void Multidemo::resizeEvent(QResizeEvent* event)
 {
-    /// @todo move functionality into QMapControl.
-    qDebug() << "setViewportSize (Multidemo::resizeEvent)";
-    QWidget::resizeEvent(event);
+    // Set the new viewport size.
     m_map_control->setViewportSize(event->size());
 }
 
@@ -340,7 +339,7 @@ void Multidemo::geometriesSelectedEvent(std::map<std::string, std::vector<std::s
 void Multidemo::geometryClickEvent(Geometry* geometry)
 {
     // Is it a GeometryLineString.
-    if (geometry->getGeometryType() == Geometry::GeometryType::GeometryLineString)
+    if(geometry->getGeometryType() == Geometry::GeometryType::GeometryLineString)
     {
         // GeometryLineString contain multi points, use touchedPoints() to find which points were actually touched.
         std::vector<std::shared_ptr<GeometryPoint>> touched_points = static_cast<GeometryLineString*>(geometry)->touchedPoints();
@@ -353,7 +352,7 @@ void Multidemo::geometryClickEvent(Geometry* geometry)
         }
     }
     // Is it a GeometryPolygon.
-    if (geometry->getGeometryType() == Geometry::GeometryType::GeometryPolygon)
+    if(geometry->getGeometryType() == Geometry::GeometryType::GeometryPolygon)
     {
         // GeometryPolygon contain multi points, use touchedPoints() to find which points were actually touched.
         std::vector<std::shared_ptr<GeometryPoint>> touched_points = static_cast<GeometryPolygon*>(geometry)->touchedPoints();
@@ -366,7 +365,7 @@ void Multidemo::geometryClickEvent(Geometry* geometry)
         }
     }
     // Is it a GeometryPoint.
-    else if (geometry->getGeometryType() == Geometry::GeometryType::GeometryPoint)
+    else if(geometry->getGeometryType() == Geometry::GeometryType::GeometryPoint)
     {
         // Display a message box with the point's details.
         QString message = QString("Position: ").append(QString().setNum(((GeometryPoint*)geometry)->x())).append(QString("/")).append(QString().setNum(((GeometryPoint*)geometry)->y()));

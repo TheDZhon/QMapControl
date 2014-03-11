@@ -1,70 +1,94 @@
 #include "gps_neo.h"
 
-GPS_Neo::GPS_Neo(QObject *parent)
- : QObject(parent)
-{
-    running = false;
-}
+// Qt includes.
+#include <QtCore/QDebug>
+#include <QtCore/QFile>
+#include <QtCore/QTimer>
 
-
-GPS_Neo::~GPS_Neo()
+GPS_Neo::GPS_Neo(QObject* parent)
+    : QObject(parent),
+      m_running(false)
 {
+
 }
 
 void GPS_Neo::start()
 {
-    if (!running)
+    // Is it already running?
+    if(m_running == false)
     {
-        running = true;
+        // Set to running.
+        m_running = true;
+
+        // Set timer to start ticking.
         QTimer::singleShot(1000, this, SLOT(tick()));
     }
 }
+
 void GPS_Neo::stop()
 {
-    running = false;
+    // Set to stop running.
+    m_running = false;
 }
 
 void GPS_Neo::tick()
 {
+    // Open a handle to the device.
     QFile file("/tmp/nmeaNP");
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    if(file.open(QIODevice::ReadOnly | QIODevice::Text) == false)
     {
-// 		qDebug() << file.error();
-        return;
+        qDebug() << "Unable to open handle to device: " << file.errorString();
     }
-
-    QByteArray line;
-    while (!file.atEnd())
+    else
     {
-        line = file.readLine();
-        if (line.contains("GPRMC"))
+        // Read in the data until we reach the end..
+        QByteArray line;
+        while(file.atEnd() == false)
         {
-            break;
+            // Read the next line in.
+            line = file.readLine();
+
+            // Does the line contain "GPRMC"?
+            if(line.contains("GPRMC"))
+            {
+                // Break the loop.
+                break;
+            }
         }
-    }
-    file.close();
 
-    GPS_Position pos = process_line(line);
+        // Close the file handle.
+        file.close();
 
-    emit(new_position(pos.getTime(), QPointF(pos.getLongitudeCoord(), pos.getLatitudeCoord())));
+        // Create a position from the line fetched.
+        const GPS_Position pos = process_line(line);
 
-    if (running)
-    {
-        QTimer::singleShot(1000, this, SLOT(tick()));
+        // Emit our new position fetched.
+        emit new_position(pos.getTime(), QPointF(pos.getLongitudeCoord(), pos.getLatitudeCoord()));
+
+        // Are we still running?
+        if(m_running)
+        {
+            // Set timer for the next tick.
+            QTimer::singleShot(1000, this, SLOT(tick()));
+        }
     }
 }
 
 GPS_Position GPS_Neo::process_line(QByteArray line)
 {
+    // Remove the last byte from the array.
     line.chop(1);
 
+    // Split the line using ','.
     QList<QByteArray> elems = line.split(',');
 
+    // Fetch the values.
     const qreal time = QString(elems.at(1)).toDouble();
     const qreal latitude = elems.at(3).toDouble() / 100.0;
     const std::string latitude_dir = QString(elems.at(4)).toStdString();
     const qreal longitude = elems.at(5).toDouble() / 100.0;
     const std::string longitude_dir = QString(elems.at(6)).toStdString();
 
+    // Create and return the populated GPS position.
     return GPS_Position(time, longitude, longitude_dir, latitude, latitude_dir);
 }

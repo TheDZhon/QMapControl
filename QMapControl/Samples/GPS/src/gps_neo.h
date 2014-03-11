@@ -1,36 +1,77 @@
-#ifndef GPS_NEO_H
-#define GPS_NEO_H
+#pragma once
 
-#include <QObject>
-#include <QtGui>
+// Qt includes.
+#include <QtCore/QObject>
+#include <QtCore/QPointF>
+
+// QMapControl includes.
 #include <QMapControl/gps_position.h>
-//! A parser for the NMEA data format
-/*!
- * This class parses gps data from the Neo´s gllin service, which you have to start manually
- * It reads the device file every seconds and emits a signal which contains a GPS_Position.
- * @see http://3rdparty.downloads.openmoko.org
- *	@author Kai Winter <kaiwinter@gmx.de>
-*/
+
 using namespace qmapcontrol;
+
+//! A parser for the NMEA data format.
+/*!
+ * This class parses gps data from the Neo´s gllin service, which you have to start manually.
+ * It reads the device file every second and emits a signal which contains a GPS_Position.
+ * @see http://3rdparty.downloads.openmoko.org
+ *
+ * @author Kai Winter <kaiwinter@gmx.de>
+ * @author Chris Stylianou <chris5287@gmail.com>
+ */
 class GPS_Neo: public QObject
 {
-        Q_OBJECT
-        public:
-                GPS_Neo(QObject *parent = 0);
-                ~GPS_Neo();
-                void start();
-                void stop();
+    Q_OBJECT
 
-        private:
-                QList<GPS_Position> positions;
-                GPS_Position process_line(QByteArray line);
-                bool running;
+public:
+    //! GPS_Neo constructor
+    /*!
+     * This is used to construct a GPS_Neo.
+     * @param parent QObject parent ownership.
+     */
+    GPS_Neo(QObject* parent = 0);
 
-        signals:
-                void new_position(float, QPointF);
+    //! Disable copy constructor.
+    ///GPS_Neo(const GPS_Neo&) = delete; @todo re-add once MSVC supports default/delete syntax.
 
-        public slots:
-                void tick();
+    //! Disable copy assignment.
+    ///GPS_Neo& operator=(const GPS_Neo&) = delete; @todo re-add once MSVC supports default/delete syntax.
+
+    //! Destructor.
+    ~GPS_Neo() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
+
+    /*!
+     * Starts the gps data collection.
+     */
+    void start();
+
+    /*!
+     * Stops the gps data collection.
+     */
+    void stop();
+
+public slots:
+    /**
+     * Check for the next position from the GPS device.
+     */
+    void tick();
+
+signals:
+    /*!
+     * Signal emitted when the position changes.
+     * @param time The GPS time.
+     * @param point The GPS position.
+     */
+    void new_position(float time, QPointF point);
+
+private:
+    /*!
+     * Parse a GPS data line.
+     * @param line The line to process.
+     * @return the populate GPS details.
+     */
+    GPS_Position process_line(QByteArray line);
+
+private:
+    /// Whether the GPS collection is running.
+    bool m_running;
 };
-
-#endif

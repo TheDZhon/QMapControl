@@ -30,12 +30,12 @@ public:
     ~GPS_Modul() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
 
     /*!
-     * Start the GPS Modul.
+     * Starts the GPS Modul.
      */
     void start();
 
     /*!
-     * Stop the GPS Modul.
+     * Stops the GPS Modul.
      */
     void stop();
 

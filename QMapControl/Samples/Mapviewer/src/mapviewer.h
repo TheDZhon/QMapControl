@@ -1,30 +1,47 @@
-#ifndef MAPVIEWER_H
-#define MAPVIEWER_H
+#pragma once
 
+// Qt includes.
 #include <QtWidgets/QMainWindow>
 
+// QMapControl includes.
 #include <QMapControl/QMapControl.h>
-#include <QMapControl/MapAdapterOSM.h>
-#include <QMapControl/Layer.h>
 
 using namespace qmapcontrol;
+
+/**
+ * @author Kai Winter <kaiwinter@gmx.de>
+ * @author Chris Stylianou <chris5287@gmail.com>
+ */
 class Mapviewer : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    Mapviewer(QWidget *parent = 0);
+    //! Mapviewer constructor
+    /*!
+     * This is used to construct a Mapviewer QWidget.
+     * @param parent QWidget parent ownership.
+     */
+    Mapviewer(QWidget* parent = 0);
 
-    ~Mapviewer();
+    //! Disable copy constructor.
+    ///Mapviewer(const Mapviewer&) = delete; @todo re-add once MSVC supports default/delete syntax.
+
+    //! Disable copy assignment.
+    ///Mapviewer& operator=(const Mapviewer&) = delete; @todo re-add once MSVC supports default/delete syntax.
+
+    //! Destructor.
+    ~Mapviewer() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
 
 private:
-    QMapControl* mc;
-    std::shared_ptr<Layer> mainlayer;
+    /**
+     * Handles QWidget resizing.
+     * @param resize_event The QResizeEvent that occured.
+     */
+    void resizeEvent(QResizeEvent* resize_event);
 
-    void addZoomButtons();
+private:
+    /// The main map control.
+    QMapControl* m_map_control;
 
-protected:
-    virtual void resizeEvent ( QResizeEvent * event );
 };
-
-#endif
