@@ -1,14 +1,22 @@
+// Qt includes.
 #include <QApplication>
+
+// Local includes.
 #include "citymap.h"
 
 int main(int argc, char *argv[])
 {
-      QApplication app(argc, argv);
-      Citymap * mw = new Citymap();
-		
-      mw->resize(400,590);
-      mw->setWindowTitle("City Map Mainz");
-      mw->show();
-      return app.exec();
-}
+    // Create a QApplication.
+    QApplication app(argc, argv);
 
+    // Create a Citymap widget.
+    Citymap citymap;
+    citymap.resize(400, 590);
+    citymap.setWindowTitle("QMapControl: Citymap");
+
+    // Show the widget.
+    citymap.show();
+
+    // Execute the application.
+    return app.exec();
+}

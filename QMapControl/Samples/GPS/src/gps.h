@@ -22,7 +22,7 @@ class GPS: public QMainWindow
 public:
     //! GPS constructor
     /*!
-     * This is used to construct a GPS Widhet.
+     * This is used to construct a GPS Widget.
      * @param parent QObject parent ownership.
      */
     GPS(QWidget* parent = 0);

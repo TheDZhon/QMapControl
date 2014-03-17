@@ -11,12 +11,16 @@ VERSION = 0.1
 TEMPLATE = app
 
 # Add header files.
-HEADERS +=                  \
-    src/citymap.h           \
-    src/dialogs.h           \
+HEADERS +=                      \
+    src/citymap.h               \
+    src/dialogs.h               \
 
 # Add source files.
-SOURCES +=                  \
-    src/main.cpp            \
-    src/citymap.cpp         \
-    src/dialogs.cpp         \
+SOURCES +=                      \
+    src/main.cpp                \
+    src/citymap.cpp             \
+    src/dialogs.cpp             \
+
+# Add resource files.
+RESOURCES +=                    \
+    ../resources/Resources.qrc  \

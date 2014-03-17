@@ -1,7 +1,6 @@
 #include "multidemo.h"
 
 // Qt includes.
-#include <QtCore/QCoreApplication>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QVBoxLayout>
@@ -128,7 +127,7 @@ void Multidemo::setupMaps()
 
 
     // Create a GPS GeometryPoint that can dynamically move, and add it to the geometry layer.
-    m_gps_point = std::make_shared<GeometryPointImage>(QPointF(0.0, 0.0), QCoreApplication::applicationDirPath() + "/images/marker1.png", GeometryPoint::AlignmentType::TopRight);
+    m_gps_point = std::make_shared<GeometryPointImage>(QPointF(0.0, 0.0), ":/resources/images/marker1.png", GeometryPoint::AlignmentType::TopRight);
     m_gps_point->setMetadata("name", "image point");
     layer_geometries->addGeometry(m_gps_point);
 

@@ -39,11 +39,11 @@ LinesAndPoints::LinesAndPoints(QWidget *parent)
     std::vector<std::shared_ptr<GeometryPoint>> points;
 
     // Image points.
-    points.emplace_back(std::make_shared<GeometryPointImage>(QPointF(8.259959, 50.001781), "images/bus_stop.png", GeometryPoint::AlignmentType::BottomLeft));
+    points.emplace_back(std::make_shared<GeometryPointImage>(QPointF(8.259959, 50.001781), ":/resources/images/bus_stop.png", GeometryPoint::AlignmentType::BottomLeft));
     points.back()->setMetadata("name", "Mainz, Hauptbahnhof");
-    points.emplace_back(std::make_shared<GeometryPointImage>(QPointF(8.263758, 49.998917), "images/bus_stop.png", GeometryPoint::AlignmentType::BottomLeft));
+    points.emplace_back(std::make_shared<GeometryPointImage>(QPointF(8.263758, 49.998917), ":/resources/images/bus_stop.png", GeometryPoint::AlignmentType::BottomLeft));
     points.back()->setMetadata("name", "Mainz, Münsterplatz");
-    points.emplace_back(std::make_shared<GeometryPointImage>(QPointF(8.265812, 50.001952), "images/bus_stop.png", GeometryPoint::AlignmentType::BottomLeft));
+    points.emplace_back(std::make_shared<GeometryPointImage>(QPointF(8.265812, 50.001952), ":/resources/images/bus_stop.png", GeometryPoint::AlignmentType::BottomLeft));
     points.back()->setMetadata("name", "Mainz, Neubrunnenplatz");
 
     // Circle points.

@@ -11,12 +11,16 @@ VERSION = 0.1
 TEMPLATE = app
 
 # Add header files.
-HEADERS +=                  \
-    src/gps_modul.h         \
-    src/multidemo.h         \
+HEADERS +=                      \
+    src/gps_modul.h             \
+    src/multidemo.h             \
 
 # Add source files.
-SOURCES +=                  \
-    src/main.cpp            \
-    src/gps_modul.cpp       \
-    src/multidemo.cpp       \
+SOURCES +=                      \
+    src/main.cpp                \
+    src/gps_modul.cpp           \
+    src/multidemo.cpp           \
+
+# Add resource files.
+RESOURCES +=                    \
+    ../resources/Resources.qrc  \

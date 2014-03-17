@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/resources">
+        <file>images/180-dom.jpg</file>
+        <file>images/180-lm.jpg</file>
+        <file>images/180-quintin.jpg</file>
+        <file>images/180-rgzm.jpg</file>
+        <file>images/180-stephan.jpg</file>
+        <file>images/bus_stop.png</file>
+        <file>images/flag.png</file>
+        <file>images/marker1.png</file>
+        <file>images/marker2.png</file>
+        <file>images/marker3.png</file>
+        <file>images/note.png</file>
+        <file>images/pub.png</file>
+    </qresource>
+</RCC>

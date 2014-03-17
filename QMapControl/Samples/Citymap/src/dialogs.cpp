@@ -1,21 +1,26 @@
 #include "dialogs.h"
 
+// Qt includes.
 #include <QtWidgets/QHBoxLayout>
 
 InfoDialog::InfoDialog(QWidget* parent)
-	: QDialog(parent)
+    : QDialog(parent)
 {
-	setWindowFlags(Qt::Dialog | Qt::WindowStaysOnTopHint);
-	infotext = new QTextEdit();
-	infotext->setReadOnly(true);
+    // Set the dialog flags.
+    setWindowFlags(Qt::Dialog | Qt::WindowStaysOnTopHint);
 
-	QHBoxLayout* layout = new QHBoxLayout();
-	setLayout(layout);
-	
-	layout->addWidget(infotext);
+    // Reset the info text as read only.
+    m_text_info = new QTextEdit();
+    m_text_info->setReadOnly(true);
+
+    // Create a new layout and add the widget.
+    QHBoxLayout* layout = new QHBoxLayout();
+    setLayout(layout);
+    layout->addWidget(m_text_info);
 }
 
-void InfoDialog::setInfotext(QString text)
+void InfoDialog::setInfotext(const QString& text)
 {
-	infotext->setHtml(text);
+    // Set the text of the infotext.
+    m_text_info->setHtml(text);
 }
