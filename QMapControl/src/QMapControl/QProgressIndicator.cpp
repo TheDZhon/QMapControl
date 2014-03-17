@@ -26,113 +26,167 @@
 QProgressIndicator::QProgressIndicator(QWidget* parent)
     : QWidget(parent),
       m_angle(0),
-      m_timerId(-1),
+      m_timer_identifier(-1),
       m_delay(40),
-      m_displayedWhenStopped(false),
+      m_always_visible(false),
       m_color(Qt::black)
 {
+    // Set the default size and focus policies.
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     setFocusPolicy(Qt::NoFocus);
 }
 
-bool QProgressIndicator::isAnimated () const
+int QProgressIndicator::animationDelay() const
 {
-    return (m_timerId != -1);
+    // Return the delay (milliseconds).
+    return m_delay;
 }
 
-void QProgressIndicator::setDisplayedWhenStopped(bool state)
+bool QProgressIndicator::isAnimated() const
 {
-    m_displayedWhenStopped = state;
-
-    update();
+    // Return if the timer is currently active.
+    return (m_timer_identifier != -1);
 }
 
 bool QProgressIndicator::isDisplayedWhenStopped() const
 {
-    return m_displayedWhenStopped;
+    // Return whether the progress indicator is displayed when stopped.
+    return m_always_visible;
 }
 
-void QProgressIndicator::startAnimation()
+const QColor & QProgressIndicator::color() const
 {
-    /// Disable angle being reset to zero.
-    //m_angle = 0;
-
-    if (m_timerId == -1)
-        m_timerId = startTimer(m_delay);
-}
-
-void QProgressIndicator::stopAnimation()
-{
-    if (m_timerId != -1)
-        killTimer(m_timerId);
-
-    m_timerId = -1;
-
-    update();
-}
-
-void QProgressIndicator::setAnimationDelay(int delay)
-{
-    if (m_timerId != -1)
-        killTimer(m_timerId);
-
-    m_delay = delay;
-
-    if (m_timerId != -1)
-        m_timerId = startTimer(m_delay);
-}
-
-void QProgressIndicator::setColor(const QColor & color)
-{
-    m_color = color;
-
-    update();
+    // Return the color.
+    return m_color;
 }
 
 QSize QProgressIndicator::sizeHint() const
 {
-    return QSize(20,20);
+    // Return the recommended size.
+    return QSize(20, 20);
 }
 
-int QProgressIndicator::heightForWidth(int w) const
+int QProgressIndicator::heightForWidth(int width) const
 {
-    return w;
+    // Return the width (as the progress indicator is looks best as a square).
+    return width;
 }
 
-void QProgressIndicator::timerEvent(QTimerEvent * /*event*/)
+void QProgressIndicator::startAnimation()
 {
-    m_angle = (m_angle+30)%360;
-
-    update();
-}
-
-void QProgressIndicator::paintEvent(QPaintEvent * /*event*/)
-{
-    if (!m_displayedWhenStopped && !isAnimated())
-        return;
-
-    int width = qMin(this->width(), this->height());
-
-    QPainter p(this);
-    p.setRenderHint(QPainter::Antialiasing);
-
-    int outerRadius = (width-1)*0.5;
-    int innerRadius = (width-1)*0.5*0.38;
-
-    int capsuleHeight = outerRadius - innerRadius;
-    int capsuleWidth  = (width > 32 ) ? capsuleHeight *.23 : capsuleHeight *.35;
-    int capsuleRadius = capsuleWidth/2;
-
-    for (int i=0; i<12; i++)
+    // Check that the timer hasn't already started.
+    if(m_timer_identifier == -1)
     {
-        QColor color = m_color;
-        color.setAlphaF(1.0f - (i/12.0f));
-        p.setPen(Qt::NoPen);
-        p.setBrush(color);
-        p.save();
-        p.translate(rect().center());
-        p.rotate(m_angle - i*30.0f);
-        p.drawRoundedRect(-capsuleWidth*0.5, -(innerRadius+capsuleHeight), capsuleWidth, capsuleHeight, capsuleRadius, capsuleRadius);
-        p.restore();
+        // Start the timer with the delay.
+        m_timer_identifier = QWidget::startTimer(m_delay);
+    }
+}
+
+void QProgressIndicator::stopAnimation()
+{
+    // Check if the timer is running.
+    if(m_timer_identifier != -1)
+    {
+        // Kill the timer.
+        QWidget::killTimer(m_timer_identifier);
+
+        // Reset the timer identifier.
+        m_timer_identifier = -1;
+
+        // Schedule a repaint.
+        QWidget::update();
+    }
+}
+
+void QProgressIndicator::setAnimationDelay(const int& delay)
+{
+    // Check if the timer is running.
+    if(m_timer_identifier != -1)
+    {
+        // Kill the timer.
+        QWidget::killTimer(m_timer_identifier);
+    }
+
+    // Set the new delay setting.
+    m_delay = delay;
+
+    // Was the timer previously running.
+    if(m_timer_identifier != -1)
+    {
+        // Restart the timer with the new delay setting.
+        m_timer_identifier = QWidget::startTimer(m_delay);
+    }
+}
+
+void QProgressIndicator::setDisplayedWhenStopped(const bool& state)
+{
+    // Set the new state.
+    m_always_visible = state;
+
+    // Schedule a repaint.
+    QWidget::update();
+}
+
+void QProgressIndicator::setColor(const QColor& color)
+{
+    // Set the new color.
+    m_color = color;
+
+    // Schedule a repaint.
+    QWidget::update();
+}
+
+void QProgressIndicator::timerEvent(QTimerEvent* /*event*/)
+{
+    // Update the current rotation angle.
+    m_angle = (m_angle + 30) % 360;
+
+    // Schedule a repaint.
+    QWidget::update();
+}
+
+void QProgressIndicator::paintEvent(QPaintEvent* /*event*/)
+{
+    // Check if we should alawys display, or we are currently animating.
+    if(m_always_visible || isAnimated())
+    {
+        // Calculate the smallest dimension of the QWidget.
+        const int width = qMin(this->width(), this->height());
+
+        // Create a painter for this QWidget.
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing);
+
+        // Calculate the inner and outer radius'.
+        const int radius_outer = (width - 1.0) * 0.5;
+        const int radius_inner = (width - 1.0) * 0.5 * 0.38;
+
+        // Calculate the capsule dimensions.
+        int capsule_height = radius_outer - radius_inner;
+        int capsule_width  = (width > 32 ) ? capsule_height * 0.23 : capsule_height * 0.35;
+        int capsule_radius = capsule_width / 2.0;
+
+        // Loop and create the progress capsule indicators.
+        for(int i = 0; i < 12; ++i)
+        {
+            // Set the painter's brush color.
+            QColor color = m_color;
+            color.setAlphaF(1.0f - (i/12.0f));
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(color);
+
+            // Save the current painter's state.
+            painter.save();
+
+            // Translate and rotate the painter as required.
+            painter.translate(rect().center());
+            painter.rotate(m_angle - i * 30.0f);
+
+            // Draw the progress capsule indicator.
+            painter.drawRoundedRect(-capsule_width * 0.5, -(radius_inner + capsule_height), capsule_width, capsule_height, capsule_radius, capsule_radius);
+
+            // Restore the painter's previous state.
+            painter.restore();
+        }
     }
 }
