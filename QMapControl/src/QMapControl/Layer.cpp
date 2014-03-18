@@ -55,6 +55,29 @@ namespace qmapcontrol
         return m_name;
     }
 
+    QVariant Layer::getMetadata(const std::string& key) const
+    {
+        // Default return value.
+        QVariant return_value;
+
+        // Find the key.
+        const auto find_itr = m_metadata.find(key);
+        if(find_itr != m_metadata.end())
+        {
+            // Fetch the value.
+            return_value = find_itr->second;
+        }
+
+        // Return the value.
+        return return_value;
+    }
+
+    void Layer::setMetadata(const std::string& key, const QVariant& value)
+    {
+        // Set the meta-data.
+        m_metadata[key] = value;
+    }
+
     const std::vector< std::shared_ptr<MapAdapter> > Layer::getMapAdapters() const
     {
         // Gain a read lock to protect the map adapters container.

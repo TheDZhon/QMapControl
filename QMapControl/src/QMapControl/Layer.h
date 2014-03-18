@@ -87,6 +87,20 @@ namespace qmapcontrol
         std::string	getName() const;
 
         /*!
+         * Fetches a meta-data value.
+         * @param key The meta-data key.
+         * @return the meta-data value.
+         */
+        QVariant getMetadata(const std::string& key) const;
+
+        /*!
+         * Set a meta-data key/value.
+         * @param key The meta-data key.
+         * @param value The meta-data value.
+         */
+        void setMetadata(const std::string& key, const QVariant& value);
+
+        /*!
          * Returns the Map Adapters from this Layer (Use this instead of the member variable for thread-safety).
          * @return a list of map adapters that are on this Layer.
          */
@@ -248,5 +262,8 @@ namespace qmapcontrol
 
         /// Maximum zoom level to show this geometry.
         const int m_zoom_maximum;
+
+        /// Meta-data storage.
+        std::map<std::string, QVariant> m_metadata;
     };
 }
