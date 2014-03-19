@@ -241,6 +241,7 @@ namespace qmapcontrol
     QString ImageManager::md5hex(const QUrl& url)
     {
         // Return the md5 hex value of the given url at a specific tile size.
+        /// @todo encode projection into md5 hex as well.
         return QString(QCryptographicHash::hash((url.toString() + QString::number(m_tile_size_px)).toUtf8(), QCryptographicHash::Md5).toHex());
     }
 

@@ -293,8 +293,8 @@ namespace qmapcontrol
                     // Gain a write lock to protect the geometries container.
                     QWriteLocker locker(&m_geometries_mutex);
 
-                    // Disconnect any signals that were previous connected.
-                    QObject::disconnect(geometry.get());
+                    // Disconnect any signals that were previously connected.
+                    QObject::disconnect(geometry.get(), 0, 0, 0);
 
                     // Remove the geometry from the list.
                     m_geometries.erase(std::static_pointer_cast<GeometryPoint>(geometry)->coordinate(), geometry);
@@ -306,8 +306,8 @@ namespace qmapcontrol
                     // Gain a write lock to protect the geometry widgets container.
                     QWriteLocker locker(&m_geometry_widgets_mutex);
 
-                    // Disconnect any signals that were previous connected.
-                    QObject::disconnect(geometry.get());
+                    // Disconnect any signals that were previously connected.
+                    QObject::disconnect(geometry.get(), 0, 0, 0);
 
                     // Find the object in the container.
                     const auto itr_find = m_geometry_widgets.find(std::static_pointer_cast<GeometryPointWidget>(geometry));
@@ -327,8 +327,8 @@ namespace qmapcontrol
                     // Gain a write lock to protect the geometries container.
                     QWriteLocker locker(&m_geometries_mutex);
 
-                    // Disconnect any signals that were previous connected.
-                    QObject::disconnect(geometry.get());
+                    // Disconnect any signals that were previously connected.
+                    QObject::disconnect(geometry.get(), 0, 0, 0);
 
                     // Loop through each GeometryLineString point and remove it to the container.
                     for(const auto point : std::static_pointer_cast<GeometryLineString>(geometry)->points())
@@ -347,8 +347,8 @@ namespace qmapcontrol
                     // Gain a write lock to protect the geometries container.
                     QWriteLocker locker(&m_geometries_mutex);
 
-                    // Disconnect any signals that were previous connected.
-                    QObject::disconnect(geometry.get());
+                    // Disconnect any signals that were previously connected.
+                    QObject::disconnect(geometry.get(), 0, 0, 0);
 
                     // Loop through each GeometryPolygon point and remove it to the container.
                     for(const auto point : std::static_pointer_cast<GeometryPolygon>(geometry)->points())
