@@ -51,9 +51,6 @@ namespace qmapcontrol
 
         // Update the pixmap.
         updatePixmap();
-
-        // Emit that we need to redraw to display this change.
-        emit requestRedraw();
     }
 
     void GeometryPointArrow::updatePixmap()

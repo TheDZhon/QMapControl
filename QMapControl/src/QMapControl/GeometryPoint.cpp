@@ -43,7 +43,10 @@ namespace qmapcontrol
           m_base_size_px(0.0, 0.0),
           m_draw_minimum_px(-1.0, -1.0),
           m_draw_maximum_px(-1.0, -1.0),
-          m_object_size_px(0.0, 0.0)
+          m_object_size_px(0.0, 0.0),
+          m_metadata_displayed_key(""),
+          m_metadata_displayed_zoom_minimum(10),
+          m_metadata_displayed_offset_px(5.0)
     {
 
     }
@@ -59,7 +62,10 @@ namespace qmapcontrol
           m_base_size_px(0.0, 0.0),
           m_draw_minimum_px(-1.0, -1.0),
           m_draw_maximum_px(-1.0, -1.0),
-          m_object_size_px(0.0, 0.0)
+          m_object_size_px(0.0, 0.0),
+          m_metadata_displayed_key(""),
+          m_metadata_displayed_zoom_minimum(10),
+          m_metadata_displayed_offset_px(5.0)
     {
 
     }
@@ -74,7 +80,10 @@ namespace qmapcontrol
           m_base_size_px(pixmap.size()),
           m_draw_minimum_px(-1.0, -1.0),
           m_draw_maximum_px(-1.0, -1.0),
-          m_object_size_px(0.0, 0.0)
+          m_object_size_px(0.0, 0.0),
+          m_metadata_displayed_key(""),
+          m_metadata_displayed_zoom_minimum(10),
+          m_metadata_displayed_offset_px(5.0)
     {
 
     }
@@ -89,7 +98,10 @@ namespace qmapcontrol
           m_base_size_px(widget->size()),
           m_draw_minimum_px(-1.0, -1.0),
           m_draw_maximum_px(-1.0, -1.0),
-          m_object_size_px(0.0, 0.0)
+          m_object_size_px(0.0, 0.0),
+          m_metadata_displayed_key(""),
+          m_metadata_displayed_zoom_minimum(10),
+          m_metadata_displayed_offset_px(5.0)
     {
         // Do we have a widget?
         if(m_widget != nullptr)
@@ -197,6 +209,17 @@ namespace qmapcontrol
         }
     }
 
+    void GeometryPoint::setMetadataDisplayed(const std::string& key, const int& zoom_minimum, const double& offset_px)
+    {
+        // Set the meta-data key to use.
+        m_metadata_displayed_key = key;
+        m_metadata_displayed_zoom_minimum = zoom_minimum;
+        m_metadata_displayed_offset_px = offset_px;
+
+        // Emit that we need to redraw to display this change.
+        emit requestRedraw();
+    }
+
     QRectF GeometryPoint::boundingBox(const int& controller_zoom) const
     {
         // Calculate the point in pixels.
@@ -271,6 +294,13 @@ namespace qmapcontrol
 
                     // Draw the pixmap.
                     painter->drawPixmap(QRectF(top_left_point_px, m_object_size_px), m_pixmap, QRectF());
+
+                    // Do we have a meta-data value and should we display it at this zoom?
+                    if(controller_zoom >= m_metadata_displayed_zoom_minimum && getMetadata(m_metadata_displayed_key).isNull() == false)
+                    {
+                        // Draw the text next to the point with an offset.
+                        painter->drawText(QRectF(top_left_point_px, m_object_size_px).topRight() + QPointF(m_metadata_displayed_offset_px, -m_metadata_displayed_offset_px), getMetadata(m_metadata_displayed_key).toString());
+                    }
                 }
             }
             // We can just draw the point.
@@ -287,6 +317,13 @@ namespace qmapcontrol
 
                     // Draw the point.
                     painter->drawPoint(point_px);
+
+                    // Do we have a meta-data value and should we display it at this zoom?
+                    if(controller_zoom >= m_metadata_displayed_zoom_minimum && getMetadata(m_metadata_displayed_key).isNull() == false)
+                    {
+                        // Draw the text next to the point with an offset.
+                        painter->drawText(point_px + QPointF(m_metadata_displayed_offset_px, -m_metadata_displayed_offset_px), getMetadata(m_metadata_displayed_key).toString());
+                    }
                 }
             }
         }
@@ -314,6 +351,9 @@ namespace qmapcontrol
     void GeometryPoint::updatePixmap()
     {
         // Do nothing.
+
+        // Emit that we need to redraw to display this change.
+        emit requestRedraw();
     }
 
     QSizeF GeometryPoint::calculateGeometrySizePx(const int& controller_zoom) const

@@ -197,6 +197,14 @@ namespace qmapcontrol
          */
         virtual void setVisible(const bool& enabled) override;
 
+        /*!
+         * Set the meta-data value to display with the geometry.
+         * @param key The meta-data key.
+         * @param zoom_minimum The minimum zoom to display the meta-data value at.
+         * @param offset_px The offset that the meta-data value is displayed from in pixels.
+         */
+        void setMetadataDisplayed(const std::string& key, const int& zoom_minimum = 10, const double& offset_px = 5.0);
+
     public:
         /*!
          * The bounding box in world coordinates.
@@ -297,5 +305,14 @@ namespace qmapcontrol
 
         /// The current draw size in pixels.
         QSizeF m_object_size_px;
+
+        /// The meta-data's key for the value to display.
+        std::string m_metadata_displayed_key;
+
+        /// The minimum zoom to display the meta-data value at.
+        int m_metadata_displayed_zoom_minimum;
+
+        /// The offset that the meta-data value is displayed from in pixels.
+        double m_metadata_displayed_offset_px;
     };
 }
