@@ -83,10 +83,8 @@ namespace qmapcontrol
         /*!
          * Enables the persistent cache, specifying the directory and expiry timeout.
          * @param path The path where the images should be stored.
-         * @param expiry The max age (in minutes) of an image before its removed and a new one is
-         * requested (0 to keep forever).
+         * @param expiry The max age (in minutes) of an image before its removed and a new one is requested (0 to keep forever).
          * @return whether the persistent cache was enabled.
-         * @todo add maximum size?
          */
         bool enablePersistentCache(const std::chrono::minutes& expiry, const QDir& path);
 

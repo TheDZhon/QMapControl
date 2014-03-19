@@ -29,6 +29,9 @@
 #include <QtCore/QCryptographicHash>
 #include <QtGui/QPainter>
 
+// Local includes.
+#include "Projection.h"
+
 namespace qmapcontrol
 {
     namespace
@@ -240,9 +243,8 @@ namespace qmapcontrol
 
     QString ImageManager::md5hex(const QUrl& url)
     {
-        // Return the md5 hex value of the given url at a specific tile size.
-        /// @todo encode projection into md5 hex as well.
-        return QString(QCryptographicHash::hash((url.toString() + QString::number(m_tile_size_px)).toUtf8(), QCryptographicHash::Md5).toHex());
+        // Return the md5 hex value of the given url at a specific projection and tile size.
+        return QString(QCryptographicHash::hash((url.toString() + QString::number(projection::get().epsg()) + QString::number(m_tile_size_px)).toUtf8(), QCryptographicHash::Md5).toHex());
     }
 
     QString ImageManager::persistentCacheFilename(const QUrl& url)
