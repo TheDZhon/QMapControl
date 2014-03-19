@@ -94,25 +94,41 @@ namespace qmapcontrol
 
     void NetworkManager::downloadImage(const QUrl& url)
     {
-        // Generate a new request.
-        QNetworkRequest request(url);
-        request.setRawHeader("User-Agent", "QMapControl");
-
-        // Send the request.
-        QNetworkReply* reply = m_nam.get(request);
+        // Keep track of our success.
+        bool success(false);
 
         // Scope this as we later call "downloadQueueSize()" which also locks all download queue mutexes.
         {
-            // Store the request into the downloading image queue.
+            // Gain a lock to protect the downloading image container.
             QMutexLocker lock(&m_mutex_downloading_image);
-            m_downloading_image[reply] = url;
+
+            // Check this is a new request.
+            if(m_downloading_image.values().contains(url) == false)
+            {
+                // Generate a new request.
+                QNetworkRequest request(url);
+                request.setRawHeader("User-Agent", "QMapControl");
+
+                // Send the request.
+                QNetworkReply* reply = m_nam.get(request);
+
+                // Store the request into the downloading image queue.
+                m_downloading_image[reply] = url;
+
+                // Mark our success.
+                success = true;
+
+                // Log success.
+                qDebug() << "Downloading image '" << url << "'";
+            }
         }
 
-        // Emit that we are downloading a new image (with details of the current queue size).
-        emit downloadingInProgress(downloadQueueSize());
-
-        // Log success.
-        qDebug() << "Downloading image '" << url << "'";
+        // Was we successful?
+        if(success)
+        {
+            // Emit that we are downloading a new image (with details of the current queue size).
+            emit downloadingInProgress(downloadQueueSize());
+        }
     }
 
     void NetworkManager::proxyAuthenticationRequired(const QNetworkProxy& proxy, QAuthenticator* authenticator)
