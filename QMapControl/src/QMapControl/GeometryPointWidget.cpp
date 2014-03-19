@@ -27,14 +27,14 @@
 
 namespace qmapcontrol
 {
-    GeometryPointWidget::GeometryPointWidget(const qreal& x_coord, const qreal& y_coord, QWidget* widget, const AlignmentType& alignment_type, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
-        : GeometryPoint(QPointF(x_coord, y_coord), widget, alignment_type, pen, zoom_minimum, zoom_maximum)
+    GeometryPointWidget::GeometryPointWidget(const qreal& x_coord, const qreal& y_coord, QWidget* widget, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
+        : GeometryPoint(QPointF(x_coord, y_coord), widget, pen, zoom_minimum, zoom_maximum)
     {
 
     }
 
-    GeometryPointWidget::GeometryPointWidget(const QPointF& point_coord, QWidget* widget, const AlignmentType& alignment_type, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
-        : GeometryPoint(point_coord, widget, alignment_type, pen, zoom_minimum, zoom_maximum)
+    GeometryPointWidget::GeometryPointWidget(const QPointF& point_coord, QWidget* widget, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
+        : GeometryPoint(point_coord, widget, pen, zoom_minimum, zoom_maximum)
     {
 
     }

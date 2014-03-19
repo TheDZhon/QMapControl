@@ -27,15 +27,15 @@
 
 namespace qmapcontrol
 {
-    GeometryPointCircle::GeometryPointCircle(const QPointF& point_coord, const int& radius_px, const AlignmentType& alignment_type, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
-            : GeometryPoint(point_coord, QPixmap(radius_px, radius_px), alignment_type, pen, zoom_minimum, zoom_maximum)
+    GeometryPointCircle::GeometryPointCircle(const QPointF& point_coord, const int& radius_px, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
+            : GeometryPoint(point_coord, QPixmap(radius_px, radius_px), pen, zoom_minimum, zoom_maximum)
     {
         // Update the pixmap.
         updatePixmap();
     }
 
-    GeometryPointCircle::GeometryPointCircle(const QPointF& point_coord, const AlignmentType& alignment_type, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
-            : GeometryPoint(point_coord, QPixmap(10.0, 10.0), alignment_type, pen, zoom_minimum, zoom_maximum)
+    GeometryPointCircle::GeometryPointCircle(const QPointF& point_coord, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
+            : GeometryPoint(point_coord, QPixmap(10.0, 10.0), pen, zoom_minimum, zoom_maximum)
     {
         // Update the pixmap.
         updatePixmap();

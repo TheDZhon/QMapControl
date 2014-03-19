@@ -47,24 +47,22 @@ namespace qmapcontrol
          * This constructor creates a point which will display a pixmap from the image file.
          * @param point_coord The x/y coordinate (longitude/latitude).
          * @param filename The image file to draw.
-         * @param alignment_type The alignment of the geometry to use when drawing.
          * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPointImage(const QPointF& point_coord, const std::string& filename, const AlignmentType& alignment_type = AlignmentType::Middle, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPointImage(const QPointF& point_coord, const std::string& filename, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Constructor.
         /*!
          * This constructor creates a point which will display a pixmap.
          * @param point_coord The x/y coordinate (longitude/latitude).
          * @param pixmap The pixmap to draw.
-         * @param alignment_type The alignment of the geometry to use when drawing.
          * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPointImage(const QPointF& point_coord, const QPixmap& pixmap, const AlignmentType& alignment_type = AlignmentType::Middle, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPointImage(const QPointF& point_coord, const QPixmap& pixmap, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Disable copy constructor.
         ///GeometryPointImage(const GeometryPointImage&) = delete; @todo re-add once MSVC supports default/delete syntax.

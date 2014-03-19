@@ -33,12 +33,12 @@
 
 namespace qmapcontrol
 {
-    GeometryPoint::GeometryPoint(const QPointF& point_coord, const AlignmentType& alignment_type, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
+    GeometryPoint::GeometryPoint(const QPointF& point_coord, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
         : Geometry(Geometry::GeometryType::GeometryPoint, pen, zoom_minimum, zoom_maximum),
           m_point_coord(point_coord),
           m_widget(nullptr),
           m_pixmap(),
-          m_alignment_type(alignment_type),
+          m_alignment_type(AlignmentType::Middle),
           m_base_zoom(-1),
           m_base_size_px(0.0, 0.0),
           m_draw_minimum_px(-1.0, -1.0),
@@ -52,12 +52,12 @@ namespace qmapcontrol
     }
 
 
-    GeometryPoint::GeometryPoint(const qreal& x_coord, const qreal& y_coord, const AlignmentType& alignment_type, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
+    GeometryPoint::GeometryPoint(const qreal& x_coord, const qreal& y_coord, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
         : Geometry(Geometry::GeometryType::GeometryPoint, pen, zoom_minimum, zoom_maximum),
           m_point_coord(QPointF(x_coord, y_coord)),
           m_widget(nullptr),
           m_pixmap(),
-          m_alignment_type(alignment_type),
+          m_alignment_type(AlignmentType::Middle),
           m_base_zoom(-1),
           m_base_size_px(0.0, 0.0),
           m_draw_minimum_px(-1.0, -1.0),
@@ -70,12 +70,12 @@ namespace qmapcontrol
 
     }
 
-    GeometryPoint::GeometryPoint(const QPointF& point_coord, const QPixmap& pixmap, const AlignmentType& alignment_type, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
+    GeometryPoint::GeometryPoint(const QPointF& point_coord, const QPixmap& pixmap, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
         : Geometry(Geometry::GeometryType::GeometryPoint, pen, zoom_minimum, zoom_maximum),
           m_point_coord(point_coord),
           m_widget(nullptr),
           m_pixmap(pixmap),
-          m_alignment_type(alignment_type),
+          m_alignment_type(AlignmentType::Middle),
           m_base_zoom(-1),
           m_base_size_px(pixmap.size()),
           m_draw_minimum_px(-1.0, -1.0),
@@ -88,12 +88,12 @@ namespace qmapcontrol
 
     }
 
-    GeometryPoint::GeometryPoint(const QPointF& point_coord, QWidget* widget, const AlignmentType& alignment_type, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
+    GeometryPoint::GeometryPoint(const QPointF& point_coord, QWidget* widget, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
         : Geometry(Geometry::GeometryType::GeometryPointWidget, pen, zoom_minimum, zoom_maximum),
           m_point_coord(point_coord),
           m_widget(widget),
           m_pixmap(),
-          m_alignment_type(alignment_type),
+          m_alignment_type(AlignmentType::Middle),
           m_base_zoom(-1),
           m_base_size_px(widget->size()),
           m_draw_minimum_px(-1.0, -1.0),
@@ -127,6 +127,12 @@ namespace qmapcontrol
     {
         // Return the x/y coordinate (longitude/latitude).
         return m_point_coord;
+    }
+
+    void GeometryPoint::setAlignmentType(const AlignmentType& alignment_type)
+    {
+        // Set the alignment type.
+        m_alignment_type = alignment_type;
     }
 
     void GeometryPoint::setBaseZoom(const int& zoom)

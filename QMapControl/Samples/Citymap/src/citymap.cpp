@@ -67,7 +67,8 @@ Citymap::Citymap(QWidget* parent)
     // Create a text edit geometry widget (and hide for now).
     m_text_edit = new QTextEdit(m_map_control);
     m_text_edit->setGeometry(0,0,200,100);
-    m_geometry_text_edit = std::make_shared<GeometryPointWidget>(QPointF(0.0, 0.0), m_text_edit, GeometryPoint::AlignmentType::TopLeft);
+    m_geometry_text_edit = std::make_shared<GeometryPointWidget>(QPointF(0.0, 0.0), m_text_edit);
+    m_geometry_text_edit->setAlignmentType(GeometryPoint::AlignmentType::TopLeft);
     m_geometry_text_edit->setVisible(false);
     m_layer_notes->addGeometry(m_geometry_text_edit);
 }
@@ -377,7 +378,8 @@ void Citymap::addNote()
 void Citymap::writeNote(QMouseEvent* /*mouse_event*/, QPointF press_coordinate)
 {
     // Create a point to represent the note.
-    std::shared_ptr<GeometryPoint> point(std::make_shared<GeometryPointImage>(press_coordinate, ":/resources/images/note.png", GeometryPoint::AlignmentType::BottomLeft));
+    std::shared_ptr<GeometryPoint> point(std::make_shared<GeometryPointImage>(press_coordinate, ":/resources/images/note.png"));
+    point->setAlignmentType(GeometryPoint::AlignmentType::BottomLeft);
     point->setBaseZoom(16);
     point->setDrawMinimumPx(QSizeF(12, 10));
     point->setDrawMaximumPx(QSizeF(47, 40));
@@ -459,8 +461,12 @@ void Citymap::calculateDistanceClick(QMouseEvent* evnt, QPointF press_coordinate
         // Capture the starting point.
         m_coord_start = press_coordinate;
 
+        // Create a start point flag.
+        std::shared_ptr<GeometryPoint> point_flag(std::make_shared<GeometryPointImage>(m_coord_start, ":/resources/images/flag.png"));
+        point_flag->setAlignmentType(GeometryPoint::AlignmentType::BottomRight);
+
         // Add the starting point to the layer.
-        m_layer_notes->addGeometry(std::make_shared<GeometryPointImage>(m_coord_start, ":/resources/images/flag.png", GeometryPoint::AlignmentType::BottomRight));
+        m_layer_notes->addGeometry(point_flag);
     }
     // Else have we captured the finishing point?
     else if(m_coord_end.isNull() && evnt->type() == QEvent::MouseButtonPress)
@@ -487,7 +493,9 @@ void Citymap::calculateDistanceClick(QMouseEvent* evnt, QPointF press_coordinate
         painter.setFont(QFont("Helvetiva", 6));
         painter.drawText(pixmap->rect(), QString().setNum(distance, 'f', 3) + " km");
         painter.end();
-        points.emplace_back(std::make_shared<GeometryPoint>(m_coord_end, *pixmap, GeometryPoint::AlignmentType::BottomLeft));
+        std::shared_ptr<GeometryPoint> point_end(std::make_shared<GeometryPoint>(m_coord_end, *pixmap));
+        point_end->setAlignmentType(GeometryPoint::AlignmentType::BottomLeft);
+        points.push_back(point_end);
         m_layer_notes->addGeometry(std::make_shared<GeometryLineString>(points));
 
         // Reset the points.

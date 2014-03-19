@@ -78,36 +78,33 @@ namespace qmapcontrol
         /*!
          * This constructor creates a point with no image or widget.
          * @param point_coord The x/y coordinate (longitude/latitude).
-         * @param alignment_type The alignment of the geometry to use when drawing.
          * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPoint(const QPointF& point_coord, const AlignmentType& alignment_type = AlignmentType::Middle, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPoint(const QPointF& point_coord, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Constructor.
         /*!
          * This constructor creates a point with no image or widget.
          * @param x_coord The x coordinate (longitude).
          * @param y_coord The y coordinate (latitude).
-         * @param alignment_type The alignment of the geometry to use when drawing.
          * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPoint(const qreal& x_coord, const qreal& y_coord, const AlignmentType& alignment_type = AlignmentType::Middle, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPoint(const qreal& x_coord, const qreal& y_coord, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Constructor.
         /*!
          * This constructor creates a point which will display the given pixmap.
          * @param point_coord The x/y coordinate (longitude/latitude).
          * @param pixmap The pixmap to be displayed by this point.
-         * @param alignment_type The alignment of the geometry to use when drawing.
          * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPoint(const QPointF& point_coord, const QPixmap& pixmap, const AlignmentType& alignment_type = AlignmentType::Middle, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPoint(const QPointF& point_coord, const QPixmap& pixmap, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Disable copy constructor.
         ///GeometryPoint(const GeometryPoint&) = delete; @todo re-add once MSVC supports default/delete syntax.
@@ -135,6 +132,12 @@ namespace qmapcontrol
          * @return the x/y coordinate (longitude/latitude).
          */
         QPointF coordinate() const;
+
+        /*!
+         * Set the alignment type to use when drawing the geometry.
+         * @param alignment_type The alignment type to set.
+         */
+        void setAlignmentType(const AlignmentType& alignment_type = AlignmentType::Middle);
 
         /*!
          * Use this method to set a zoom level on which the pixmap will be drawn at its real size.
@@ -244,12 +247,11 @@ namespace qmapcontrol
          * @note IMPORTANT: You have to set the size of the widget before this is constructed.
          * @param point_coord The x/y coordinate (longitude/latitude).
          * @param widget The widget to be displayed by this point.
-         * @param alignment_type The alignment of the geometry to use when drawing.
          * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPoint(const QPointF& point_coord, QWidget* widget, const AlignmentType& alignment_type = AlignmentType::Middle, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPoint(const QPointF& point_coord, QWidget* widget, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         /*!
          * Updates the pixmap.
@@ -289,7 +291,7 @@ namespace qmapcontrol
         QPixmap m_pixmap;
 
         /// The alignment type to use when drawing.
-        const AlignmentType m_alignment_type;
+        AlignmentType m_alignment_type;
 
         /// The base zoom level.
         int m_base_zoom;

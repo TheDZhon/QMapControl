@@ -39,29 +39,32 @@ LinesAndPoints::LinesAndPoints(QWidget *parent)
     std::vector<std::shared_ptr<GeometryPoint>> points;
 
     // Image points.
-    points.emplace_back(std::make_shared<GeometryPointImage>(QPointF(8.259959, 50.001781), ":/resources/images/bus_stop.png", GeometryPoint::AlignmentType::BottomLeft));
+    points.emplace_back(std::make_shared<GeometryPointImage>(QPointF(8.259959, 50.001781), ":/resources/images/bus_stop.png"));
+    points.back()->setAlignmentType(GeometryPoint::AlignmentType::BottomLeft);
     points.back()->setMetadata("name", "Mainz, Hauptbahnhof");
-    points.emplace_back(std::make_shared<GeometryPointImage>(QPointF(8.263758, 49.998917), ":/resources/images/bus_stop.png", GeometryPoint::AlignmentType::BottomLeft));
+    points.emplace_back(std::make_shared<GeometryPointImage>(QPointF(8.263758, 49.998917), ":/resources/images/bus_stop.png"));
+    points.back()->setAlignmentType(GeometryPoint::AlignmentType::BottomLeft);
     points.back()->setMetadata("name", "Mainz, Münsterplatz");
-    points.emplace_back(std::make_shared<GeometryPointImage>(QPointF(8.265812, 50.001952), ":/resources/images/bus_stop.png", GeometryPoint::AlignmentType::BottomLeft));
+    points.emplace_back(std::make_shared<GeometryPointImage>(QPointF(8.265812, 50.001952), ":/resources/images/bus_stop.png"));
+    points.back()->setAlignmentType(GeometryPoint::AlignmentType::BottomLeft);
     points.back()->setMetadata("name", "Mainz, Neubrunnenplatz");
 
     // Circle points.
-    points.emplace_back(std::make_shared<GeometryPointCircle>(QPointF(8.2688, 50.004015), GeometryPoint::AlignmentType::Middle));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(QPointF(8.2688, 50.004015)));
     points.back()->setMetadata("name", "Mainz, Bauhofstraße LRP");
-    points.emplace_back(std::make_shared<GeometryPointCircle>(QPointF(8.272845, 50.00495), GeometryPoint::AlignmentType::Middle));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(QPointF(8.272845, 50.00495)));
     points.back()->setMetadata("name", "Mainz, Landtag");
-    points.emplace_back(std::make_shared<GeometryPointCircle>(QPointF(8.280349, 50.008173), GeometryPoint::AlignmentType::Middle));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(QPointF(8.280349, 50.008173)));
     points.back()->setMetadata("name", "Mainz, Brückenkopf");
 
     // Circle points with large green borders.
     QPen point_pen(QColor(0,255,0));
     point_pen.setWidth(3);
-    points.emplace_back(std::make_shared<GeometryPointCircle>(QPointF(8.273573, 50.016315), 15, GeometryPoint::AlignmentType::Middle, point_pen));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(QPointF(8.273573, 50.016315), 15, point_pen));
     points.back()->setMetadata("name", "Wiesbaden-Mainz-Kastel, Eleonorenstraße");
-    points.emplace_back(std::make_shared<GeometryPointCircle>(QPointF(8.275145, 50.016992), 15, GeometryPoint::AlignmentType::Middle, point_pen));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(QPointF(8.275145, 50.016992), 15, point_pen));
     points.back()->setMetadata("name", "Wiesbaden-Mainz-Kastel, Johannes-Goßner-Straße");
-    points.emplace_back(std::make_shared<GeometryPointCircle>(QPointF(8.270476, 50.021426), 15, GeometryPoint::AlignmentType::Middle, point_pen));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(QPointF(8.270476, 50.021426), 15, point_pen));
     points.back()->setMetadata("name", "Wiesbaden-Mainz-Kastel, Ruthof");
 
     // Basic Points

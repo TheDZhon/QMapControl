@@ -31,17 +31,19 @@
 namespace qmapcontrol
 {
     GeometryPointImageFixed::GeometryPointImageFixed(const QPointF& top_left_coord, const QPointF& bottom_right_coord, const std::string& filename, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
-        : GeometryPointImage(top_left_coord, QPixmap(filename.c_str()), AlignmentType::TopLeft, pen, zoom_minimum, zoom_maximum),
+        : GeometryPointImage(top_left_coord, QPixmap(filename.c_str()), pen, zoom_minimum, zoom_maximum),
           m_bottom_right_coord(bottom_right_coord)
     {
-
+        // Fixed image requires the alignment type set to the top-left.
+        setAlignmentType(AlignmentType::TopLeft);
     }
 
     GeometryPointImageFixed::GeometryPointImageFixed(const QPointF& top_left_coord, const QPointF& bottom_right_coord, const QPixmap& pixmap, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
-        : GeometryPointImage(top_left_coord, pixmap, AlignmentType::TopLeft, pen, zoom_minimum, zoom_maximum),
+        : GeometryPointImage(top_left_coord, pixmap, pen, zoom_minimum, zoom_maximum),
           m_bottom_right_coord(bottom_right_coord)
     {
-
+        // Fixed image requires the alignment type set to the top-left.
+        setAlignmentType(AlignmentType::TopLeft);
     }
 
     void GeometryPointImageFixed::draw(QPainter* painter, const QRectF& backbuffer_rect_px, const int& controller_zoom)
