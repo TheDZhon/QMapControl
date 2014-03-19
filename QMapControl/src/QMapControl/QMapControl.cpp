@@ -114,7 +114,7 @@ namespace qmapcontrol
     void QMapControl::setProjection(const projection::EPSG& epsg, const int tile_size_px)
     {
         // Disconnect any signals that were previously connected.
-        QObject::disconnect(&ImageManager::getInstance(), 0, 0, 0);
+        QObject::disconnect(&ImageManager::getInstance(), 0, this, 0);
 
         // Set the projection to use and tile size for the Image Manager.
         projection::set(epsg, tile_size_px);
@@ -259,7 +259,7 @@ namespace qmapcontrol
                 if(itr_find != m_layers.end())
                 {
                     // Disconnect all signals associated with the layer.
-                    QObject::disconnect(itr_find->get(), 0, 0, 0);
+                    QObject::disconnect(itr_find->get(), 0, this, 0);
 
                     // Remove the layer.
                     m_layers.erase(itr_find);
@@ -524,9 +524,9 @@ namespace qmapcontrol
         m_zoom_control_button_out.setVisible(enable);
 
         // Disconnect previous signals from zoom controls.
-        QObject::disconnect(&m_zoom_control_button_in, 0, 0, 0);
-        QObject::disconnect(&m_zoom_control_slider, 0, 0, 0);
-        QObject::disconnect(&m_zoom_control_button_out, 0, 0, 0);
+        QObject::disconnect(&m_zoom_control_button_in, 0, this, 0);
+        QObject::disconnect(&m_zoom_control_slider, 0, this, 0);
+        QObject::disconnect(&m_zoom_control_button_out, 0, this, 0);
 
         // Connect signals from zoom controls.
         QObject::connect(&m_zoom_control_button_in, &QPushButton::clicked, this, &QMapControl::zoomIn);

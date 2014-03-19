@@ -294,7 +294,7 @@ namespace qmapcontrol
                     QWriteLocker locker(&m_geometries_mutex);
 
                     // Disconnect any signals that were previously connected.
-                    QObject::disconnect(geometry.get(), 0, 0, 0);
+                    QObject::disconnect(geometry.get(), 0, this, 0);
 
                     // Remove the geometry from the list.
                     m_geometries.erase(std::static_pointer_cast<GeometryPoint>(geometry)->coordinate(), geometry);
@@ -307,7 +307,7 @@ namespace qmapcontrol
                     QWriteLocker locker(&m_geometry_widgets_mutex);
 
                     // Disconnect any signals that were previously connected.
-                    QObject::disconnect(geometry.get(), 0, 0, 0);
+                    QObject::disconnect(geometry.get(), 0, this, 0);
 
                     // Find the object in the container.
                     const auto itr_find = m_geometry_widgets.find(std::static_pointer_cast<GeometryPointWidget>(geometry));
@@ -328,7 +328,7 @@ namespace qmapcontrol
                     QWriteLocker locker(&m_geometries_mutex);
 
                     // Disconnect any signals that were previously connected.
-                    QObject::disconnect(geometry.get(), 0, 0, 0);
+                    QObject::disconnect(geometry.get(), 0, this, 0);
 
                     // Loop through each GeometryLineString point and remove it to the container.
                     for(const auto point : std::static_pointer_cast<GeometryLineString>(geometry)->points())
@@ -348,7 +348,7 @@ namespace qmapcontrol
                     QWriteLocker locker(&m_geometries_mutex);
 
                     // Disconnect any signals that were previously connected.
-                    QObject::disconnect(geometry.get(), 0, 0, 0);
+                    QObject::disconnect(geometry.get(), 0, this, 0);
 
                     // Loop through each GeometryPolygon point and remove it to the container.
                     for(const auto point : std::static_pointer_cast<GeometryPolygon>(geometry)->points())
