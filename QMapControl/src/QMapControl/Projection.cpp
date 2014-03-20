@@ -45,38 +45,26 @@ namespace qmapcontrol
         // Does the singleton instance exist?
         if(m_instance == nullptr)
         {
-            // Create the instance (default to Spherical Mercator with 256px tiles).
-            set(EPSG::SphericalMercator, 256);
+            // Create a default instance (Spherical Mercator).
+            set(EPSG::SphericalMercator);
         }
 
         // Return the reference to the instance object.
         return *(m_instance.get());
     }
 
-    void projection::set(const EPSG& type, const int& tile_size_px)
+    void projection::set(const EPSG& type)
     {
         // Equirectangular ?
         if(type == EPSG::Equirectangular)
         {
             // Create a Equirectangular instance.
-            m_instance.reset(new ProjectionEquirectangular(tile_size_px));
+            m_instance.reset(new ProjectionEquirectangular);
         }
         else
         {
             // Default to a Spherical Mercator instance.
-            m_instance.reset(new ProjectionSphericalMercator(tile_size_px));
+            m_instance.reset(new ProjectionSphericalMercator);
         }
-    }
-
-    Projection::Projection(const int& tile_size_px)
-        : m_tile_size_px(tile_size_px)
-    {
-
-    }
-
-    int Projection::tileSizePx() const
-    {
-        // Return the tiles size in pixels.
-        return m_tile_size_px;
     }
 }

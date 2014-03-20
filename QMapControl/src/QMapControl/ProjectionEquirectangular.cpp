@@ -28,14 +28,11 @@
 // STL includes.
 #include <cmath>
 
+// Local include.
+#include "ImageManager.h"
+
 namespace qmapcontrol
 {
-    ProjectionEquirectangular::ProjectionEquirectangular(const int& tile_size_px)
-        : Projection(tile_size_px)
-    {
-
-    }
-
     int ProjectionEquirectangular::tilesX(const int& zoom) const
     {
         // Return the number of tiles for the x-axis.
@@ -57,8 +54,8 @@ namespace qmapcontrol
     QPointF ProjectionEquirectangular::toPixelPoint(const QPointF& point_coord, const int& zoom) const
     {
         // Convert from coordinate to pixel by - top/left delta, then ratio of coords per pixel.
-        const qreal x_px((point_coord.x() + 180.0) * (tilesX(zoom) * m_tile_size_px) / 360.0);
-        const qreal y_px(-(point_coord.y() - 90.0) * (tilesY(zoom) * m_tile_size_px) / 180.0);
+        const qreal x_px((point_coord.x() + 180.0) * (tilesX(zoom) * ImageManager::get().tileSizePx()) / 360.0);
+        const qreal y_px(-(point_coord.y() - 90.0) * (tilesY(zoom) * ImageManager::get().tileSizePx()) / 180.0);
 
         // Return the converted point (x/y pixel point - 0,0 is screen top left).
         return QPointF(x_px, y_px);
@@ -67,8 +64,8 @@ namespace qmapcontrol
     QPointF ProjectionEquirectangular::toCoordinatePoint(const QPointF& point_px, const int& zoom) const
     {
         // Convert pixel into coordinate by * against ratio of pixels per coord, then + top/left delta offset.
-        const qreal longitude((point_px.x() * 360.0 / (tilesX(zoom) * m_tile_size_px)) - 180.0);
-        const qreal latitude(-(point_px.y() * 180.0 / (tilesY(zoom) * m_tile_size_px)) + 90.0);
+        const qreal longitude((point_px.x() * 360.0 / (tilesX(zoom) * ImageManager::get().tileSizePx())) - 180.0);
+        const qreal latitude(-(point_px.y() * 180.0 / (tilesY(zoom) * ImageManager::get().tileSizePx())) + 90.0);
 
         // Return the converted coordinate (longitude/latitude coordinate - 0,0 is screen middle).
         return QPointF(longitude, latitude);

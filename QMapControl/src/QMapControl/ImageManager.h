@@ -52,17 +52,14 @@ namespace qmapcontrol
     {
         Q_OBJECT
     public:
-        //! Get the singleton instance of Image Manager.
-        static ImageManager& getInstance();
-
         /*!
-         * Create a new instance of Image Manager.
-         * @param tile_size_px The tile size in pixels.
+         * Get the singleton instance of the Image Manager.
+         * @return the singleton instance.
          */
-        static void createInstance(const int& tile_size_px);
+        static ImageManager& get();
 
         //! Destroys the singleton instance of Image Manager.
-        static void destoryInstance();
+        static void destory();
 
     public:
         //! Disable copy constructor.
@@ -73,6 +70,18 @@ namespace qmapcontrol
 
         //! Destructor.
         ~ImageManager() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
+
+        /*!
+         * Fetch the tile size in pixels.
+         * @return the tile size in pixels.
+         */
+        int tileSizePx() const;
+
+        /*!
+         * Set the new tile size (and resets any resources as required).
+         * @param tile_size_px The tile size in pixels to set.
+         */
+        void setTileSizePx(const int& tile_size_px);
 
         /*!
          * Set the network proxy to use.
@@ -169,12 +178,6 @@ namespace qmapcontrol
 
         //! Disable copy assignment.
         ImageManager& operator=(const ImageManager&); /// @todo remove once MSVC supports default/delete syntax.
-
-        /*!
-         * Set the new tile size (and resets any resources as required).
-         * @param tile_size_px The tile size in pixels to set.
-         */
-        void setTileSizePx(const int& tile_size_px);
 
         /*!
          * Create a loading pixmap for use.

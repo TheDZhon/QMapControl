@@ -123,13 +123,17 @@ namespace qmapcontrol
         ~QMapControl();
 
         // Settings.
-        /// @todo split projection and tile size setting functions!
         /*!
          * Set the displayed projection.
          * @param epsg The projection required.
+         */
+        void setProjection(const projection::EPSG& epsg = projection::EPSG::SphericalMercator);
+
+        /*!
+         * Set the tile size used in pxiels.
          * @param tile_size_px The tile size in pixels required.
          */
-        void setProjection(const projection::EPSG& epsg, const int tile_size_px);
+        void setTileSizePx(const int& tile_size_px = 256);
 
         /*!
          * Set the background colour of the map control.

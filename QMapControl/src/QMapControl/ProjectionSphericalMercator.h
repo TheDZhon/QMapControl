@@ -40,9 +40,8 @@ namespace qmapcontrol
         //! Constuctor.
         /*!
          * Projection Spherical Mercator (EPSG:3857 - meters) constructor.
-         * @param tile_size_px The tile size in pixels.
          */
-        ProjectionSphericalMercator(const int& tile_size_px);
+        ProjectionSphericalMercator() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
 
         //! Disable copy constructor.
         ///ProjectionSphericalMercator(const ProjectionSphericalMercator&) = delete; @todo re-add once MSVC supports default/delete syntax.

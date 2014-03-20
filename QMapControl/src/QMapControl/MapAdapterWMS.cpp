@@ -31,6 +31,9 @@
 // STL includes.
 #include <cmath>
 
+// Local includes.
+#include "ImageManager.h"
+
 namespace qmapcontrol
 {
     MapAdapterWMS::MapAdapterWMS(const QUrl& base_url, const std::set<projection::EPSG>& epsg_projections, QObject* parent)
@@ -59,11 +62,11 @@ namespace qmapcontrol
 
         // Enforce WIDTH (the tile size).
         url_query.removeQueryItem("WIDTH");
-        url_query.addQueryItem("WIDTH", QString::number(projection::get().tileSizePx()));
+        url_query.addQueryItem("WIDTH", QString::number(ImageManager::get().tileSizePx()));
 
         // Enforce HEIGHT (the tile size).
         url_query.removeQueryItem("HEIGHT");
-        url_query.addQueryItem("HEIGHT", QString::number(projection::get().tileSizePx()));
+        url_query.addQueryItem("HEIGHT", QString::number(ImageManager::get().tileSizePx()));
 
         // Is VERSION specified?
         if(url_query.hasQueryItem("VERSION") == false)

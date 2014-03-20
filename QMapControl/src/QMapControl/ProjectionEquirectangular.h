@@ -40,9 +40,8 @@ namespace qmapcontrol
         //! Constuctor.
         /*!
          * Projection Equirectangular (EPSG:4326 - lat/long) constructor.
-         * @param tile_size_px The tile size in pixels.
          */
-        ProjectionEquirectangular(const int& tile_size_px);
+        ProjectionEquirectangular() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
 
         //! Disable copy constructor.
         ///ProjectionEquirectangular(const ProjectionEquirectangular&) = delete; @todo re-add once MSVC supports default/delete syntax.

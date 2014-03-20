@@ -40,35 +40,20 @@ namespace qmapcontrol
         std::unique_ptr<ImageManager> m_instance = nullptr;
     }
 
-    ImageManager& ImageManager::getInstance()
+    ImageManager& ImageManager::get()
     {
         // Does the singleton instance exist?
         if(m_instance == nullptr)
         {
             // Create a default instance (256px tiles).
-            createInstance(256);
+            m_instance.reset(new ImageManager(256));
         }
 
         // Return the reference to the instance object.
         return *(m_instance.get());
     }
 
-    void ImageManager::createInstance(const int& tile_size_px)
-    {
-        // Does the singleton instance exist?
-        if(m_instance == nullptr)
-        {
-            // Create a new instance.
-            m_instance.reset(new ImageManager(tile_size_px));
-        }
-        else
-        {
-            // Change the tile size of the existing singleton instance.
-            m_instance->setTileSizePx(tile_size_px);
-        }
-    }
-
-    void ImageManager::destoryInstance()
+    void ImageManager::destory()
     {
         // Ensure the singleton instance is destroyed.
         m_instance.reset(nullptr);
@@ -89,6 +74,21 @@ namespace qmapcontrol
         QObject::connect(&m_nm, &NetworkManager::imageDownloaded, this, &ImageManager::imageDownloaded);
         QObject::connect(&m_nm, &NetworkManager::downloadingInProgress, this, &ImageManager::downloadingInProgress);
         QObject::connect(&m_nm, &NetworkManager::downloadingFinished, this, &ImageManager::downloadingFinished);
+    }
+
+    int ImageManager::tileSizePx() const
+    {
+        // Return the tiles size in pixels.
+        return m_tile_size_px;
+    }
+
+    void ImageManager::setTileSizePx(const int& tile_size_px)
+    {
+        // Set the new tile size.
+        m_tile_size_px = tile_size_px;
+
+        // Create a new loading pixmap.
+        setupLoadingPixmap();
     }
 
     void ImageManager::setProxy(const QNetworkProxy& proxy)
@@ -212,15 +212,6 @@ namespace qmapcontrol
             // Let the world know we have received an updated image.
             emit imageUpdated(url);
         }
-    }
-
-    void ImageManager::setTileSizePx(const int& tile_size_px)
-    {
-        // Set the new tile size.
-        m_tile_size_px = tile_size_px;
-
-        // Create a new loading pixmap.
-        setupLoadingPixmap();
     }
 
     void ImageManager::setupLoadingPixmap()

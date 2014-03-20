@@ -28,14 +28,11 @@
 // STL includes.
 #include <cmath>
 
+// Local include.
+#include "ImageManager.h"
+
 namespace qmapcontrol
 {
-    ProjectionSphericalMercator::ProjectionSphericalMercator(const int& tile_size_px)
-        : Projection(tile_size_px)
-    {
-
-    }
-
     int ProjectionSphericalMercator::tilesX(const int& zoom) const
     {
         // Return the number of tiles for the x-axis.
@@ -62,8 +59,8 @@ namespace qmapcontrol
             xtile = n * ((lon_deg + 180) / 360) : floor the answer?
             ytile = n * (1 - (log(tan(lat_rad) + sec(lat_rad)) / π)) / 2 : floor the answer?
          */
-        const qreal x_px((tilesX(zoom) * m_tile_size_px) * ((point_coord.x() + 180.0) / 360.0));
-        const qreal y_px((tilesY(zoom) * m_tile_size_px) * (1.0 - (std::log(std::tan(point_coord.y() * M_PI / 180.0) + (1.0 / std::cos(point_coord.y() * M_PI / 180.0))) / M_PI )) / 2.0);
+        const qreal x_px((tilesX(zoom) * ImageManager::get().tileSizePx()) * ((point_coord.x() + 180.0) / 360.0));
+        const qreal y_px((tilesY(zoom) * ImageManager::get().tileSizePx()) * (1.0 - (std::log(std::tan(point_coord.y() * M_PI / 180.0) + (1.0 / std::cos(point_coord.y() * M_PI / 180.0))) / M_PI )) / 2.0);
 
         // Return the converted point (x/y pixel point - 0,0 is screen top left).
         return QPointF(x_px, y_px);
@@ -78,8 +75,8 @@ namespace qmapcontrol
             lat_rad = arctan(sinh(π * (1 - 2 * y_point / n)))
             lat_deg = lat_rad * 180.0 / π
          */
-        const qreal longitude_coord(qreal(point_px.x()) / qreal(tilesX(zoom) * m_tile_size_px) * 360.0 - 180.0);
-        const qreal latitude_coord(std::atan(std::sinh(M_PI * (1.0 - 2.0 * qreal(point_px.y()) / qreal(tilesY(zoom) * m_tile_size_px)))) * 180.0 / M_PI);
+        const qreal longitude_coord(qreal(point_px.x()) / qreal(tilesX(zoom) * ImageManager::get().tileSizePx()) * 360.0 - 180.0);
+        const qreal latitude_coord(std::atan(std::sinh(M_PI * (1.0 - 2.0 * qreal(point_px.y()) / qreal(tilesY(zoom) * ImageManager::get().tileSizePx())))) * 180.0 / M_PI);
 
         // Return the converted coordinate (longitude/latitude coordinate - 0,0 is screen middle).
         return QPointF(longitude_coord, latitude_coord);

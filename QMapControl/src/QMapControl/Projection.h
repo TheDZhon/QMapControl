@@ -49,12 +49,6 @@ namespace qmapcontrol
         virtual ~Projection() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
 
         /*!
-         * Fetch the tile size in pixels.
-         * @return the tile size in pixels.
-         */
-        int tileSizePx() const;
-
-        /*!
          * The number of tiles on the x-axis for a given zoom.
          * @param zoom The zoom level.
          * @return number of tiles on the x-axis for a given zoom.
@@ -94,13 +88,8 @@ namespace qmapcontrol
         //! Constuctor.
         /*!
          * Projection constructor.
-         * @param tile_size_px The tile size in pixels.
          */
-        Projection(const int& tile_size_px);
-
-    protected:
-        /// Tile size in pixels.
-        const int m_tile_size_px;
+        Projection() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
 
     private:
         //! Disable copy constructor.
@@ -121,10 +110,16 @@ namespace qmapcontrol
             SphericalMercator = 3857
         };
 
-        //! Get the singleton instance of Projection.
+        /*!
+         * Get the singleton instance of the Projection.
+         * @return the singleton instance.
+         */
         QMAPCONTROL_EXPORT Projection& get();
 
-        //! Set the projection.
-        QMAPCONTROL_EXPORT void set(const EPSG& type, const int& tile_size_px);
+        /*!
+         * Set the projection (Creates new singleton instance).
+         * @param type The projection type required.
+         */
+        QMAPCONTROL_EXPORT void set(const EPSG& type);
     }
 }

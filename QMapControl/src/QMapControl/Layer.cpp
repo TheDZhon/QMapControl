@@ -454,13 +454,13 @@ namespace qmapcontrol
             else
             {
                 // The current tile size.
-                const QSizeF tile_size_px(projection::get().tileSizePx(), projection::get().tileSizePx());
+                const QSizeF tile_size_px(ImageManager::get().tileSizePx(), ImageManager::get().tileSizePx());
 
                 // Calculate the tiles to draw.
-                const int furthest_tile_left = std::floor(backbuffer_rect_px.left() / projection::get().tileSizePx());
-                const int furthest_tile_top = std::floor(backbuffer_rect_px.top() / projection::get().tileSizePx());
-                const int furthest_tile_right = std::floor(backbuffer_rect_px.right() / projection::get().tileSizePx());
-                const int furthest_tile_bottom = std::floor(backbuffer_rect_px.bottom() / projection::get().tileSizePx());
+                const int furthest_tile_left = std::floor(backbuffer_rect_px.left() / tile_size_px.width());
+                const int furthest_tile_top = std::floor(backbuffer_rect_px.top() / tile_size_px.height());
+                const int furthest_tile_right = std::floor(backbuffer_rect_px.right() / tile_size_px.width());
+                const int furthest_tile_bottom = std::floor(backbuffer_rect_px.bottom() / tile_size_px.height());
 
                 // Loop through the tiles to draw (left to right).
                 for(int i = furthest_tile_left; i <= furthest_tile_right; ++i)
@@ -472,10 +472,10 @@ namespace qmapcontrol
                         if(map_adapter->isTileValid(i, j, controller_zoom))
                         {
                             // Calculate the tile rect.
-                            const QRectF tile_rect_px(QPointF(i * projection::get().tileSizePx(), j * projection::get().tileSizePx()), tile_size_px);
+                            const QRectF tile_rect_px(QPointF(i * tile_size_px.width(), j * tile_size_px.height()), tile_size_px);
 
                             // Draw the tile.
-                            painter->drawPixmap(tile_rect_px.topLeft(), ImageManager::getInstance().getImage(map_adapter->tileQuery(i, j, controller_zoom)));
+                            painter->drawPixmap(tile_rect_px.topLeft(), ImageManager::get().getImage(map_adapter->tileQuery(i, j, controller_zoom)));
                         }
                     }
                 }
@@ -493,14 +493,14 @@ namespace qmapcontrol
                     if(map_adapter->isTileValid(i, prefetch_tile_top, controller_zoom))
                     {
                         // Prefetch the tile.
-                        ImageManager::getInstance().prefetchImage(map_adapter->tileQuery(i, prefetch_tile_top, controller_zoom));
+                        ImageManager::get().prefetchImage(map_adapter->tileQuery(i, prefetch_tile_top, controller_zoom));
                     }
 
                     // Bottom row - check the tile is valid.
                     if(map_adapter->isTileValid(i, prefetch_tile_bottom, controller_zoom))
                     {
                         // Prefetch the tile.
-                        ImageManager::getInstance().prefetchImage(map_adapter->tileQuery(i, prefetch_tile_bottom, controller_zoom));
+                        ImageManager::get().prefetchImage(map_adapter->tileQuery(i, prefetch_tile_bottom, controller_zoom));
                     }
                 }
 
@@ -511,14 +511,14 @@ namespace qmapcontrol
                     if(map_adapter->isTileValid(prefetch_tile_left, j, controller_zoom))
                     {
                         // Prefetch the tile.
-                        ImageManager::getInstance().prefetchImage(map_adapter->tileQuery(prefetch_tile_left, j, controller_zoom));
+                        ImageManager::get().prefetchImage(map_adapter->tileQuery(prefetch_tile_left, j, controller_zoom));
                     }
 
                     // Right column - check the tile is valid.
                     if(map_adapter->isTileValid(prefetch_tile_right, j, controller_zoom))
                     {
                         // Prefetch the tile.
-                        ImageManager::getInstance().prefetchImage(map_adapter->tileQuery(prefetch_tile_right, j, controller_zoom));
+                        ImageManager::get().prefetchImage(map_adapter->tileQuery(prefetch_tile_right, j, controller_zoom));
                     }
                 }
             }

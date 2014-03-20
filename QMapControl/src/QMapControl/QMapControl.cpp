@@ -81,48 +81,53 @@ namespace qmapcontrol
           m_zoom_control_button_out("-", this),
           m_progress_indicator(this)
     {
-        // Allow the map to gain click focus.
-        setFocusPolicy(Qt::ClickFocus);
-
-        // Enable mouse tracking (all mouse events received - not just clicks).
-        setMouseTracking(true);
-
-        // Default projection/tile size.
-        setProjection(projection::EPSG::SphericalMercator, 256);
-
         // Set the initial background colour (transparent).
         m_primary_screen_scaled.fill(m_background_colour);
 
         // Connect signal/slot for when the backbuffer is updated, so that primary screen is updated in the main thread.
         QObject::connect(this, &QMapControl::updatedBackBuffer, this, &QMapControl::updatePrimaryScreen);
 
-        // Set QWidget maximum size.
-        setViewportSize(size_px);
+        // Connect signals from the Image Manager.
+        QObject::connect(&ImageManager::get(), &ImageManager::imageUpdated, this, &QMapControl::requestRedraw);
+        QObject::connect(&ImageManager::get(), &ImageManager::downloadingFinished, this, &QMapControl::loadingFinished);
 
-        // Enable the zoom controls by default.
+        // Default - projection as Spherical Mercator.
+        setProjection(projection::EPSG::SphericalMercator);
+
+        // Default - tile size as 256px.
+        setTileSizePx(256);
+
+        // Default - zoom controls enabled.
         enableZoomControls(true);
+
+        // Default - allow the map to gain click focus.
+        setFocusPolicy(Qt::ClickFocus);
+
+        // Default - enable mouse tracking (all mouse events received - not just clicks).
+        setMouseTracking(true);
+
+        // Set QWidget viewport size.
+        setViewportSize(size_px);
     }
 
     QMapControl::~QMapControl()
     {
         // Destroy the image manager instance.
-        ImageManager::destoryInstance();
+        ImageManager::destory();
     }
 
     /// Public...
     // Settings.
-    void QMapControl::setProjection(const projection::EPSG& epsg, const int tile_size_px)
+    void QMapControl::setProjection(const projection::EPSG& epsg)
     {
-        // Disconnect any signals that were previously connected.
-        QObject::disconnect(&ImageManager::getInstance(), 0, this, 0);
+        // Set the projection.
+        projection::set(epsg);
+    }
 
-        // Set the projection to use and tile size for the Image Manager.
-        projection::set(epsg, tile_size_px);
-        ImageManager::createInstance(tile_size_px);
-
-        // Connect signals from the Image Manager.
-        QObject::connect(&ImageManager::getInstance(), &ImageManager::imageUpdated, this, &QMapControl::requestRedraw);
-        QObject::connect(&ImageManager::getInstance(), &ImageManager::downloadingFinished, this, &QMapControl::loadingFinished);
+    void QMapControl::setTileSizePx(const int& tile_size_px)
+    {
+        // Set the tile size used by the Image Manager.
+        ImageManager::get().setTileSizePx(tile_size_px);
     }
 
     void QMapControl::setBackgroundColour(const QColor& colour)
@@ -136,19 +141,19 @@ namespace qmapcontrol
     void QMapControl::enablePersistentCache(const std::chrono::minutes& expiry, const QDir& path)
     {
         // Set the Image Manager's persistent cache settings.
-        ImageManager::getInstance().enablePersistentCache(expiry, path);
+        ImageManager::get().enablePersistentCache(expiry, path);
     }
 
     void QMapControl::setProxy(const QNetworkProxy& proxy)
     {
         // Set the Image Manager's network proxy.
-        ImageManager::getInstance().setProxy(proxy);
+        ImageManager::get().setProxy(proxy);
     }
 
     void QMapControl::setProxy(const std::string& host, const int& port)
     {
         // Set the Image Manager's network proxy.
-        ImageManager::getInstance().setProxy(QNetworkProxy(QNetworkProxy::HttpProxy, host.c_str(), port));
+        ImageManager::get().setProxy(QNetworkProxy(QNetworkProxy::HttpProxy, host.c_str(), port));
     }
 
     void QMapControl::enableScaledBackground(const bool& visible)
@@ -902,7 +907,7 @@ namespace qmapcontrol
         if(m_current_zoom < m_zoom_maximum)
         {
             // Cancel existing image loading.
-            ImageManager::getInstance().abortLoading();
+            ImageManager::get().abortLoading();
 
             /// @todo Could we cancel current layer drawing as well?
 
@@ -936,7 +941,7 @@ namespace qmapcontrol
         if(m_current_zoom > m_zoom_minimum)
         {
             // Cancel existing image loading.
-            ImageManager::getInstance().abortLoading();
+            ImageManager::get().abortLoading();
 
             /// @todo Could we cancel current layer drawing as well?
 
