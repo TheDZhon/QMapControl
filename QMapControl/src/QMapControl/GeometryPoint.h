@@ -305,9 +305,6 @@ namespace qmapcontrol
         /// The maximum size a point/widget/pixmap can be drawn in pixels.
         QSizeF m_draw_maximum_px;
 
-        /// The current draw size in pixels.
-        QSizeF m_object_size_px;
-
         /// The meta-data's key for the value to display.
         std::string m_metadata_displayed_key;
 

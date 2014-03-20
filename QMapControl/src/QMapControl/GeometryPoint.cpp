@@ -43,7 +43,6 @@ namespace qmapcontrol
           m_base_size_px(0.0, 0.0),
           m_draw_minimum_px(-1.0, -1.0),
           m_draw_maximum_px(-1.0, -1.0),
-          m_object_size_px(0.0, 0.0),
           m_metadata_displayed_key(""),
           m_metadata_displayed_zoom_minimum(10),
           m_metadata_displayed_offset_px(5.0)
@@ -62,7 +61,6 @@ namespace qmapcontrol
           m_base_size_px(0.0, 0.0),
           m_draw_minimum_px(-1.0, -1.0),
           m_draw_maximum_px(-1.0, -1.0),
-          m_object_size_px(0.0, 0.0),
           m_metadata_displayed_key(""),
           m_metadata_displayed_zoom_minimum(10),
           m_metadata_displayed_offset_px(5.0)
@@ -80,7 +78,6 @@ namespace qmapcontrol
           m_base_size_px(pixmap.size()),
           m_draw_minimum_px(-1.0, -1.0),
           m_draw_maximum_px(-1.0, -1.0),
-          m_object_size_px(0.0, 0.0),
           m_metadata_displayed_key(""),
           m_metadata_displayed_zoom_minimum(10),
           m_metadata_displayed_offset_px(5.0)
@@ -98,7 +95,6 @@ namespace qmapcontrol
           m_base_size_px(widget->size()),
           m_draw_minimum_px(-1.0, -1.0),
           m_draw_maximum_px(-1.0, -1.0),
-          m_object_size_px(0.0, 0.0),
           m_metadata_displayed_key(""),
           m_metadata_displayed_zoom_minimum(10),
           m_metadata_displayed_offset_px(5.0)
@@ -288,24 +284,23 @@ namespace qmapcontrol
                 // Calculate the point in pixels.
                 const QPointF point_px = projection::get().toPixelPoint(m_point_coord, controller_zoom);
 
-                // Is the point within the backbuffer rect?
-                /// @todo should this perform an intersects on the pixmap rect instead?
-                if(backbuffer_rect_px.contains(point_px))
+                // Update the object size for the pixmap size for this controller zoom.
+                const QSizeF pixmap_size_px(calculateGeometrySizePx(controller_zoom));
+
+                // Calculate the pixmap rect to draw within.
+                const QRectF pixmap_rect(calculateTopLeftPoint(point_px, pixmap_size_px), pixmap_size_px);
+
+                // Does the pixmap rect intersect within the backbuffer rect?
+                if(backbuffer_rect_px.intersects(pixmap_rect))
                 {
-                    // Update the object size for the pixmap size for this controller zoom.
-                    m_object_size_px = calculateGeometrySizePx(controller_zoom);
-
-                    // Calculate the top-left point.
-                    const QPointF top_left_point_px = calculateTopLeftPoint(point_px, m_object_size_px);
-
                     // Draw the pixmap.
-                    painter->drawPixmap(QRectF(top_left_point_px, m_object_size_px), m_pixmap, QRectF());
+                    painter->drawPixmap(pixmap_rect, m_pixmap, QRectF());
 
                     // Do we have a meta-data value and should we display it at this zoom?
                     if(controller_zoom >= m_metadata_displayed_zoom_minimum && getMetadata(m_metadata_displayed_key).isNull() == false)
                     {
                         // Draw the text next to the point with an offset.
-                        painter->drawText(QRectF(top_left_point_px, m_object_size_px).topRight() + QPointF(m_metadata_displayed_offset_px, -m_metadata_displayed_offset_px), getMetadata(m_metadata_displayed_key).toString());
+                        painter->drawText(pixmap_rect.topRight() + QPointF(m_metadata_displayed_offset_px, -m_metadata_displayed_offset_px), getMetadata(m_metadata_displayed_key).toString());
                     }
                 }
             }
@@ -344,13 +339,13 @@ namespace qmapcontrol
             const QPointF point_px(projection::get().toPixelPoint(m_point_coord, controller_zoom) - offset_px);
 
             // Update the object size for the widget size for this controller zoom.
-            m_object_size_px = calculateGeometrySizePx(controller_zoom);
+            const QSizeF widget_size_px(calculateGeometrySizePx(controller_zoom));
 
             // Calculate the top-left point.
-            const QPointF top_left_point_px = calculateTopLeftPoint(point_px, m_object_size_px);
+            const QPointF top_left_point_px = calculateTopLeftPoint(point_px, widget_size_px);
 
             // Set the new location of the geometry.
-            m_widget->setGeometry(top_left_point_px.x(), top_left_point_px.y(), m_object_size_px.width(), m_object_size_px.height());
+            m_widget->setGeometry(top_left_point_px.x(), top_left_point_px.y(), widget_size_px.width(), widget_size_px.height());
         }
     }
 
