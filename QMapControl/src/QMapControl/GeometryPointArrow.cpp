@@ -44,8 +44,6 @@ namespace qmapcontrol
 
     void GeometryPointArrow::setHeading(const qreal& heading)
     {
-        /// @todo replace with setRotate in GeometryPoint.
-
         // Set the heading.
         m_heading = heading;
 
@@ -56,7 +54,7 @@ namespace qmapcontrol
     void GeometryPointArrow::updatePixmap()
     {
         // Fetch the current pixmap.
-        QPixmap pixmap = getPixmap();
+        QPixmap pixmap(getPixmap());
 
         // Reset the pixmap.
         pixmap.fill(Qt::transparent);
@@ -76,13 +74,14 @@ namespace qmapcontrol
         QPointF center_px(pixmap.width() / 2.0, pixmap.height() / 2.0);
         painter.translate(center_px);
         painter.rotate(m_heading);
+        painter.translate(-center_px);
 
         // Add points to create arrow shape.
         QPolygonF arrow;
-        arrow << QPointF((pixmap.width() / 2.0) - center_px.x(), 0.0 - center_px.y());
-        arrow << QPointF(pixmap.width() - center_px.x(), pixmap.height() - center_px.y());
-        arrow << QPointF((pixmap.width() / 2.0) - center_px.x(), (pixmap.height() / 2.0) - center_px.y());
-        arrow << QPointF(0.0 - center_px.x(), pixmap.height() - center_px.y());
+        arrow << QPointF((pixmap.width() / 2.0), 0.0);
+        arrow << QPointF(pixmap.width(), pixmap.height());
+        arrow << QPointF((pixmap.width() / 2.0), (pixmap.height() / 2.0));
+        arrow << QPointF(0.0, pixmap.height());
 
         // Draw the arrow.
         painter.drawPolygon(arrow);
