@@ -87,7 +87,7 @@ void Multidemo::setupMaps()
 
     // Create some GeometryPoints to add to a GeometryLineString.
     QPen pen(QColor(255, 0, 0, 100));
-    pen.setWidth(5);
+    pen.setWidth(2);
     std::vector<std::shared_ptr<GeometryPoint>> points;
     points.emplace_back(std::make_shared<GeometryPointCircle>(QPointF(8.259959, 50.001781), pen));
     points.back()->setMetadata("name", "Mainz, Hauptbahnhof");

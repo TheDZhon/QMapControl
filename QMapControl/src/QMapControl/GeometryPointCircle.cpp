@@ -60,7 +60,8 @@ namespace qmapcontrol
         painter.setPen(getPen());
 
         // Draw the ellipse.
-        painter.drawEllipse(QRectF(0.0, 0.0, pixmap.width(), pixmap.height()));
+        const double center_px(pixmap.width() / 2.0);
+        painter.drawEllipse(QPointF(center_px, center_px), center_px - getPen().widthF(), center_px - getPen().widthF());
 
         // Set the new pixmap.
         setPixmap(pixmap);
