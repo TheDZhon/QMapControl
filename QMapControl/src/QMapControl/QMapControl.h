@@ -280,7 +280,6 @@ namespace qmapcontrol
         /*!
          * Sets the map focus point, based on the mean average of all the coordinates.
          * If request, will also automatically calculate best zoom level and zoom to it.
-         * @note The code of setting the view to multiple coordinates is "brute force" and pretty slow. Have to be reworked.
          * @param points_coord The coorinates to based the map focus point on.
          * @param auto_zoom Whether to automatically zoom to the best level.
          */
