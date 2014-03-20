@@ -47,7 +47,7 @@ namespace qmapcontrol
          * This construct a OpenStreetmap MapAdapter.
          * @param parent QObject parent ownership.
          */
-        MapAdapterOSM(QObject* parent = 0);
+        explicit MapAdapterOSM(QObject* parent = 0);
 
         //! Disable copy constructor.
         ///MapAdapterOSM(const MapAdapterOSM&) = delete; @todo re-add once MSVC supports default/delete syntax.

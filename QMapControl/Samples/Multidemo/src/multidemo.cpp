@@ -54,9 +54,9 @@ void Multidemo::setupMaps()
     // Create a base map adapter to use.
 //    std::set<projection::EPSG> wms_projections;
 //    wms_projections.insert(projection::EPSG::Equirectangular);
-//    std::shared_ptr<MapAdapter> mapadapter(std::make_shared<MapAdapterWMS>(QUrl("http://www2.demis.nl/wms/wms.asp?wms=WorldMap&LAYERS=Countries,Borders,Cities,Rivers,Settlements,Hillshading,Waterbodies,Railroads,Highways,Roads&FORMAT=image/png&VERSION=1.1.1&SERVICE=WMS&REQUEST=GetMap&STYLES=&EXCEPTIONS=application/vnd.ogc.se_inimage&SRS=EPSG:4326&TRANSPARENT=FALSE"), wms_projections));
-//    std::shared_ptr<MapAdapter> mapadapter(std::make_shared<MapAdapterOSM>());
-//    std::shared_ptr<MapAdapter> mapadapter(std::make_shared<MapAdapterYahoo>());
+//    std::shared_ptr<MapAdapter> map_adapter(std::make_shared<MapAdapterWMS>(QUrl("http://www2.demis.nl/wms/wms.asp?wms=WorldMap&LAYERS=Countries,Borders,Cities,Rivers,Settlements,Hillshading,Waterbodies,Railroads,Highways,Roads&FORMAT=image/png&VERSION=1.1.1&SERVICE=WMS&REQUEST=GetMap&STYLES=&EXCEPTIONS=application/vnd.ogc.se_inimage&SRS=EPSG:4326&TRANSPARENT=FALSE"), wms_projections));
+//    std::shared_ptr<MapAdapter> map_adapter(std::make_shared<MapAdapterOSM>());
+//    std::shared_ptr<MapAdapter> map_adapter(std::make_shared<MapAdapterYahoo>());
     std::shared_ptr<MapAdapter> map_adapter(std::make_shared<MapAdapterGoogle>(MapAdapterGoogle::GoogleLayerType::MAPS));
 
     // Create a layer for the map adapter and add it to the QMapControl.

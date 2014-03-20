@@ -28,7 +28,7 @@ public:
      * This is used to construct a GPS_Neo.
      * @param parent QObject parent ownership.
      */
-    GPS_Neo(QObject* parent = 0);
+    explicit GPS_Neo(QObject* parent = 0);
 
     //! Disable copy constructor.
     ///GPS_Neo(const GPS_Neo&) = delete; @todo re-add once MSVC supports default/delete syntax.

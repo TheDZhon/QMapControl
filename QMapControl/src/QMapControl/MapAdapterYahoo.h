@@ -45,13 +45,13 @@ namespace qmapcontrol
          * This construct a default Yahoo MapAdapter.
          * @param parent QObject parent ownership.
          */
-        MapAdapterYahoo(QObject* parent = 0);
+        explicit MapAdapterYahoo(QObject* parent = 0);
 
         //! Constructor.
         /*!
          * This construct a Yahoo MapAdapter for a specific url.
          */
-        MapAdapterYahoo(const QUrl& url);
+        explicit MapAdapterYahoo(const QUrl& url);
 
         //! Disable copy constructor.
         ///MapAdapterYahoo(const MapAdapterYahoo&) = delete; @todo re-add once MSVC supports default/delete syntax.

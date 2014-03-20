@@ -43,7 +43,7 @@ public:
      * This construct a QProgressIndicator.
      * @param parent QWidget parent ownership.
      */
-    QProgressIndicator(QWidget* parent = 0);
+    explicit QProgressIndicator(QWidget* parent = 0);
 
     //! Copy constructor.
     ///QProgressIndicator(const QProgressIndicator&) = default; @todo re-add once MSVC supports default/delete syntax.

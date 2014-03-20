@@ -18,7 +18,7 @@ public:
      * This is used to construct a Multidemo QWidget.
      * @param parent QObject parent ownership.
      */
-    GPS_Modul(QObject* parent = 0);
+    explicit GPS_Modul(QObject* parent = 0);
 
     //! Disable copy constructor.
     ///GPS_Modul(const GPS_Modul&) = delete; @todo re-add once MSVC supports default/delete syntax.
