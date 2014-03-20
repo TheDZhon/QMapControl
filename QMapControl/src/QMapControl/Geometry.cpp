@@ -28,8 +28,7 @@
 namespace qmapcontrol
 {
     Geometry::Geometry(const GeometryType& geometry_type, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
-        :
-          m_visible(true),
+        : m_visible(true),
           m_geometry_type(geometry_type),
           m_pen(pen),
           m_zoom_minimum(zoom_minimum),

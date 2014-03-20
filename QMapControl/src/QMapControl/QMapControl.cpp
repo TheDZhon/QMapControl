@@ -1171,9 +1171,8 @@ namespace qmapcontrol
         // Should we draw the scalebar?
         if(m_scalebar_enabled)
         {
-            /// @todo This currently only shows the correct scale at the equator!
+            /// @todo This currently only shows the correct scale at the equator when in Spherical Mercator mode!
 
-            /// @todo calculate scalebar instead of hardcode? also support different measurements? (metric (meter/kilometer) and imperial (mile/nautical mile)).
             // Default list of scalebar distances.
             QList<double> scalebar_distances;
             scalebar_distances << 5000000.0
@@ -1201,7 +1200,6 @@ namespace qmapcontrol
             {
                 // Calculate the length of the scalebar line in pixels.
                 /// @todo remove magic numbers!
-                /// @todo 18!!!!
                 const double scalebar_line_length_px = scalebar_distances.at(m_current_zoom) / std::pow(2.0, 18 - m_current_zoom) / 0.597164;
 
                 // Draw the scalebar line.

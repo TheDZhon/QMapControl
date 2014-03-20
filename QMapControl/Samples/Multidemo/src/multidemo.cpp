@@ -7,6 +7,7 @@
 
 // QMapControl includes.
 #include <QMapControl/GeometryLineString.h>
+#include <QMapControl/GeometryPointArrow.h>
 #include <QMapControl/GeometryPointCircle.h>
 #include <QMapControl/GeometryPointWidget.h>
 #include <QMapControl/GeometryPolygon.h>
@@ -131,6 +132,12 @@ void Multidemo::setupMaps()
     m_gps_point->setAlignmentType(GeometryPoint::AlignmentType::TopRight);
     m_gps_point->setMetadata("name", "image point");
     layer_geometries->addGeometry(m_gps_point);
+
+
+    // Create a GeometryArrow with a heading set.
+    std::shared_ptr<GeometryPointArrow> arrow_point(std::make_shared<GeometryPointArrow>(QPointF(-20.0, 20.0), 0, 15, QPen(Qt::red)));
+    arrow_point->setHeading(92.4);
+    layer_geometries->addGeometry(arrow_point);
 
 
     // Create a GeometryPoint with a PushButton widget.
