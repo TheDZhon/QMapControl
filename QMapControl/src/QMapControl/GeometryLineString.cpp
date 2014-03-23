@@ -69,7 +69,7 @@ namespace qmapcontrol
 
     QRectF GeometryLineString::boundingBox(const int& /*controller_zoom*/) const
     {
-        /// @note This does not take into account the size of each GeometryPoint (ie: if it is a pixmap/widget instead of a point).
+        /// @TODO logic of bb, touches and draw should be the same as Polygon!!! (update samples!)
 
         // Create a polygon of the points.
         QPolygonF polygon_line;

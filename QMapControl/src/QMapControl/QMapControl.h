@@ -69,7 +69,7 @@ namespace qmapcontrol
         //! Declares what actions mouse buttons have on the map.
         enum class MouseButtonMode
         {
-            /// @todo add polygon support!
+            /// @TODO add polygon support!
 
             /// No action.
             None,

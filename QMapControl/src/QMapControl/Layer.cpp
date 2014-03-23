@@ -390,7 +390,7 @@ namespace qmapcontrol
             // Is this a left-click event?
             if(mouse_event->button() == Qt::LeftButton)
             {
-                /// @todo expose the fuzzy factor as a setting.
+                /// @TODO expose the fuzzy factor as a setting.
                 const qreal fuzzy_factor_px = 5.0;
 
                 // Calculate a rect around the mouse point with a 'fuzzy-factor' around it in pixels.

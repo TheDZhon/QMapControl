@@ -70,8 +70,6 @@ namespace qmapcontrol
 
     QRectF GeometryPolygon::boundingBox(const int& /*controller_zoom*/) const
     {
-        /// @note This does not take into account the size of each GeometryPoint (ie: if it is a pixmap/widget instead of a point).
-
         // Create a polygon of the points.
         QPolygonF polygon;
 
@@ -88,6 +86,8 @@ namespace qmapcontrol
 
     bool GeometryPolygon::touches(const QGraphicsItem& area_px, const int& controller_zoom)
     {
+        /// @TODO check this!?!?!
+
         // Default return success.
         bool return_touches(false);
 

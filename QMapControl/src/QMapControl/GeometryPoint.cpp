@@ -242,7 +242,7 @@ namespace qmapcontrol
 
     bool GeometryPoint::touches(const QGraphicsItem& area_px, const int& controller_zoom)
     {
-        /// @note This does not take into account the size of each GeometryPoint (ie: if it is a pixmap/widget instead of a point).
+        /// @TODO This does not take into account the size of each GeometryPoint (ie: if it is a pixmap/widget instead of a point).
 
         // Default return success.
         bool return_touches(false);

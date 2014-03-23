@@ -109,7 +109,7 @@ namespace qmapcontrol
             m_persistent_cache_directory = path;
 
             // Set the persistent cache expiry.
-            /// @todo should each map adapter should provide their own specific exipry?
+            /// @TODO should each map adapter should provide their own specific exipry?
             m_persistent_cache_expiry = expiry;
 
             // Enable persistent caching.

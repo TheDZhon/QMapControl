@@ -41,7 +41,7 @@ namespace qmapcontrol
 {
     QMapControl::QMapControl(QWidget * parent, Qt::WindowFlags window_flags)
     {
-        /// @todo understand how QtDesigner uses this so that the correct size can be passed to the constructor.
+        /// @TODO understand how QtDesigner uses this so that the correct size can be passed to the constructor.
         QMapControl(parent->size(), parent, window_flags);
     }
 
@@ -692,7 +692,7 @@ namespace qmapcontrol
                 area_px.reset(new QGraphicsLineItem(top_left_px.x(), top_left_px.y(), bottom_right_px.x(), bottom_right_px.y()));
 
                 // Set the line with a 'fuzzy-factor' around it using the pen.
-                /// @todo expose the fuzzy factor as a setting.
+                /// @TODO expose the fuzzy factor as a setting.
                 const qreal fuzzy_factor_px = 5.0;
                 QPen line_pen(static_cast<QGraphicsLineItem*>(area_px.get())->pen());
                 line_pen.setWidthF(fuzzy_factor_px);
@@ -717,7 +717,7 @@ namespace qmapcontrol
                     for(const auto& geometry : layer->getGeometries(QRectF(projection::get().toCoordinatePoint(top_left_px, m_current_zoom), projection::get().toCoordinatePoint(bottom_right_px, m_current_zoom))))
                     {
                         // Does the geometry touch our area rect?
-                        /// @todo look at using coordinates instead of pixel areas?
+                        /// @TODO look at using coordinates instead of pixel areas?
                         if(geometry->touches(*(area_px.get()), m_current_zoom))
                         {
                             // Add the geometry to the selected collection.
@@ -798,7 +798,7 @@ namespace qmapcontrol
                 const QPointF wheel_delta = mapFocusPointPx() - toPointPx(wheel_event->posF());
 
                 // Update the scaled offset with the current wheel_delta.
-                /// @todo should this add to the offset?
+                /// @TODO should this add to the offset?
                 m_primary_screen_scaled_offset = wheel_delta;
 
                 // Zoom in.
@@ -826,8 +826,8 @@ namespace qmapcontrol
                 const QPointF wheel_delta = mapFocusPointPx() - toPointPx(wheel_event->posF());
 
                 // Update the scaled offset with the current wheel_delta.
-                /// @todo should this add to the offset?
-                /// @todo not sure if this is correct delta to apply on zoom out!
+                /// @TODO should this add to the offset?
+                /// @TODO not sure if this is correct delta to apply on zoom out!
                 m_primary_screen_scaled_offset = wheel_delta;
 
                 // Zoom out.
@@ -909,7 +909,7 @@ namespace qmapcontrol
             // Cancel existing image loading.
             ImageManager::get().abortLoading();
 
-            /// @todo Could we cancel current layer drawing as well?
+            /// @TODO Could we cancel current layer drawing as well?
 
             // Is the primary screen scaled enabled?
             if(m_primary_screen_scaled_enabled)
@@ -943,7 +943,7 @@ namespace qmapcontrol
             // Cancel existing image loading.
             ImageManager::get().abortLoading();
 
-            /// @todo Could we cancel current layer drawing as well?
+            /// @TODO Could we cancel current layer drawing as well?
 
             // Is the primary screen scaled enabled?
             if(m_primary_screen_scaled_enabled)
@@ -1199,7 +1199,7 @@ namespace qmapcontrol
             if(m_current_zoom >= 0 && scalebar_distances.size() > m_current_zoom)
             {
                 // Calculate the length of the scalebar line in pixels.
-                /// @todo remove magic numbers!
+                /// @TODO remove magic numbers!
                 const double scalebar_line_length_px = scalebar_distances.at(m_current_zoom) / std::pow(2.0, 18 - m_current_zoom) / 0.597164;
 
                 // Draw the scalebar line.
@@ -1293,7 +1293,7 @@ namespace qmapcontrol
                 // Capture the pen.
                 QPen line_pen(painter.pen());
 
-                /// @todo expose the fuzzy factor as a setting.
+                /// @TODO expose the fuzzy factor as a setting.
                 const qreal fuzzy_factor_px = 5.0;
                 line_pen.setWidthF(fuzzy_factor_px);
                 painter.setPen(line_pen);
