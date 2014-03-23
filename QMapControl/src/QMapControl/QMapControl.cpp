@@ -27,6 +27,7 @@
 
 // Qt includes.
 #include <QtConcurrent/QtConcurrentRun>
+#include <QtWidgets/QStyleOption>
 
 // STL includes.
 #include <cmath>
@@ -47,7 +48,6 @@ namespace qmapcontrol
 
     QMapControl::QMapControl(const QSizeF& size_px, QWidget* parent, Qt::WindowFlags window_flags)
         : QWidget(parent, window_flags),
-          m_background_colour(Qt::transparent),
           m_scalebar_enabled(false),
           m_crosshairs_enabled(true),
           m_layer_mouse_events_enabled(true),
@@ -81,8 +81,9 @@ namespace qmapcontrol
           m_zoom_control_button_out("-", this),
           m_progress_indicator(this)
     {
-        // Set the initial background colour (transparent).
-        m_primary_screen_scaled.fill(m_background_colour);
+        // Ensure the primary screens are empty.
+        m_primary_screen.fill(Qt::transparent);
+        m_primary_screen_scaled.fill(Qt::transparent);
 
         // Connect signal/slot for when the backbuffer is updated, so that primary screen is updated in the main thread.
         QObject::connect(this, &QMapControl::updatedBackBuffer, this, &QMapControl::updatePrimaryScreen);
@@ -105,6 +106,9 @@ namespace qmapcontrol
 
         // Default - enable mouse tracking (all mouse events received - not just clicks).
         setMouseTracking(true);
+
+        // Default - background colour (transparent).
+        setBackgroundColour(Qt::transparent);
 
         // Set QWidget viewport size.
         setViewportSize(size_px);
@@ -132,10 +136,9 @@ namespace qmapcontrol
 
     void QMapControl::setBackgroundColour(const QColor& colour)
     {
-        // Set the background colour.
-        m_background_colour = colour;
-
-        /// @todo how do we force a redraw with the colour?
+        // Update the QWidget background colour.
+        QWidget::setObjectName("QMapControl");
+        QWidget::setStyleSheet("QWidget#QMapControl { background-color: " + colour.name() + " }");
     }
 
     void QMapControl::enablePersistentCache(const std::chrono::minutes& expiry, const QDir& path)
@@ -342,8 +345,9 @@ namespace qmapcontrol
 
         // Create new pixmaps with the new size required (2 x viewport size to allow for panning backbuffer).
         m_primary_screen = QPixmap(m_viewport_size_px.toSize() * 2);
+        m_primary_screen.fill(Qt::transparent);
         m_primary_screen_scaled = QPixmap(m_viewport_size_px.toSize() * 2);
-        m_primary_screen_scaled.fill(m_background_colour);
+        m_primary_screen_scaled.fill(Qt::transparent);
         m_primary_screen_scaled_offset = QPointF(0.0, 0.0);
 
         // Force the primary screen to be redrawn.
@@ -916,6 +920,7 @@ namespace qmapcontrol
             {
                 // Paint the primary screen to the scaled screen with a scale.
                 QPixmap new_primary_screen_scaled(m_viewport_size_px.toSize() * 2.0);
+                new_primary_screen_scaled.fill(Qt::transparent);
                 QPainter painter(&new_primary_screen_scaled);
                 painter.scale(2, 2);
                 painter.drawPixmap(QPointF(0.0, 0.0), getPrimaryScreen());
@@ -923,6 +928,9 @@ namespace qmapcontrol
                 // Store the new scaled primary screen.
                 m_primary_screen_scaled = new_primary_screen_scaled;
             }
+
+            // Reset the primary screen, as this is invalid.
+            m_primary_screen.fill(Qt::transparent);
 
             // Increase the zoom!
             m_current_zoom++;
@@ -948,8 +956,9 @@ namespace qmapcontrol
             // Is the primary screen scaled enabled?
             if(m_primary_screen_scaled_enabled)
             {
-            // Paint the primary screen to the scaled screen with a scale.
+                // Paint the primary screen to the scaled screen with a scale.
                 QPixmap new_primary_screen_scaled(m_viewport_size_px.toSize() * 2.0);
+                new_primary_screen_scaled.fill(Qt::transparent);
                 QPainter painter(&new_primary_screen_scaled);
                 painter.scale(0.5, 0.5);
                 painter.drawPixmap(QPointF(m_viewport_size_px.width(), m_viewport_size_px.height()), m_primary_screen);
@@ -957,6 +966,9 @@ namespace qmapcontrol
                 // Store the new scaled primary screen.
                 m_primary_screen_scaled = new_primary_screen_scaled;
             }
+
+            // Reset the primary screen, as this is invalid.
+            m_primary_screen.fill(Qt::transparent);
 
             // Decrease the zoom!
             m_current_zoom--;
@@ -1161,6 +1173,11 @@ namespace qmapcontrol
 
         // Create a painter for this QWidget to draw on.
         QPainter painter(this);
+
+        // Apply style sheet options to painter.
+        QStyleOption style_options;
+        style_options.initFrom(this);
+        QWidget::style()->drawPrimitive(QStyle::PE_Widget, &style_options, &painter, this);
 
         // Draw the current primary screen to the widget.
         drawPrimaryScreen(&painter);
@@ -1385,7 +1402,7 @@ namespace qmapcontrol
             QImage image_backbuffer(m_viewport_size_px.toSize() * 2, QImage::Format_ARGB32);
 
             // Clear the backbuffer.
-            image_backbuffer.fill(m_background_colour);
+            image_backbuffer.fill(Qt::transparent);
 
             // Create a painter for the backbuffer.
             QPainter painter_back_buffer(&image_backbuffer);
@@ -1470,7 +1487,7 @@ namespace qmapcontrol
     void QMapControl::loadingFinished()
     {
         // Remove the scaled image, as all new images have been loaded.
-        m_primary_screen_scaled.fill(m_background_colour);
+        m_primary_screen_scaled.fill(Qt::transparent);
 
         // Reset the scaled image offset.
         m_primary_screen_scaled_offset = QPointF(0.0, 0.0);

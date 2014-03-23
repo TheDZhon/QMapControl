@@ -626,9 +626,6 @@ namespace qmapcontrol
         //! Disable copy assignment.
         QMapControl& operator=(const QMapControl&); /// @todo remove once MSVC supports default/delete syntax.
 
-        /// The background colour.
-        QColor m_background_colour;
-
         /// Whether the scale should be visible.
         bool m_scalebar_enabled;
 
