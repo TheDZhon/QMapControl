@@ -73,20 +73,20 @@ namespace qmapcontrol
         int epsg() const final;
 
         /*!
-         * Converts a coorindate point (longitude/latitude) into the pixel point for a given zoom.
-         * @param point_coord The coordinate point to convert (longitude/latitude).
+         * Converts a world coorindate point (longitude/latitude) into the pixel point for a given zoom.
+         * @param point_coord The world coordinate point to convert (longitude/latitude).
          * @param zoom The zoom level.
-         * @return the coverted pixel point.
+         * @return the converted world pixel point.
          */
-        QPointF toPixelPoint(const QPointF& point_coord, const int& zoom) const final;
+        PointWorldPx toPointWorldPx(const PointWorldCoord& point_coord, const int& zoom) const final;
 
         /*!
-         * Converts a pixel point into the coorindate point (longitude/latitude) for a given zoom.
-         * @param point_px The pixel point to convert.
+         * Converts a world pixel point into the coorindate point (longitude/latitude) for a given zoom.
+         * @param point_px The world pixel point to convert.
          * @param zoom The zoom level.
-         * @return the coverted coorindate point (longitude/latitude).
+         * @return the converted world coorindate point (longitude/latitude).
          */
-        QPointF toCoordinatePoint(const QPointF& point_px, const int& zoom) const final;
+        PointWorldCoord toPointWorldCoord(const PointWorldPx& point_px, const int& zoom) const final;
 
     private:
         //! Disable copy constructor.

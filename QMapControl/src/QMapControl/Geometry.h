@@ -27,7 +27,6 @@
 
 // Qt includes.
 #include <QtCore/QObject>
-#include <QtCore/QPointF>
 #include <QtCore/QRectF>
 #include <QtCore/QVariant>
 #include <QtGui/QPainter>

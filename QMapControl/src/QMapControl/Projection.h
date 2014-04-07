@@ -30,6 +30,7 @@
 
 // Local includes.
 #include "qmapcontrol_global.h"
+#include "Point.h"
 
 /*!
  * @author Chris Stylianou <chris5287@gmail.com>
@@ -69,20 +70,20 @@ namespace qmapcontrol
         virtual int epsg() const = 0;
 
         /*!
-         * Converts a coorindate point (longitude/latitude) into the pixel point for a given zoom.
-         * @param point_coord The coordinate point to convert (longitude/latitude).
+         * Converts a world coorindate point (longitude/latitude) into the pixel point for a given zoom.
+         * @param point_coord The world coordinate point to convert (longitude/latitude).
          * @param zoom The zoom level.
-         * @return the coverted pixel point.
+         * @return the converted world pixel point.
          */
-        virtual QPointF toPixelPoint(const QPointF& point_coord, const int& zoom) const = 0;
+        virtual PointWorldPx toPointWorldPx(const PointWorldCoord& point_coord, const int& zoom) const = 0;
 
         /*!
-         * Converts a pixel point into the coorindate point (longitude/latitude) for a given zoom.
-         * @param point_px The pixel point to convert.
+         * Converts a world pixel point into the coorindate point (longitude/latitude) for a given zoom.
+         * @param point_px The world pixel point to convert.
          * @param zoom The zoom level.
-         * @return the coverted coorindate point (longitude/latitude).
+         * @return the converted world coorindate point (longitude/latitude).
          */
-        virtual QPointF toCoordinatePoint(const QPointF& point_px, const int& zoom) const = 0;
+        virtual PointWorldCoord toPointWorldCoord(const PointWorldPx& point_px, const int& zoom) const = 0;
 
     protected:
         //! Constuctor.

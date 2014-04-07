@@ -174,10 +174,10 @@ namespace qmapcontrol
         /*!
          * Handles mouse press events (such as left-clicking an item on the layer).
          * @param mouse_event The mouse event.
-         * @param mouse_point_px The mouse point on the map in pixels.
+         * @param mouse_point_coord The mouse point on the map in coord.
          * @param controller_zoom The current controller zoom.
          */
-        void mousePressEvent(const QMouseEvent* mouse_event, const QPointF& mouse_point_px, const int& controller_zoom);
+        void mousePressEvent(const QMouseEvent* mouse_event, const PointWorldCoord& mouse_point_coord, const int& controller_zoom);
 
         /*!
          * Draws each map adapter and geometry to a pixmap using the provided painter.
@@ -185,14 +185,14 @@ namespace qmapcontrol
          * @param backbuffer_rect_px Only draw map tiles/geometries that are contained in the backbuffer rect (pixels).
          * @param controller_zoom The current controller zoom.
          */
-        void draw(QPainter* painter, const QRectF& backbuffer_rect_px, const int& controller_zoom) const;
+        void draw(QPainter* painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const;
 
         /*!
          * Moves any geometries that represent a widget, as these are not drawn to the actually pixmap.
          * @param offset_px The offset in pixels to remove from the coordinate pixel point.
          * @param controller_zoom The current controller zoom.
          */
-        void moveGeometryWidgets(const QPointF& offset_px, const int& controller_zoom) const;
+        void moveGeometryWidgets(const PointPx& offset_px, const int& controller_zoom) const;
 
     private:
         /*!
@@ -201,7 +201,7 @@ namespace qmapcontrol
          * @param backbuffer_rect_px Only draw map tiles that are contained in the backbuffer rect (pixels).
          * @param controller_zoom The current controller zoom.
          */
-        void drawMapAdapters(QPainter* painter, const QRectF& backbuffer_rect_px, const int& controller_zoom) const;
+        void drawMapAdapters(QPainter* painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const;
 
         /*!
          * Draws each geometry to a pixmap using the provided painter.
@@ -209,7 +209,7 @@ namespace qmapcontrol
          * @param backbuffer_rect_px Only draw geometries that are contained in the backbuffer rect (pixels).
          * @param controller_zoom The current controller zoom.
          */
-        void drawGeometries(QPainter* painter, const QRectF& backbuffer_rect_px, const int& controller_zoom) const;
+        void drawGeometries(QPainter* painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const;
 
     signals:
         /*!

@@ -51,7 +51,7 @@ namespace qmapcontrol
         return 3857;
     }
 
-    QPointF ProjectionSphericalMercator::toPixelPoint(const QPointF& point_coord, const int& zoom) const
+    PointWorldPx ProjectionSphericalMercator::toPointWorldPx(const PointWorldCoord& point_coord, const int& zoom) const
     {
         /*!
           Formula basis: http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Lon..2Flat._to_tile_numbers
@@ -63,10 +63,10 @@ namespace qmapcontrol
         const qreal y_px((tilesY(zoom) * ImageManager::get().tileSizePx()) * (1.0 - (std::log(std::tan(point_coord.y() * M_PI / 180.0) + (1.0 / std::cos(point_coord.y() * M_PI / 180.0))) / M_PI )) / 2.0);
 
         // Return the converted point (x/y pixel point - 0,0 is screen top left).
-        return QPointF(x_px, y_px);
+        return PointWorldPx(x_px, y_px);
     }
 
-    QPointF ProjectionSphericalMercator::toCoordinatePoint(const QPointF& point_px, const int& zoom) const
+    PointWorldCoord ProjectionSphericalMercator::toPointWorldCoord(const PointWorldPx& point_px, const int& zoom) const
     {
         /*!
           Formula basis: http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_numbers_to_lon..2Flat.
@@ -75,10 +75,10 @@ namespace qmapcontrol
             lat_rad = arctan(sinh(π * (1 - 2 * y_point / n)))
             lat_deg = lat_rad * 180.0 / π
          */
-        const qreal longitude_coord(qreal(point_px.x()) / qreal(tilesX(zoom) * ImageManager::get().tileSizePx()) * 360.0 - 180.0);
-        const qreal latitude_coord(std::atan(std::sinh(M_PI * (1.0 - 2.0 * qreal(point_px.y()) / qreal(tilesY(zoom) * ImageManager::get().tileSizePx())))) * 180.0 / M_PI);
+        const qreal longitude(qreal(point_px.x()) / qreal(tilesX(zoom) * ImageManager::get().tileSizePx()) * 360.0 - 180.0);
+        const qreal latitude(std::atan(std::sinh(M_PI * (1.0 - 2.0 * qreal(point_px.y()) / qreal(tilesY(zoom) * ImageManager::get().tileSizePx())))) * 180.0 / M_PI);
 
         // Return the converted coordinate (longitude/latitude coordinate - 0,0 is screen middle).
-        return QPointF(longitude_coord, latitude_coord);
+        return PointWorldCoord(longitude, latitude);
     }
 }

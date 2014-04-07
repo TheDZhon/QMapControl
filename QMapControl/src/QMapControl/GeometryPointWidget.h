@@ -53,27 +53,27 @@ namespace qmapcontrol
         * This constructor creates a point which will display the given widget.
         * @note IMPORTANT: You have to set the QMapControl as parent to the widget before this is constructed.
         * @note IMPORTANT: You have to set the size of the widget before this is constructed.
-        * @param x_coord The x coordinate (longitude).
-        * @param y_coord The y coordinate (latitude).
+        * @param longitude The longitude coordinate (x).
+        * @param latitude The latitude coordinate (y).
         * @param widget The widget to be displayed by this point.
         * @param pen The pen to draw with.
         * @param zoom_minimum The minimum zoom level to show this geometry at.
         * @param zoom_maximum The maximum zoom level to show this geometry at.
         */
-        GeometryPointWidget(const qreal& x_coord, const qreal& y_coord, QWidget* widget, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPointWidget(const qreal& longitude, const qreal& latitude, QWidget* widget, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Constructor.
         /*!
         * This constructor creates a point which will display the given widget.
         * @note IMPORTANT: You have to set the QMapControl as parent to the widget before this is constructed.
         * @note IMPORTANT: You have to set the size of the widget before this is constructed.
-        * @param point_coord The x/y coordinate (longitude/latitude).
+        * @param point_coord The longitude/latitude coordinate (x/y).
         * @param widget The widget to be displayed by this point.
         * @param pen The pen to draw with.
         * @param zoom_minimum The minimum zoom level to show this geometry at.
         * @param zoom_maximum The maximum zoom level to show this geometry at.
         */
-        GeometryPointWidget(const QPointF& point_coord, QWidget* widget, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPointWidget(const PointWorldCoord& point_coord, QWidget* widget, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Disable copy constructor.
         ///GeometryPointWidget(const GeometryPointWidget&) = delete; @todo re-add once MSVC supports default/delete syntax.

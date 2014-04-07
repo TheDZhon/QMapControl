@@ -41,6 +41,14 @@
 namespace qmapcontrol
 {
     QMapControl::QMapControl(QWidget * parent, Qt::WindowFlags window_flags)
+        : m_viewport_center_px(0.0, 0.0),
+          m_map_focus_coord(0.0, 0.0),
+          m_animated_map_focus_point(0.0, 0.0),
+          m_mouse_position_pressed_px(0.0, 0.0),
+          m_mouse_position_current_px(0.0, 0.0),
+          m_primary_screen_map_focus_point_px(0.0, 0.0),
+          m_primary_screen_backbuffer_rect_px(PointWorldPx(0.0, 0.0), PointWorldPx(0.0, 0.0)),
+          m_primary_screen_scaled_offset(0.0, 0.0)
     {
         /// @TODO understand how QtDesigner uses this so that the correct size can be passed to the constructor.
         QMapControl(parent->size(), parent, window_flags);
@@ -70,8 +78,8 @@ namespace qmapcontrol
           m_mouse_position_pressed_px(0.0, 0.0),
           m_mouse_position_current_px(0.0, 0.0),
           m_primary_screen(size_px.toSize() * 2),
-          m_primary_screen_map_focus_point(0.0, 0.0),
-          m_primary_screen_backbuffer_rect_px(0.0, 0.0, 0.0, 0.0),
+          m_primary_screen_map_focus_point_px(0.0, 0.0),
+          m_primary_screen_backbuffer_rect_px(PointWorldPx(0.0, 0.0), PointWorldPx(0.0, 0.0)),
           m_primary_screen_scaled_enabled(false),
           m_primary_screen_scaled(size_px.toSize() * 2),
           m_primary_screen_scaled_offset(0.0, 0.0),
@@ -81,6 +89,10 @@ namespace qmapcontrol
           m_zoom_control_button_out("-", this),
           m_progress_indicator(this)
     {
+        // Register meta types.
+        qRegisterMetaType<RectWorldPx>("RectWorldPx");
+        qRegisterMetaType<PointWorldPx>("PointWorldPx");
+
         // Ensure the primary screens are empty.
         m_primary_screen.fill(Qt::transparent);
         m_primary_screen_scaled.fill(Qt::transparent);
@@ -341,14 +353,14 @@ namespace qmapcontrol
         m_viewport_size_px = size_px;
 
         // Calculate the middle point of the viewport (visible-part of the layer) in pixels.
-        m_viewport_center_px = QPointF(m_viewport_size_px.width() / 2.0, m_viewport_size_px.height() / 2.0);
+        m_viewport_center_px = PointViewportPx(m_viewport_size_px.width() / 2.0, m_viewport_size_px.height() / 2.0);
 
         // Create new pixmaps with the new size required (2 x viewport size to allow for panning backbuffer).
         m_primary_screen = QPixmap(m_viewport_size_px.toSize() * 2);
         m_primary_screen.fill(Qt::transparent);
         m_primary_screen_scaled = QPixmap(m_viewport_size_px.toSize() * 2);
         m_primary_screen_scaled.fill(Qt::transparent);
-        m_primary_screen_scaled_offset = QPointF(0.0, 0.0);
+        m_primary_screen_scaled_offset = PointPx(0.0, 0.0);
 
         // Force the primary screen to be redrawn.
         redrawPrimaryScreen(true);
@@ -360,10 +372,10 @@ namespace qmapcontrol
     QRectF QMapControl::getViewportRect() const
     {
         // Return the viewport rect converted into the coordinates system.
-        return QRectF(projection::get().toCoordinatePoint(QPointF(mapFocusPointPx() - m_viewport_center_px), m_current_zoom), projection::get().toCoordinatePoint(QPointF(mapFocusPointPx() + m_viewport_center_px), m_current_zoom));
+        return QRectF(projection::get().toPointWorldCoord(mapFocusPointWorldPx() - m_viewport_center_px, m_current_zoom).rawPoint(), projection::get().toPointWorldCoord(mapFocusPointWorldPx() + m_viewport_center_px, m_current_zoom).rawPoint());
     }
 
-    bool QMapControl::viewportContainsAll(const std::vector<QPointF>& points_coord) const
+    bool QMapControl::viewportContainsAll(const std::vector<PointWorldCoord>& points_coord) const
     {
         // Default return value.
         bool return_contains_all(true);
@@ -375,7 +387,7 @@ namespace qmapcontrol
         for(size_t i = 0; return_contains_all == true && i < points_coord.size(); i++)
         {
             // Is the point within the rect.
-            return_contains_all = viewport_rect_coord.contains(points_coord.at(i));
+            return_contains_all = viewport_rect_coord.contains(points_coord.at(i).rawPoint());
         }
 
         // Return the result.
@@ -395,13 +407,13 @@ namespace qmapcontrol
     }
 
     // Map management.
-    QPointF QMapControl::mapFocusPointCoord() const
+    PointWorldCoord QMapControl::mapFocusPointCoord() const
     {
         // Return the current map focus point in coordinates.
         return m_map_focus_coord;
     }
 
-    void QMapControl::setMapFocusPoint(const QPointF& point_coord)
+    void QMapControl::setMapFocusPoint(const PointWorldCoord& point_coord)
     {
         // Set the map focus point.
         m_map_focus_coord = point_coord;
@@ -410,7 +422,7 @@ namespace qmapcontrol
         redrawPrimaryScreen();
     }
 
-    void QMapControl::setMapFocusPoint(const std::vector<QPointF>& points_coord, const bool& auto_zoom)
+    void QMapControl::setMapFocusPoint(const std::vector<PointWorldCoord>& points_coord, const bool& auto_zoom)
     {
         // Calculate the map focus point and then set the view.
         setMapFocusPoint(calculateMapFocusPoint(points_coord));
@@ -443,7 +455,7 @@ namespace qmapcontrol
         }
     }
 
-    void QMapControl::setMapFocusPointAnimated(const QPointF& coordinate, const int& steps, const std::chrono::milliseconds& step_interval)
+    void QMapControl::setMapFocusPointAnimated(const PointWorldCoord& coordinate, const int& steps, const std::chrono::milliseconds& step_interval)
     {
         // Is animation already taking place?
         if(m_animated_mutex.try_lock())
@@ -470,25 +482,25 @@ namespace qmapcontrol
     void QMapControl::scrollViewLeft(const double& delta_px)
     {
         // Scroll the view left by required pixels.
-        scrollView(QPointF(-delta_px, 0.0));
+        scrollView(PointPx(-delta_px, 0.0));
     }
 
     void QMapControl::scrollViewRight(const double& delta_px)
     {
         // Scroll the view right by required pixels.
-        scrollView(QPointF(delta_px, 0.0));
+        scrollView(PointPx(delta_px, 0.0));
     }
 
     void QMapControl::scrollViewUp(const double& delta_px)
     {
         // Scroll the view up by required pixels.
-        scrollView(QPointF(0.0, -delta_px));
+        scrollView(PointPx(0.0, -delta_px));
     }
 
     void QMapControl::scrollViewDown(const double& delta_px)
     {
         // Scroll the view down by required pixels.
-        scrollView(QPointF(0.0, delta_px));
+        scrollView(PointPx(0.0, delta_px));
     }
 
     // Zoom management.
@@ -582,7 +594,7 @@ namespace qmapcontrol
     void QMapControl::mousePressEvent(QMouseEvent* mouse_event)
     {
         // Store the mouse location of the current/starting mouse click.
-        m_mouse_position_current_px = mouse_event->localPos();
+        m_mouse_position_current_px = PointViewportPx(mouse_event->localPos().x(), mouse_event->localPos().y());
         m_mouse_position_pressed_px = m_mouse_position_current_px;
 
         // Are mouse events enabled for all layers?
@@ -592,7 +604,7 @@ namespace qmapcontrol
             for(const auto& layer : getLayers())
             {
                 // Send the mouse press event to the layer.
-                layer->mousePressEvent(mouse_event, toPointPx(m_mouse_position_current_px), m_current_zoom);
+                layer->mousePressEvent(mouse_event, toPointWorldCoord(m_mouse_position_current_px), m_current_zoom);
             }
         }
 
@@ -610,13 +622,13 @@ namespace qmapcontrol
         }
 
         // Emit the pressed mouse event with the current mouse coordinate.
-        emit mouseEventPressCoordinate(mouse_event, toPointCoord(m_mouse_position_current_px));
+        emit mouseEventPressCoordinate(mouse_event, toPointWorldCoord(m_mouse_position_current_px));
     }
 
     void QMapControl::mouseReleaseEvent(QMouseEvent* mouse_event)
     {
         // Store the mouse location of the current mouse click.
-        m_mouse_position_current_px = mouse_event->localPos();
+        m_mouse_position_current_px = PointViewportPx(mouse_event->localPos().x(), mouse_event->localPos().y());
 
         // Default mouse mode.
         QMapControl::MouseButtonMode mouse_mode = QMapControl::MouseButtonMode::None;
@@ -649,21 +661,21 @@ namespace qmapcontrol
                 mouse_mode == QMapControl::MouseButtonMode::PanEllipse)
         {
             // Capture coords to move/zoom with.
-            std::vector<QPointF> coords;
+            std::vector<PointWorldCoord> coords;
 
             // Origin at center?
             if(mouse_origin_center)
             {
                 // From mouse pressed with offsets applied.
-                const QPointF mouse_diff = m_mouse_position_pressed_px - m_mouse_position_current_px;
-                coords.push_back(toPointCoord(m_mouse_position_pressed_px - mouse_diff));
-                coords.push_back(toPointCoord(m_mouse_position_pressed_px + mouse_diff));
+                const PointPx mouse_diff(m_mouse_position_pressed_px - m_mouse_position_current_px);
+                coords.push_back(toPointWorldCoord(m_mouse_position_pressed_px - mouse_diff));
+                coords.push_back(toPointWorldCoord(m_mouse_position_pressed_px + mouse_diff));
             }
             else
             {
                 // From mouse pressed to mouse released.
-                coords.push_back(toPointCoord(m_mouse_position_pressed_px));
-                coords.push_back(toPointCoord(m_mouse_position_current_px));
+                coords.push_back(toPointWorldCoord(m_mouse_position_pressed_px));
+                coords.push_back(toPointWorldCoord(m_mouse_position_current_px));
             }
 
             // Tell the map control to move and zoom as required by pan ... mode.
@@ -675,21 +687,21 @@ namespace qmapcontrol
                 mouse_mode == QMapControl::MouseButtonMode::SelectEllipse)
         {
             // From mouse pressed to mouse released.
-            QPointF top_left_px(toPointPx(m_mouse_position_pressed_px));
-            QPointF bottom_right_px(toPointPx(m_mouse_position_current_px));
+            PointWorldPx top_left_px(toPointWorldPx(m_mouse_position_pressed_px));
+            PointWorldPx bottom_right_px(toPointWorldPx(m_mouse_position_current_px));
 
             // Origin at center?
             if(mouse_origin_center)
             {
                 // From mouse pressed with offsets applied.
-                const QPointF mouse_diff = m_mouse_position_pressed_px - m_mouse_position_current_px;
-                top_left_px = toPointPx(m_mouse_position_pressed_px - mouse_diff);
-                bottom_right_px = toPointPx(m_mouse_position_pressed_px + mouse_diff);
+                const PointPx mouse_diff(m_mouse_position_pressed_px - m_mouse_position_current_px);
+                top_left_px = toPointWorldPx(m_mouse_position_pressed_px - mouse_diff);
+                bottom_right_px = toPointWorldPx(m_mouse_position_pressed_px + mouse_diff);
             }
 
             // Construct area to check.
             // Default to rect.
-            std::unique_ptr<QGraphicsItem> area_px(new QGraphicsRectItem(QRectF(top_left_px, bottom_right_px)));
+            std::unique_ptr<QGraphicsItem> area_px(new QGraphicsRectItem(QRectF(top_left_px.rawPoint(), bottom_right_px.rawPoint())));
             if(mouse_mode == QMapControl::MouseButtonMode::SelectLine)
             {
                 // Line check.
@@ -705,7 +717,7 @@ namespace qmapcontrol
             else if(mouse_mode == QMapControl::MouseButtonMode::SelectEllipse)
             {
                 // Ellipse check.
-                area_px.reset(new QGraphicsEllipseItem(QRectF(top_left_px, bottom_right_px)));
+                area_px.reset(new QGraphicsEllipseItem(QRectF(top_left_px.rawPoint(), bottom_right_px.rawPoint())));
             }
 
             // Collection of selected geometries.
@@ -718,7 +730,7 @@ namespace qmapcontrol
                 if(layer->isVisible(m_current_zoom))
                 {
                     // Loop through each geometry for the layer.
-                    for(const auto& geometry : layer->getGeometries(QRectF(projection::get().toCoordinatePoint(top_left_px, m_current_zoom), projection::get().toCoordinatePoint(bottom_right_px, m_current_zoom))))
+                    for(const auto& geometry : layer->getGeometries(QRectF(projection::get().toPointWorldCoord(top_left_px, m_current_zoom).rawPoint(), projection::get().toPointWorldCoord(bottom_right_px, m_current_zoom).rawPoint())))
                     {
                         // Does the geometry touch our area rect?
                         /// @TODO look at using coordinates instead of pixel areas?
@@ -739,22 +751,22 @@ namespace qmapcontrol
         QWidget::update();
 
         // Emit the released mouse event with the press and release mouse coordinates.
-        emit mouseEventReleaseCoordinate(mouse_event, toPointCoord(m_mouse_position_pressed_px), toPointCoord(m_mouse_position_current_px));
+        emit mouseEventReleaseCoordinate(mouse_event, toPointWorldCoord(m_mouse_position_pressed_px), toPointWorldCoord(m_mouse_position_current_px));
     }
 
     void QMapControl::mouseDoubleClickEvent(QMouseEvent* mouse_event)
     {
         // Store the mouse location of the current mouse click.
-        m_mouse_position_current_px = mouse_event->localPos();
+        m_mouse_position_current_px = PointViewportPx(mouse_event->localPos().x(), mouse_event->localPos().y());
 
         // Emit the double click mouse event with the press and current mouse coordinate.
-        emit mouseEventDoubleClickCoordinate(mouse_event, toPointCoord(m_mouse_position_pressed_px), toPointCoord(m_mouse_position_current_px));
+        emit mouseEventDoubleClickCoordinate(mouse_event, toPointWorldCoord(m_mouse_position_pressed_px), toPointWorldCoord(m_mouse_position_current_px));
     }
 
     void QMapControl::mouseMoveEvent(QMouseEvent* mouse_event)
     {
         // Update the current mouse position.
-        m_mouse_position_current_px = mouse_event->localPos();
+        m_mouse_position_current_px = PointViewportPx(mouse_event->localPos().x(), mouse_event->localPos().y());
 
         // Default mouse mode.
         QMapControl::MouseButtonMode mouse_mode = QMapControl::MouseButtonMode::None;
@@ -786,7 +798,7 @@ namespace qmapcontrol
         QWidget::update();
 
         // Emit the moved mouse event with the press and current mouse coordinates.
-        emit mouseEventMoveCoordinate(mouse_event, toPointCoord(m_mouse_position_pressed_px), toPointCoord(m_mouse_position_current_px));
+        emit mouseEventMoveCoordinate(mouse_event, toPointWorldCoord(m_mouse_position_pressed_px), toPointWorldCoord(m_mouse_position_current_px));
     }
 
     void QMapControl::wheelEvent(QWheelEvent* wheel_event)
@@ -798,8 +810,9 @@ namespace qmapcontrol
             if(m_current_zoom < m_zoom_maximum)
             {
                 // Capture the current wheel point at the current zoom level.
-                const QPointF wheel_coord = toPointCoord(wheel_event->posF());
-                const QPointF wheel_delta = mapFocusPointPx() - toPointPx(wheel_event->posF());
+                const PointViewportPx wheel_px(wheel_event->posF().x(), wheel_event->posF().y());
+                const PointWorldCoord wheel_coord(toPointWorldCoord(wheel_px));
+                const PointPx wheel_delta(mapFocusPointWorldPx() - toPointWorldPx(wheel_px));
 
                 // Update the scaled offset with the current wheel_delta.
                 /// @TODO should this add to the offset?
@@ -809,7 +822,7 @@ namespace qmapcontrol
                 zoomIn();
 
                 // Google-style zoom...
-                setMapFocusPoint(projection::get().toCoordinatePoint(projection::get().toPixelPoint(wheel_coord, m_current_zoom) + wheel_delta, m_current_zoom));
+                setMapFocusPoint(projection::get().toPointWorldCoord(projection::get().toPointWorldPx(wheel_coord, m_current_zoom) + wheel_delta, m_current_zoom));
 
                 // Tell parents we have accepted this events.
                 wheel_event->accept();
@@ -826,8 +839,9 @@ namespace qmapcontrol
             if(m_current_zoom > m_zoom_minimum)
             {
                 // Capture the current wheel point at the current zoom level.
-                const QPointF wheel_coord = toPointCoord(wheel_event->posF());
-                const QPointF wheel_delta = mapFocusPointPx() - toPointPx(wheel_event->posF());
+                const PointViewportPx wheel_px(wheel_event->posF().x(), wheel_event->posF().y());
+                const PointWorldCoord wheel_coord(toPointWorldCoord(wheel_px));
+                const PointPx wheel_delta(mapFocusPointWorldPx() - toPointWorldPx(wheel_px));
 
                 // Update the scaled offset with the current wheel_delta.
                 /// @TODO should this add to the offset?
@@ -838,7 +852,7 @@ namespace qmapcontrol
                 zoomOut();
 
                 // Google-style zoom...
-                setMapFocusPoint(projection::get().toCoordinatePoint(projection::get().toPixelPoint(wheel_coord, m_current_zoom) + wheel_delta, m_current_zoom));
+                setMapFocusPoint(projection::get().toPointWorldCoord(projection::get().toPointWorldPx(wheel_coord, m_current_zoom) + wheel_delta, m_current_zoom));
 
                 // Tell parents we have accepted this events.
                 wheel_event->accept();
@@ -899,7 +913,7 @@ namespace qmapcontrol
     {
         // Return the primary screen (ie: what is currently being displayed).
         // Note: m_viewport_center_px is the same as (m_viewport_size_px / 2)
-        return m_primary_screen.copy(QRect((m_viewport_center_px + (mapFocusPointPx() - m_primary_screen_map_focus_point)).toPoint(), m_viewport_size_px.toSize()));
+        return m_primary_screen.copy(QRect((m_viewport_center_px + mapFocusPointWorldPx() - m_primary_screen_map_focus_point_px).rawPoint().toPoint(), m_viewport_size_px.toSize()));
     }
 
 
@@ -1028,13 +1042,13 @@ namespace qmapcontrol
 
     /// Private...
     // Map management.
-    QPointF QMapControl::toPointPx(const QPointF& click_point_px) const
+    PointWorldPx QMapControl::toPointWorldPx(const PointViewportPx& click_point_px) const
     {
         // Return the actual position on the map (uses the current map focus point).
-        return toPointPx(click_point_px, mapFocusPointPx());
+        return toPointWorldPx(click_point_px, mapFocusPointWorldPx());
     }
 
-    QPointF QMapControl::toPointPx(const QPointF& click_point_px, const QPointF& map_focus_point_px) const
+    PointWorldPx QMapControl::toPointWorldPx(const PointViewportPx& click_point_px, const PointWorldPx& map_focus_point_px) const
     {
         // Convert the mouse pixel position into the coordinate system required.
         /*
@@ -1055,28 +1069,28 @@ namespace qmapcontrol
          */
 
         // Calculate the actual position on the map (click - viewport center = delta from map focus point).
-        return click_point_px - m_viewport_center_px + map_focus_point_px;
+        return map_focus_point_px + (click_point_px - m_viewport_center_px);
     }
 
-    QPointF QMapControl::toPointCoord(const QPointF& click_point_px) const
+    PointWorldCoord QMapControl::toPointWorldCoord(const PointViewportPx& click_point_px) const
     {
         // Return the point converted into the coordinates system (uses the current map focus point).
-        return projection::get().toCoordinatePoint(toPointPx(click_point_px, mapFocusPointPx()), m_current_zoom);
+        return projection::get().toPointWorldCoord(toPointWorldPx(click_point_px, mapFocusPointWorldPx()), m_current_zoom);
     }
 
-    QPointF QMapControl::toPointCoord(const QPointF& click_point_px, const QPointF& map_focus_point_px) const
+    PointWorldCoord QMapControl::toPointWorldCoord(const PointViewportPx& click_point_px, const PointWorldPx& map_focus_point_px) const
     {
         // Return the point converted into the coordinates system.
-        return projection::get().toCoordinatePoint(toPointPx(click_point_px, map_focus_point_px), m_current_zoom);
+        return projection::get().toPointWorldCoord(toPointWorldPx(click_point_px, map_focus_point_px), m_current_zoom);
     }
 
-    QPointF QMapControl::mapFocusPointPx() const
+    PointWorldPx QMapControl::mapFocusPointWorldPx() const
     {
         // Return the current map focus point in pixels.
-        return projection::get().toPixelPoint(m_map_focus_coord, m_current_zoom);
+        return projection::get().toPointWorldPx(m_map_focus_coord, m_current_zoom);
     }
 
-    QPointF QMapControl::calculateMapFocusPoint(const std::vector<QPointF>& points_coord)
+    PointWorldCoord QMapControl::calculateMapFocusPoint(const std::vector<PointWorldCoord>& points_coord)
     {
         // Sum totals.
         double sum_x = 0.0;
@@ -1090,16 +1104,16 @@ namespace qmapcontrol
         }
 
         // Return the calculated map focus point = mean of x and y.
-        return QPointF(sum_x / points_coord.size(), sum_y / points_coord.size());
+        return PointWorldCoord(sum_x / points_coord.size(), sum_y / points_coord.size());
     }
 
-    void QMapControl::scrollView(const QPointF& delta_px)
+    void QMapControl::scrollView(const PointPx& delta_px)
     {
         // Calculate the new map focus coord.
-        const QPointF new_map_focus_coord = projection::get().toCoordinatePoint(mapFocusPointPx() + delta_px, m_current_zoom);
+        const PointWorldCoord new_map_focus_coord(projection::get().toPointWorldCoord(mapFocusPointWorldPx() + delta_px, m_current_zoom));
 
         // If no limited viewport is set, or if the new map focus point coord is within the limited viewport...
-        if(m_limited_viewport_rect_coord.isNull() || (m_limited_viewport_rect_coord.isValid() && m_limited_viewport_rect_coord.contains(new_map_focus_coord)))
+        if(m_limited_viewport_rect_coord.isNull() || (m_limited_viewport_rect_coord.isValid() && m_limited_viewport_rect_coord.contains(new_map_focus_coord.rawPoint())))
         {
             // Update map focus point with delta.
             setMapFocusPoint(new_map_focus_coord);
@@ -1270,8 +1284,8 @@ namespace qmapcontrol
             }
 
             // Capture the start and end points.
-            QPointF start_point_px = m_mouse_position_pressed_px;
-            QPointF end_point_px = m_mouse_position_current_px;
+            PointViewportPx start_point_px = m_mouse_position_pressed_px;
+            PointViewportPx end_point_px = m_mouse_position_current_px;
 
             // Draw at center of mouse pressed?
             if(mouse_origin_center)
@@ -1285,7 +1299,7 @@ namespace qmapcontrol
                                  m_mouse_position_pressed_px.x() + 1.0, m_mouse_position_pressed_px.y());
 
                 // Update the start and end points.
-                const QPointF mouse_diff_px = m_mouse_position_pressed_px - m_mouse_position_current_px;
+                const PointPx mouse_diff_px(m_mouse_position_pressed_px - m_mouse_position_current_px);
                 start_point_px = m_mouse_position_pressed_px - mouse_diff_px;
                 end_point_px = m_mouse_position_pressed_px + mouse_diff_px;
             }
@@ -1302,7 +1316,7 @@ namespace qmapcontrol
             if(mouse_mode == QMapControl::MouseButtonMode::DrawBox || mouse_mode == QMapControl::MouseButtonMode::PanBox || mouse_mode == QMapControl::MouseButtonMode::SelectBox)
             {
                 // Draw rect.
-                painter.drawRect(QRectF(start_point_px, end_point_px));
+                painter.drawRect(QRectF(start_point_px.rawPoint(), end_point_px.rawPoint()));
             }
             // Is the mouse mode set to draw/pan/select a line.
             else if(mouse_mode == QMapControl::MouseButtonMode::DrawLine || mouse_mode == QMapControl::MouseButtonMode::PanLine || mouse_mode == QMapControl::MouseButtonMode::SelectLine)
@@ -1316,13 +1330,13 @@ namespace qmapcontrol
                 painter.setPen(line_pen);
 
                 // Draw line.
-                painter.drawLine(start_point_px, end_point_px);
+                painter.drawLine(start_point_px.rawPoint(), end_point_px.rawPoint());
             }
             // Is the mouse mode set to draw/pan/select a ellipse.
             else if(mouse_mode == QMapControl::MouseButtonMode::DrawEllipse || mouse_mode == QMapControl::MouseButtonMode::PanEllipse || mouse_mode == QMapControl::MouseButtonMode::SelectEllipse)
             {
                 // Draw ellipse from start to current mouse point.
-                painter.drawEllipse(QRectF(start_point_px, end_point_px));
+                painter.drawEllipse(QRectF(start_point_px.rawPoint(), end_point_px.rawPoint()));
             }
 
             // Restore the painter's state.
@@ -1337,12 +1351,12 @@ namespace qmapcontrol
         {
             // Draw the current scaled primary screem image to the pixmap with wheel event offset.
             // Note: m_viewport_center_px is the same as (m_viewport_size_px / 2)
-            painter->drawPixmap(-(m_viewport_center_px + (mapFocusPointPx() - m_primary_screen_map_focus_point) - m_primary_screen_scaled_offset), m_primary_screen_scaled);
+            painter->drawPixmap(-(m_viewport_center_px + mapFocusPointWorldPx() - m_primary_screen_map_focus_point_px - m_primary_screen_scaled_offset).rawPoint(), m_primary_screen_scaled);
         }
 
         // Draws the primary screen image to the pixmap.
         // Note: m_viewport_center_px is the same as (m_viewport_size_px / 2)
-        painter->drawPixmap(-(m_viewport_center_px + (mapFocusPointPx() - m_primary_screen_map_focus_point)), m_primary_screen);
+        painter->drawPixmap(-(m_viewport_center_px + mapFocusPointWorldPx() - m_primary_screen_map_focus_point_px).rawPoint(), m_primary_screen);
     }
 
     bool QMapControl::checkBackbuffer() const
@@ -1351,10 +1365,10 @@ namespace qmapcontrol
         bool return_redraw_required(false);
 
         // Calculate required viewport rect.
-        const QRectF required_viewport_rect_px(toPointPx(QPointF(0, 0)), toPointPx(QPointF(m_viewport_size_px.width(), m_viewport_size_px.height())));
+        const QRectF required_viewport_rect_px(toPointWorldPx(PointViewportPx(0.0, 0.0)).rawPoint(), toPointWorldPx(PointViewportPx(m_viewport_size_px.width(), m_viewport_size_px.height())).rawPoint());
 
         // Does the primary screen's backbuffer rect contain the requried viewport rect?
-        if(m_primary_screen_backbuffer_rect_px.contains(required_viewport_rect_px) == false)
+        if(m_primary_screen_backbuffer_rect_px.rawRect().contains(required_viewport_rect_px) == false)
         {
             // Backbuffer rect does not contain the required viewport rect, therefore we need to redraw the backbuffer.
             return_redraw_required = true;
@@ -1377,7 +1391,7 @@ namespace qmapcontrol
         for(const auto& layer : getLayers())
         {
             // Tell the layer to move its geometry widgets.
-            layer->moveGeometryWidgets(mapFocusPointPx() - m_viewport_center_px, m_current_zoom);
+            layer->moveGeometryWidgets(mapFocusPointWorldPx() - m_viewport_center_px, m_current_zoom);
         }
 
         // Schedule a repaint.
@@ -1408,14 +1422,15 @@ namespace qmapcontrol
             QPainter painter_back_buffer(&image_backbuffer);
 
             // Capture the map focus point we are going to use for this backbuffer.
-            QPointF backbuffer_map_focus_px = mapFocusPointPx();
+            PointWorldPx backbuffer_map_focus_px(mapFocusPointWorldPx());
 
             // Calculate the new backbuffer rect (based on the saved backbuffer map focus point).
             // Note: m_viewport_center_px is the same as (m_viewport_size_px / 2)
-            QRectF backbuffer_rect_px = QRectF(toPointPx(QPointF(0, 0) - m_viewport_center_px, backbuffer_map_focus_px), toPointPx(QPointF(m_viewport_size_px.width(), m_viewport_size_px.height()) + m_viewport_center_px, backbuffer_map_focus_px));
+            const PointPx viewport_offset_px(m_viewport_size_px.width() / 2.0, m_viewport_size_px.height() / 2.0);
+            RectWorldPx backbuffer_rect_px(toPointWorldPx(PointViewportPx(0, 0) - viewport_offset_px, backbuffer_map_focus_px), toPointWorldPx(PointViewportPx(m_viewport_size_px.width(), m_viewport_size_px.height()) + viewport_offset_px, backbuffer_map_focus_px));
 
             // Translate to the backbuffer top/left point.
-            painter_back_buffer.translate(-backbuffer_rect_px.topLeft());
+            painter_back_buffer.translate(-backbuffer_rect_px.topLeftPx().rawPoint());
 
             // Loop through each layer and draw it to the backbuffer.
             for(const auto& layer : getLayers())
@@ -1425,7 +1440,7 @@ namespace qmapcontrol
             }
 
             // Undo the backbuffer top/left point translation.
-            painter_back_buffer.translate(backbuffer_rect_px.topLeft());
+            painter_back_buffer.translate(backbuffer_rect_px.topLeftPx().rawPoint());
 
             // Inform the main thread that we have a new backbuffer.
             emit updatedBackBuffer(QPixmap::fromImage(image_backbuffer), backbuffer_rect_px, backbuffer_map_focus_px);
@@ -1444,9 +1459,9 @@ namespace qmapcontrol
         if(geometry->getGeometryType() == Geometry::GeometryType::GeometryPoint)
         {
             // Calculate the delta between the current map focus and the new geometry position.
-            const QPointF start_px = projection::get().toPixelPoint(m_map_focus_coord, m_current_zoom);
-            const QPointF dest_px = projection::get().toPixelPoint(static_cast<GeometryPoint*>(geometry)->coordinate(), m_current_zoom);
-            const QPointF delta_px = dest_px - start_px;
+            const PointWorldPx start_px(projection::get().toPointWorldPx(m_map_focus_coord, m_current_zoom));
+            const PointWorldPx dest_px(projection::get().toPointWorldPx(static_cast<GeometryPoint*>(geometry)->coord(), m_current_zoom));
+            const PointPx delta_px(dest_px - start_px);
 
             // Scroll the view
             scrollView(delta_px);
@@ -1463,9 +1478,9 @@ namespace qmapcontrol
         if(m_animated_steps > 0)
         {
             // Calculate the delta between the current map focus and the target animated map focus point.
-            const QPointF start_px = projection::get().toPixelPoint(m_map_focus_coord, m_current_zoom);
-            const QPointF dest_px = projection::get().toPixelPoint(m_animated_map_focus_point, m_current_zoom);
-            const QPointF delta_px = dest_px - start_px;
+            const PointWorldPx start_px(projection::get().toPointWorldPx(m_map_focus_coord, m_current_zoom));
+            const PointWorldPx dest_px(projection::get().toPointWorldPx(m_animated_map_focus_point, m_current_zoom));
+            const PointPx delta_px(dest_px - start_px);
 
             // Scroll to the next point in the step.
             scrollView(delta_px / m_animated_steps);
@@ -1490,13 +1505,13 @@ namespace qmapcontrol
         m_primary_screen_scaled.fill(Qt::transparent);
 
         // Reset the scaled image offset.
-        m_primary_screen_scaled_offset = QPointF(0.0, 0.0);
+        m_primary_screen_scaled_offset = PointPx(0.0, 0.0);
 
         // Request the primary screen to be redrawn.
         redrawPrimaryScreen();
     }
 
-    void QMapControl::updatePrimaryScreen(QPixmap backbuffer_pixmap, QRectF backbuffer_rect_px, QPointF backbuffer_map_focus_px)
+    void QMapControl::updatePrimaryScreen(QPixmap backbuffer_pixmap, RectWorldPx backbuffer_rect_px, PointWorldPx backbuffer_map_focus_px)
     {
         // Backbuffer image is ready, save it to the primary screen.
         m_primary_screen = backbuffer_pixmap;
@@ -1505,7 +1520,7 @@ namespace qmapcontrol
         m_primary_screen_backbuffer_rect_px = backbuffer_rect_px;
 
         // Update the primary screen's map focus point.
-        m_primary_screen_map_focus_point = backbuffer_map_focus_px;
+        m_primary_screen_map_focus_point_px = backbuffer_map_focus_px;
 
         // Schedule a repaint.
         QWidget::update();

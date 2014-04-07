@@ -30,7 +30,7 @@
 
 namespace qmapcontrol
 {
-    GeometryPointImageFixed::GeometryPointImageFixed(const QPointF& top_left_coord, const QPointF& bottom_right_coord, const std::string& filename, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
+    GeometryPointImageFixed::GeometryPointImageFixed(const PointWorldCoord& top_left_coord, const PointWorldCoord& bottom_right_coord, const std::string& filename, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
         : GeometryPointImage(top_left_coord, QPixmap(filename.c_str()), pen, zoom_minimum, zoom_maximum),
           m_bottom_right_coord(bottom_right_coord)
     {
@@ -38,7 +38,7 @@ namespace qmapcontrol
         setAlignmentType(AlignmentType::TopLeft);
     }
 
-    GeometryPointImageFixed::GeometryPointImageFixed(const QPointF& top_left_coord, const QPointF& bottom_right_coord, const QPixmap& pixmap, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
+    GeometryPointImageFixed::GeometryPointImageFixed(const PointWorldCoord& top_left_coord, const PointWorldCoord& bottom_right_coord, const QPixmap& pixmap, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
         : GeometryPointImage(top_left_coord, pixmap, pen, zoom_minimum, zoom_maximum),
           m_bottom_right_coord(bottom_right_coord)
     {
@@ -52,7 +52,7 @@ namespace qmapcontrol
         if(isVisible(controller_zoom))
         {
             // Calculate the image rect pixels.
-            const QRectF image_rect_px(projection::get().toPixelPoint(coordinate(), controller_zoom), projection::get().toPixelPoint(QPointF(m_bottom_right_coord), controller_zoom));
+            const QRectF image_rect_px(projection::get().toPointWorldPx(coord(), controller_zoom).rawPoint(), projection::get().toPointWorldPx(m_bottom_right_coord, controller_zoom).rawPoint());
 
             // Does the image rect intersect with the backbuffer rect?
             if(backbuffer_rect_px.intersects(image_rect_px))

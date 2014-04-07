@@ -31,6 +31,7 @@
 // Local includes.
 #include "qmapcontrol_global.h"
 #include "Geometry.h"
+#include "Point.h"
 
 namespace qmapcontrol
 {
@@ -77,34 +78,34 @@ namespace qmapcontrol
         //! Constructor.
         /*!
          * This constructor creates a point with no image or widget.
-         * @param point_coord The x/y coordinate (longitude/latitude).
+         * @param point_coord The longitude/latitude coordinate (x/y).
          * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPoint(const QPointF& point_coord, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPoint(const PointWorldCoord& point_coord, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Constructor.
         /*!
          * This constructor creates a point with no image or widget.
-         * @param x_coord The x coordinate (longitude).
-         * @param y_coord The y coordinate (latitude).
+         * @param longitude The longitude coordinate (x).
+         * @param latitude The latitude coordinate (y).
          * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPoint(const qreal& x_coord, const qreal& y_coord, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPoint(const qreal& longitude, const qreal& latitude, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Constructor.
         /*!
          * This constructor creates a point which will display the given pixmap.
-         * @param point_coord The x/y coordinate (longitude/latitude).
+         * @param point_coord The longitude/latitude coordinate (x/y).
          * @param pixmap The pixmap to be displayed by this point.
          * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPoint(const QPointF& point_coord, const QPixmap& pixmap, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPoint(const PointWorldCoord& point_coord, const QPixmap& pixmap, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Disable copy constructor.
         ///GeometryPoint(const GeometryPoint&) = delete; @todo re-add once MSVC supports default/delete syntax.
@@ -116,22 +117,22 @@ namespace qmapcontrol
         virtual ~GeometryPoint() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
 
         /*!
-         * Fetches the x-coordinate (longitude).
-         * @return the x-coordinate (longitude).
+         * Fetches the longitude coordinate (x).
+         * @return the longitude coordinate (x).
          */
-        qreal x() const;
+        qreal longitude() const;
 
         /*!
-         * Fetches the y-coordinate (latitude).
-         * @return the y-coordinate (latitude).
+         * Fetches the latitude coordinate (y).
+         * @return the latitude coordinate (y).
          */
-        qreal y() const;
+        qreal latitude() const;
 
         /*!
-         * Fetches the x/y coordinate (longitude/latitude).
-         * @return the x/y coordinate (longitude/latitude).
+         * Fetches the longitude/latitude coordinate (x/y).
+         * @return the longitude/latitude coordinate (x/y).
          */
-        QPointF coordinate() const;
+        PointWorldCoord coord() const;
 
         /*!
          * Set the alignment type to use when drawing the geometry.
@@ -189,10 +190,10 @@ namespace qmapcontrol
 
     public slots:
         /*!
-         * Set the coordinate of the point.
-         * @param point The coordinate to set.
+         * Set the longitude/latitude coordinate (x/y).
+         * @param point The longitude/latitude coordinate (x/y) to set.
          */
-        void setCoordinate(const QPointF& point);
+        void setCoord(const PointWorldCoord& point);
 
         /*!
          * Set the visibility of the geometry.
@@ -237,7 +238,7 @@ namespace qmapcontrol
          * @param offset_px The offset in pixels to remove from the coordinate pixel point.
          * @param controller_zoom The current controller zoom.
          */
-        void moveWidget(const QPointF& offset_px, const int& controller_zoom);
+        void moveWidget(const PointPx& offset_px, const int& controller_zoom);
 
     protected:
         //! Constructor.
@@ -245,13 +246,13 @@ namespace qmapcontrol
          * This constructor creates a point which will display the given widget (Use GeometryPointWidget).
          * @note IMPORTANT: You have to set the QMapControl as parent to the widget before this is constructed.
          * @note IMPORTANT: You have to set the size of the widget before this is constructed.
-         * @param point_coord The x/y coordinate (longitude/latitude).
+         * @param point_coord The longitude/latitude coordinate (x/y).
          * @param widget The widget to be displayed by this point.
          * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPoint(const QPointF& point_coord, QWidget* widget, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPoint(const PointWorldCoord& point_coord, QWidget* widget, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         /*!
          * Updates the pixmap.
@@ -273,16 +274,16 @@ namespace qmapcontrol
         QSizeF calculateGeometrySizePx(const int& controller_zoom) const;
 
         /*!
-         * Calculates the top-left point in pixels after the alignment type has been applied.
-         * @param point_px The point in pixels to align.
+         * Calculates the top-left world point in pixels after the alignment type has been applied.
+         * @param point_px The world point in pixels to align.
          * @param geometry_size_px The geometry object (widget/pixmap) at this zoom level.
-         * @return the top-left point in pixels.
+         * @return the top-left world point in pixels.
          */
-        QPointF calculateTopLeftPoint(const QPointF& point_px, const QSizeF geometry_size_px) const;
+        PointWorldPx calculateTopLeftPoint(const PointWorldPx& point_px, const QSizeF geometry_size_px) const;
 
     private:
         /// The x/y coordinate (longitude/latitude).
-        QPointF m_point_coord;
+        PointWorldCoord m_point_coord;
 
         /// The associated widget to draw.
         QWidget* m_widget;

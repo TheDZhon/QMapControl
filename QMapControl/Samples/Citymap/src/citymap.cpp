@@ -24,7 +24,9 @@
 Citymap::Citymap(QWidget* parent)
     : QMainWindow(parent),
       m_mode_note_adding(false),
-      m_mode_distance_calculating(false)
+      m_mode_distance_calculating(false),
+      m_coord_start(0.0, 0.0),
+      m_coord_end(0.0, 0.0)
 {
     // Create a new QMapControl.
     m_map_control = new QMapControl(QSizeF(400.0, 590.0));
@@ -61,13 +63,13 @@ Citymap::Citymap(QWidget* parent)
     QObject::connect(m_layer_notes.get(), &Layer::geometryClicked, this, &Citymap::editNote);
 
     // Set the map focus and zoom to Mainz.
-    m_map_control->setMapFocusPoint(QPointF(8.26, 50.0));
+    m_map_control->setMapFocusPoint(PointWorldCoord(8.26, 50.0));
     m_map_control->setZoom(13);
 
     // Create a text edit geometry widget (and hide for now).
     m_text_edit = new QTextEdit(m_map_control);
     m_text_edit->setGeometry(0,0,200,100);
-    m_geometry_text_edit = std::make_shared<GeometryPointWidget>(QPointF(0.0, 0.0), m_text_edit);
+    m_geometry_text_edit = std::make_shared<GeometryPointWidget>(PointWorldCoord(0.0, 0.0), m_text_edit);
     m_geometry_text_edit->setAlignmentType(GeometryPoint::AlignmentType::TopLeft);
     m_geometry_text_edit->setVisible(false);
     m_layer_notes->addGeometry(m_geometry_text_edit);
@@ -80,19 +82,19 @@ void Citymap::addSights()
     m_map_control->addLayer(m_layer_sights);
 
     // Create the "Mainzer Dom" sight and add it to the layer.
-    std::shared_ptr<GeometryPoint> dom(std::make_shared<GeometryPointImage>(QPointF(8.274167, 49.998889), ":/resources/images/180-dom.jpg"));
+    std::shared_ptr<GeometryPoint> dom(std::make_shared<GeometryPointImage>(PointWorldCoord(8.274167, 49.998889), ":/resources/images/180-dom.jpg"));
     dom->setMetadata("name", "Mainzer Dom");
     dom->setBaseZoom(17);
     m_layer_sights->addGeometry(dom);
 
     // Create the "St. Stephan" sight and add it to the layer.
-    std::shared_ptr<GeometryPoint> stephan(std::make_shared<GeometryPointImage>(QPointF(8.268611, 49.995556), ":/resources/images/180-stephan.jpg"));
+    std::shared_ptr<GeometryPoint> stephan(std::make_shared<GeometryPointImage>(PointWorldCoord(8.268611, 49.995556), ":/resources/images/180-stephan.jpg"));
     stephan->setMetadata("name", "St. Stephan");
     stephan->setBaseZoom(17);
     m_layer_sights->addGeometry(stephan);
 
     // Create the "St. Quintin" sight and add it to the layer.
-    std::shared_ptr<GeometryPoint> quitin(std::make_shared<GeometryPointImage>(QPointF(8.272222, 50.000833), ":/resources/images/180-quintin.jpg"));
+    std::shared_ptr<GeometryPoint> quitin(std::make_shared<GeometryPointImage>(PointWorldCoord(8.272222, 50.000833), ":/resources/images/180-quintin.jpg"));
     quitin->setMetadata("name", "St. Quintin");
     quitin->setBaseZoom(17);
     m_layer_sights->addGeometry(quitin);
@@ -108,17 +110,17 @@ void Citymap::addPubs()
     m_map_control->addLayer(m_layer_pubs);
 
     // Create the "Bagatelle" pub and add it to the layer.
-    std::shared_ptr<GeometryPoint> bagatelle(std::make_shared<GeometryPointImage>(QPointF(8.2606, 50.0052), ":/resources/images/pub.png"));
+    std::shared_ptr<GeometryPoint> bagatelle(std::make_shared<GeometryPointImage>(PointWorldCoord(8.2606, 50.0052), ":/resources/images/pub.png"));
     bagatelle->setMetadata("name", "Bagatelle");
     m_layer_pubs->addGeometry(bagatelle);
 
     // Create the "Nirgendwo" pub and add it to the layer.
-    std::shared_ptr<GeometryPoint> nirgendwo(std::make_shared<GeometryPointImage>(QPointF(8.2595, 50.0048), ":/resources/images/pub.png"));
+    std::shared_ptr<GeometryPoint> nirgendwo(std::make_shared<GeometryPointImage>(PointWorldCoord(8.2595, 50.0048), ":/resources/images/pub.png"));
     nirgendwo->setMetadata("name", "Nirgendwo");
     m_layer_pubs->addGeometry(nirgendwo);
 
     // Create the "Krokodil" pub and add it to the layer.
-    std::shared_ptr<GeometryPoint> krokodil(std::make_shared<GeometryPointImage>(QPointF(8.2594, 50.0106), ":/resources/images/pub.png"));
+    std::shared_ptr<GeometryPoint> krokodil(std::make_shared<GeometryPointImage>(PointWorldCoord(8.2594, 50.0106), ":/resources/images/pub.png"));
     krokodil->setMetadata("name", "Krokodil");
     m_layer_pubs->addGeometry(krokodil);
 
@@ -133,13 +135,13 @@ void Citymap::addMuseums()
     m_map_control->addLayer(m_layer_museum);
 
     // Create the "rgzm" pub and add it to the layer.
-    std::shared_ptr<GeometryPoint> rgzm(std::make_shared<GeometryPointImage>(QPointF(8.269722, 50.006111), ":/resources/images/180-rgzm.jpg"));
+    std::shared_ptr<GeometryPoint> rgzm(std::make_shared<GeometryPointImage>(PointWorldCoord(8.269722, 50.006111), ":/resources/images/180-rgzm.jpg"));
     rgzm->setMetadata("name", "rgzm");
     rgzm->setBaseZoom(17);
     m_layer_museum->addGeometry(rgzm);
 
     // Create the "lm" pub and add it to the layer.
-    std::shared_ptr<GeometryPoint> lm(std::make_shared<GeometryPointImage>(QPointF(8.26778, 50.00385), ":/resources/images/180-lm.jpg"));
+    std::shared_ptr<GeometryPoint> lm(std::make_shared<GeometryPointImage>(PointWorldCoord(8.26778, 50.00385), ":/resources/images/180-lm.jpg"));
     lm->setMetadata("name", "lm");
     lm->setBaseZoom(17);
     m_layer_museum->addGeometry(lm);
@@ -375,7 +377,7 @@ void Citymap::addNote()
     QObject::connect(m_map_control, &QMapControl::mouseEventPressCoordinate, this, &Citymap::writeNote);
 }
 
-void Citymap::writeNote(QMouseEvent* /*mouse_event*/, QPointF press_coordinate)
+void Citymap::writeNote(QMouseEvent* /*mouse_event*/, PointWorldCoord press_coordinate)
 {
     // Create a point to represent the note.
     std::shared_ptr<GeometryPoint> point(std::make_shared<GeometryPointImage>(press_coordinate, ":/resources/images/note.png"));
@@ -392,7 +394,7 @@ void Citymap::writeNote(QMouseEvent* /*mouse_event*/, QPointF press_coordinate)
     m_text_edit->clear();
 
     // Show the text edit geometry and move to the press coordinates.
-    m_geometry_text_edit->setCoordinate(press_coordinate);
+    m_geometry_text_edit->setCoord(press_coordinate);
     m_geometry_text_edit->setVisible(true);
 
     // Disconnect the signal/slot to create a note.
@@ -402,7 +404,7 @@ void Citymap::writeNote(QMouseEvent* /*mouse_event*/, QPointF press_coordinate)
     QObject::connect(m_map_control, &QMapControl::mouseEventDoubleClickCoordinate, this, &Citymap::hideNote);
 }
 
-void Citymap::hideNote(QMouseEvent* mouse_event, QPointF /*press_coordinate*/)
+void Citymap::hideNote(QMouseEvent* mouse_event, PointWorldCoord /*press_coordinate*/)
 {
     // Check we are adding a note and the user has double clicked.
     if(m_mode_note_adding && mouse_event->type() == QEvent::MouseButtonDblClick)
@@ -437,7 +439,7 @@ void Citymap::editNote(Geometry* geometry)
     m_text_edit->setPlainText(m_selected_geometry->getMetadata("notes").toString());
 
     // Show the text edit geometry and move to the geometry coordinates.
-    m_geometry_text_edit->setCoordinate(static_cast<GeometryPoint*>(geometry)->coordinate());
+    m_geometry_text_edit->setCoord(static_cast<GeometryPoint*>(geometry)->coord());
     m_geometry_text_edit->setVisible(true);
 
     // Connect signal/slot to capture the next mouse double click to hide the note.
@@ -453,10 +455,10 @@ void Citymap::calculateDistance()
     QObject::connect(m_map_control, &QMapControl::mouseEventPressCoordinate, this, &Citymap::calculateDistanceClick);
 }
 
-void Citymap::calculateDistanceClick(QMouseEvent* evnt, QPointF press_coordinate)
+void Citymap::calculateDistanceClick(QMouseEvent* evnt, PointWorldCoord press_coordinate)
 {
     // Have we captured the starting point?
-    if(m_coord_start.isNull() && evnt->type() == QEvent::MouseButtonPress)
+    if(m_coord_start.rawPoint().isNull() && evnt->type() == QEvent::MouseButtonPress)
     {
         // Capture the starting point.
         m_coord_start = press_coordinate;
@@ -469,7 +471,7 @@ void Citymap::calculateDistanceClick(QMouseEvent* evnt, QPointF press_coordinate
         m_layer_notes->addGeometry(point_flag);
     }
     // Else have we captured the finishing point?
-    else if(m_coord_end.isNull() && evnt->type() == QEvent::MouseButtonPress)
+    else if(m_coord_end.rawPoint().isNull() && evnt->type() == QEvent::MouseButtonPress)
     {
         // Capture the finishing point.
         m_coord_end = press_coordinate;
@@ -499,8 +501,8 @@ void Citymap::calculateDistanceClick(QMouseEvent* evnt, QPointF press_coordinate
         m_layer_notes->addGeometry(std::make_shared<GeometryLineString>(points));
 
         // Reset the points.
-        m_coord_start = QPointF();
-        m_coord_end = QPointF();
+        m_coord_start = PointWorldCoord(0.0, 0.0);
+        m_coord_end = PointWorldCoord(0.0, 0.0);
 
         // Set that we have finished measuring.
         m_mode_distance_calculating = false;

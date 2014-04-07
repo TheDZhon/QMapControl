@@ -36,6 +36,7 @@ HEADERS +=                                      \
     MapAdapterWMS.h                             \
     MapAdapterYahoo.h                           \
     NetworkManager.h                            \
+    Point.h                                     \
     Projection.h                                \
     ProjectionEquirectangular.h                 \
     ProjectionSphericalMercator.h               \

@@ -46,26 +46,26 @@ namespace qmapcontrol
         //! Constructor.
         /*!
          * This constructor creates a point which will display a pixmap from the image file to specifed fixed points.
-         * @param top_left_coord The top-left x/y coordinate (longitude/latitude).
-         * @param bottom_right_coord The bottom-right x/y coordinate (longitude/latitude).
+         * @param top_left_coord The top-left longitude/latitude coordinate (x/y).
+         * @param bottom_right_coord The bottom-right longitude/latitude coordinate (x/y).
          * @param filename The image file to draw.
          * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPointImageFixed(const QPointF& top_left_coord, const QPointF& bottom_right_coord, const std::string& filename, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPointImageFixed(const PointWorldCoord& top_left_coord, const PointWorldCoord& bottom_right_coord, const std::string& filename, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Constructor.
         /*!
          * This constructor creates a point which will display a pixmap to specifed fixed points.
-         * @param top_left_coord The top-left x/y coordinate (longitude/latitude).
-         * @param bottom_right_coord The bottom-right x/y coordinate (longitude/latitude).
+         * @param top_left_coord The top-left longitude/latitude coordinate (x/y).
+         * @param bottom_right_coord The bottom-right longitude/latitude coordinate (x/y).
          * @param pixmap The pixmap to draw.
          * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPointImageFixed(const QPointF& point_top_left, const QPointF& bottom_right_coord, const QPixmap& pixmap, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPointImageFixed(const PointWorldCoord& point_top_left, const PointWorldCoord& bottom_right_coord, const QPixmap& pixmap, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Disable copy constructor.
         ///GeometryPointImageFixed(const GeometryPointImageFixed&) = delete; @todo re-add once MSVC supports default/delete syntax.
@@ -94,6 +94,6 @@ namespace qmapcontrol
 
     private:
         /// The bottom-right x/y coordinate (longitude/latitude).
-        QPointF m_bottom_right_coord;
+        PointWorldCoord m_bottom_right_coord;
     };
 }

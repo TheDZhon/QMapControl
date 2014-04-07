@@ -77,7 +77,7 @@ namespace qmapcontrol
         for(const auto& point : m_points)
         {
             // Add the point to be drawn.
-            polygon.append(point->coordinate());
+            polygon.append(point->coord().rawPoint());
         }
 
         // Return the bounding box.
@@ -135,7 +135,7 @@ namespace qmapcontrol
             for(const auto& point : m_points)
             {
                 // Add the point to be drawn.
-                polygon.append(projection::get().toPixelPoint(point->coordinate(), controller_zoom));
+                polygon.append(projection::get().toPointWorldPx(point->coord(), controller_zoom).rawPoint());
             }
 
             // Does the polygon intersect with the backbuffer rect?

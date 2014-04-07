@@ -27,8 +27,6 @@
 
 // Qt includes.
 #include <QtCore/QObject>
-#include <QtCore/QPoint>
-#include <QtCore/QPointF>
 #include <QtCore/QUrl>
 
 // STL includes.
@@ -42,9 +40,6 @@ namespace qmapcontrol
 {
     //! Used to fit map servers into QMapControl.
     /*!
-     * MapAdapters are needed to convert between world- and display coordinates.
-     * This calculations depend on the used map projection.
-     *
      * There are two ready-made MapAdapters:
      *  - MapAdapterTile, which is ready to use for OpenStreetMap or Google (Mercator projection).
      *  - MapAdapterWMS, which could be used for the most WMS-Server (some servers show errors, because of image ratio).

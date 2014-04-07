@@ -48,6 +48,7 @@
 #include "qmapcontrol_global.h"
 #include "Geometry.h"
 #include "Layer.h"
+#include "Point.h"
 #include "QProgressIndicator.h"
 
 //! QMapControl namespace
@@ -250,7 +251,7 @@ namespace qmapcontrol
          * @param points_coord The coordinates to check.
          * @return Whether all the coordinates are visible in the viewport.
          */
-        bool viewportContainsAll(const std::vector<QPointF>& points_coord) const;
+        bool viewportContainsAll(const std::vector<PointWorldCoord>& points_coord) const;
 
         /*!
          * Reset limited viewport rect (ie: disable it).
@@ -269,13 +270,13 @@ namespace qmapcontrol
          * Fetches the map focus point in world coordinates (location on map in relation to the center of the screen).
          * @return The map focus point in world coordinates.
          */
-        QPointF mapFocusPointCoord() const;
+        PointWorldCoord mapFocusPointCoord() const;
 
         /*!
-         * Set the map focus point to the given coordinate.
+         * Set the map focus point to the given world coordinate.
          * @param point_coord The coordinate which the view´s middle should be set to
          */
-        void setMapFocusPoint(const QPointF& point_coord);
+        void setMapFocusPoint(const PointWorldCoord& point_coord);
 
         /*!
          * Sets the map focus point, based on the mean average of all the coordinates.
@@ -283,7 +284,7 @@ namespace qmapcontrol
          * @param points_coord The coorinates to based the map focus point on.
          * @param auto_zoom Whether to automatically zoom to the best level.
          */
-        void setMapFocusPoint(const std::vector<QPointF>& points_coord, const bool& auto_zoom = false);
+        void setMapFocusPoint(const std::vector<PointWorldCoord>& points_coord, const bool& auto_zoom = false);
 
         /*!
          * Smoothly moves the center of the view to the given coordinate.
@@ -291,7 +292,7 @@ namespace qmapcontrol
          * @param steps The number of steps to use in the animation.
          * @param step_interval The number of millseconds to wait between each step.
          */
-        void setMapFocusPointAnimated(const QPointF& coordinate, const int& steps = 25, const std::chrono::milliseconds& step_interval = std::chrono::milliseconds(50));
+        void setMapFocusPointAnimated(const PointWorldCoord& coordinate, const int& steps = 25, const std::chrono::milliseconds& step_interval = std::chrono::milliseconds(50));
 
         /*!
          * Scrol the view left by required pixels.
@@ -451,7 +452,7 @@ namespace qmapcontrol
          * @param click_point_px The mouse click point in pixels to convert.
          * @return the map point in pixels.
          */
-        QPointF toPointPx(const QPointF& click_point_px) const;
+        PointWorldPx toPointWorldPx(const PointViewportPx& click_point_px) const;
 
         /*!
          * Converts a mouse click point in pixels to map point in pixels.
@@ -459,14 +460,14 @@ namespace qmapcontrol
          * @param map_focus_point_px The map focus point in pixels to use.
          * @return the map point in pixels.
          */
-        QPointF toPointPx(const QPointF& click_point_px, const QPointF& map_focus_point_px) const;
+        PointWorldPx toPointWorldPx(const PointViewportPx& click_point_px, const PointWorldPx& map_focus_point_px) const;
 
         /*!
          * Converts a mouse click point in pixels to map point in coordinates (uses the current map focus point).
          * @param click_point_px The mouse click point in pixels to convert.
          * @return the map point in coordinates.
          */
-        QPointF toPointCoord(const QPointF& click_point_px) const;
+        PointWorldCoord toPointWorldCoord(const PointViewportPx& click_point_px) const;
 
         /*!
          * Converts a mouse click point in pixels to map point in coordinates.
@@ -474,26 +475,26 @@ namespace qmapcontrol
          * @param map_focus_point_px The map focus point in pixels to use.
          * @return the map point in coordinates.
          */
-        QPointF toPointCoord(const QPointF& click_point_px, const QPointF& map_focus_point_px) const;
+        PointWorldCoord toPointWorldCoord(const PointViewportPx& click_point_px, const PointWorldPx& map_focus_point_px) const;
 
         /*!
          * Fetches the map focus point in pixels (location on map in relation to the center of the screen).
          * @return the map focus point in pixels.
          */
-        QPointF mapFocusPointPx() const;
+        PointWorldPx mapFocusPointWorldPx() const;
 
         /*!
          * Calculates the map focus point from a list of coordinates, based on the x and y mean values.
          * @param points_coord The coorinates to based the map focus point on.
          * @return the map focus point, based on the x and y mean values.
          */
-        QPointF calculateMapFocusPoint(const std::vector<QPointF>& points_coord);
+        PointWorldCoord calculateMapFocusPoint(const std::vector<PointWorldCoord>& points_coord);
 
         /*!
          * Scrolls the view by the given value in pixels and in display coordinates.
          * @param delta_px The distance which the view should be scrolled in pixels.
          */
-        void scrollView(const QPointF& delta_px);
+        void scrollView(const PointPx& delta_px);
 
         // Zoom management.
         /*!
@@ -562,7 +563,7 @@ namespace qmapcontrol
          * @param backbuffer_rect_px The updated backbuffer rect in pixels.
          * @param backbuffer_map_focus_px The updated backbuffer map foucs point in pixels.
          */
-        void updatePrimaryScreen(QPixmap backbuffer_pixmap, QRectF backbuffer_rect_px, QPointF backbuffer_map_focus_px);
+        void updatePrimaryScreen(QPixmap backbuffer_pixmap, RectWorldPx backbuffer_rect_px, PointWorldPx backbuffer_map_focus_px);
 
     signals:
         // Geometry management.
@@ -584,7 +585,7 @@ namespace qmapcontrol
          * @param mouse_event The QMouseEvent that occured.
          * @param press_coordinate The corresponding world coordinate of the mouse press.
          */
-        void mouseEventPressCoordinate(QMouseEvent* mouse_event, QPointF press_coordinate);
+        void mouseEventPressCoordinate(QMouseEvent* mouse_event, PointWorldCoord press_coordinate);
 
         /*!
          * Signal emitted on MouseReleaseEvents with the additional map coordinates of the mouse press/release.
@@ -592,7 +593,7 @@ namespace qmapcontrol
          * @param press_coordinate The corresponding world coordinate of the mouse press.
          * @param release_coordinate The corresponding world coordinate of the mouse release.
          */
-        void mouseEventReleaseCoordinate(QMouseEvent* mouse_event, QPointF press_coordinate, QPointF release_coordinate);
+        void mouseEventReleaseCoordinate(QMouseEvent* mouse_event, PointWorldCoord press_coordinate, PointWorldCoord release_coordinate);
 
         /*!
          * Signal emitted on MouseDoubleClickEvents with the additional map coordinates of the mouse press/double press.
@@ -600,7 +601,7 @@ namespace qmapcontrol
          * @param press_coordinate The corresponding world coordinate of the mouse press.
          * @param double_press_coordinate The corresponding world coordinate of the mouse double press.
          */
-        void mouseEventDoubleClickCoordinate(QMouseEvent* mouse_event, QPointF press_coordinate, QPointF double_press_coordinate);
+        void mouseEventDoubleClickCoordinate(QMouseEvent* mouse_event, PointWorldCoord press_coordinate, PointWorldCoord double_press_coordinate);
 
         /*!
          * Signal emitted on MouseMoveEvents with the additional map coordinates of the mouse press/current.
@@ -608,7 +609,7 @@ namespace qmapcontrol
          * @param press_coordinate The corresponding world coordinate of the mouse press.
          * @param current_coordinate The corresponding world coordinate of the current mouse.
          */
-        void mouseEventMoveCoordinate(QMouseEvent* mouse_event, QPointF press_coordinate, QPointF current_coordinate);
+        void mouseEventMoveCoordinate(QMouseEvent* mouse_event, PointWorldCoord press_coordinate, PointWorldCoord current_coordinate);
 
         // Drawing management.
         /*!
@@ -617,7 +618,7 @@ namespace qmapcontrol
          * @param backbuffer_rect_px The updated backbuffer rect in pixels.
          * @param backbuffer_map_focus_px The updated backbuffer map foucs point in pixels.
          */
-        void updatedBackBuffer(QPixmap backbuffer_pixmap, QRectF backbuffer_rect_px, QPointF backbuffer_map_focus_px);
+        void updatedBackBuffer(QPixmap backbuffer_pixmap, RectWorldPx backbuffer_rect_px, PointWorldPx backbuffer_map_focus_px);
 
     private:
         //! Disable copy constructor.
@@ -647,20 +648,20 @@ namespace qmapcontrol
         /// The viewport (visible-part of each layer) size in pixels.
         QSizeF m_viewport_size_px;
 
-        /// The viewport (visible-part of each layer) center point in pixels.
-        QPointF m_viewport_center_px;
+        /// The viewport (visible-part of each layer) top-left offset for the center point in pixels.
+        PointViewportPx m_viewport_center_px;
 
         /// The viewing bounding box coord (set to QRectF(0.0, 0.0, 0.0, 0.0) to disable.
         QRectF m_limited_viewport_rect_coord;
 
         /// The current map focus point in coordinates.
-        QPointF m_map_focus_coord;
+        PointWorldCoord m_map_focus_coord;
 
         /// Mutex to protect the animation loop.
         std::mutex m_animated_mutex;
 
         /// Animation map focus point target.
-        QPointF m_animated_map_focus_point;
+        PointWorldCoord m_animated_map_focus_point;
 
         /// Number of animation steps remaining.
         int m_animated_steps;
@@ -696,19 +697,19 @@ namespace qmapcontrol
         bool m_mouse_right_origin_center;
 
         /// The mouse position when a mouse button was initially pressed in pixels.
-        QPointF m_mouse_position_pressed_px;
+        PointViewportPx m_mouse_position_pressed_px;
 
         /// The current mouse position in pixels (set after every mouse event).
-        QPointF m_mouse_position_current_px;
+        PointViewportPx m_mouse_position_current_px;
 
         /// Primary screen pixmap (always 2 x viewport size to allow for panning backbuffer).
         QPixmap m_primary_screen;
 
         /// The map focus point when the primary screen was created.
-        QPointF m_primary_screen_map_focus_point;
+        PointWorldPx m_primary_screen_map_focus_point_px;
 
         /// Primary screen backbuffer rect in pixels.
-        QRectF m_primary_screen_backbuffer_rect_px;
+        RectWorldPx m_primary_screen_backbuffer_rect_px;
 
         /// Whether the primary screen scaled is drawn in the background.
         bool m_primary_screen_scaled_enabled;
@@ -717,7 +718,7 @@ namespace qmapcontrol
         QPixmap m_primary_screen_scaled;
 
         /// Primary screen scaled pixmap offset (wheel events only).
-        QPointF m_primary_screen_scaled_offset;
+        PointPx m_primary_screen_scaled_offset;
 
         /// Whether to align the zoom controls to the left (or right).
         bool m_zoom_control_align_left;
