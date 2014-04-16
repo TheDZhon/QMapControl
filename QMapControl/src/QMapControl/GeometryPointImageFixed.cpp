@@ -30,16 +30,16 @@
 
 namespace qmapcontrol
 {
-    GeometryPointImageFixed::GeometryPointImageFixed(const PointWorldCoord& top_left_coord, const PointWorldCoord& bottom_right_coord, const std::string& filename, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
-        : GeometryPointImage(top_left_coord, QPixmap(filename.c_str()), pen, zoom_minimum, zoom_maximum),
+    GeometryPointImageFixed::GeometryPointImageFixed(const PointWorldCoord& top_left_coord, const PointWorldCoord& bottom_right_coord, const std::string& filename, const int& zoom_minimum, const int& zoom_maximum)
+        : GeometryPointImage(top_left_coord, QPixmap(filename.c_str()), zoom_minimum, zoom_maximum),
           m_bottom_right_coord(bottom_right_coord)
     {
         // Fixed image requires the alignment type set to the top-left.
         setAlignmentType(AlignmentType::TopLeft);
     }
 
-    GeometryPointImageFixed::GeometryPointImageFixed(const PointWorldCoord& top_left_coord, const PointWorldCoord& bottom_right_coord, const QPixmap& pixmap, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
-        : GeometryPointImage(top_left_coord, pixmap, pen, zoom_minimum, zoom_maximum),
+    GeometryPointImageFixed::GeometryPointImageFixed(const PointWorldCoord& top_left_coord, const PointWorldCoord& bottom_right_coord, const QPixmap& pixmap, const int& zoom_minimum, const int& zoom_maximum)
+        : GeometryPointImage(top_left_coord, pixmap, zoom_minimum, zoom_maximum),
           m_bottom_right_coord(bottom_right_coord)
     {
         // Fixed image requires the alignment type set to the top-left.

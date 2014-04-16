@@ -148,7 +148,7 @@ namespace qmapcontrol
         return return_geometries;
     }
 
-    const std::set< std::shared_ptr<GeometryPointWidget> > Layer::getGeometryWidgets() const
+    const std::set< std::shared_ptr<GeometryWidget> > Layer::getGeometryWidgets() const
     {
         // Gain a read lock to protect the geometry widgets container.
         QReadLocker locker(&m_geometry_widgets_mutex);
@@ -166,7 +166,7 @@ namespace qmapcontrol
         if(geometry != nullptr)
         {
             // Is it a geometry widget?
-            if(geometry->getGeometryType() == Geometry::GeometryType::GeometryPointWidget)
+            if(geometry->getGeometryType() == Geometry::GeometryType::GeometryWidget)
             {
                 // Fetch a copy of the current geometry widgets.
                 const auto geometry_widgets = getGeometryWidgets();
@@ -215,18 +215,19 @@ namespace qmapcontrol
                 }
 
                 // Is it a GeometryPointWidget.
-                case Geometry::GeometryType::GeometryPointWidget:
+                case Geometry::GeometryType::GeometryWidget:
                 {
                     // Gain a write lock to protect the geometry widget container.
                     QWriteLocker locker(&m_geometry_widgets_mutex);
 
                     // Add the geometry widget.
-                    m_geometry_widgets.insert(std::static_pointer_cast<GeometryPointWidget>(geometry));
+                    m_geometry_widgets.insert(std::static_pointer_cast<GeometryWidget>(geometry));
 
                     // Finished.
                     break;
                 }
 
+                /// @todo move linestring and polygon into different container type.
                 // Is it a GeometryLineString.
                 case Geometry::GeometryType::GeometryLineString:
                 {
@@ -237,7 +238,7 @@ namespace qmapcontrol
                     for(const auto point : std::static_pointer_cast<GeometryLineString>(geometry)->points())
                     {
                         // Add the geometry.
-                        m_geometries.insert(point->coord().rawPoint(), geometry);
+                        m_geometries.insert(point.rawPoint(), geometry);
                     }
 
                     // Finished.
@@ -254,7 +255,7 @@ namespace qmapcontrol
                     for(const auto point : std::static_pointer_cast<GeometryPolygon>(geometry)->points())
                     {
                         // Add the geometry.
-                        m_geometries.insert(point->coord().rawPoint(), geometry);
+                        m_geometries.insert(point.rawPoint(), geometry);
                     }
 
                     // Finished.
@@ -301,7 +302,7 @@ namespace qmapcontrol
                 }
 
                 // Is it a GeometryPointWidget.
-                case Geometry::GeometryType::GeometryPointWidget:
+                case Geometry::GeometryType::GeometryWidget:
                 {
                     // Gain a write lock to protect the geometry widgets container.
                     QWriteLocker locker(&m_geometry_widgets_mutex);
@@ -310,7 +311,7 @@ namespace qmapcontrol
                     QObject::disconnect(geometry.get(), 0, this, 0);
 
                     // Find the object in the container.
-                    const auto itr_find = m_geometry_widgets.find(std::static_pointer_cast<GeometryPointWidget>(geometry));
+                    const auto itr_find = m_geometry_widgets.find(std::static_pointer_cast<GeometryWidget>(geometry));
                     if(itr_find != m_geometry_widgets.end())
                     {
                         // Remove the geometry from the list.
@@ -321,6 +322,7 @@ namespace qmapcontrol
                     break;
                 }
 
+                /// @todo move linestring and polygon into different container type.
                 // Is it a GeometryLineString.
                 case Geometry::GeometryType::GeometryLineString:
                 {
@@ -334,7 +336,7 @@ namespace qmapcontrol
                     for(const auto point : std::static_pointer_cast<GeometryLineString>(geometry)->points())
                     {
                         // Remove the geometry.
-                        m_geometries.erase(point->coord().rawPoint(), geometry);
+                        m_geometries.erase(point.rawPoint(), geometry);
                     }
 
                     // Finished.
@@ -354,7 +356,7 @@ namespace qmapcontrol
                     for(const auto point : std::static_pointer_cast<GeometryPolygon>(geometry)->points())
                     {
                         // Remove the geometry.
-                        m_geometries.erase(point->coord().rawPoint(), geometry);
+                        m_geometries.erase(point.rawPoint(), geometry);
                     }
 
                     // Finished.

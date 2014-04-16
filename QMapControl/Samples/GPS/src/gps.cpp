@@ -37,7 +37,7 @@ GPS::GPS(QWidget* parent)
     setCentralWidget(m_map_control);
 }
 
-void GPS::updatePosition(float /*time*/, QPointF point)
+void GPS::updatePosition(float /*time*/, PointWorldCoord point)
 {
     // Update the map focus point to the GPS location.
     m_map_control->setMapFocusPoint(point);

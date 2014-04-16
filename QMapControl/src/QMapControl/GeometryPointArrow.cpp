@@ -28,8 +28,8 @@
 
 namespace qmapcontrol
 {
-    GeometryPointArrow::GeometryPointArrow(const PointWorldCoord& point_coord, const qreal& heading, const int& size_px, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
-        : GeometryPoint(point_coord, QPixmap(size_px, size_px), pen, zoom_minimum, zoom_maximum),
+    GeometryPointArrow::GeometryPointArrow(const PointWorldCoord& point_coord, const qreal& heading, const int& size_px, const int& zoom_minimum, const int& zoom_maximum)
+        : GeometryPoint(point_coord, QPixmap(size_px, size_px), zoom_minimum, zoom_maximum),
           m_heading(heading)
     {
         // Update the pixmap.

@@ -30,8 +30,8 @@
 
 // Local includes.
 #include "qmapcontrol_global.h"
-#include "GeometryCurve.h"
-#include "GeometryPoint.h"
+#include "Geometry.h"
+#include "Point.h"
 
 namespace qmapcontrol
 {
@@ -42,7 +42,7 @@ namespace qmapcontrol
      * @author Kai Winter <kaiwinter@gmx.de>
      * @author Chris Stylianou <chris5287@gmail.com>
      */
-    class QMAPCONTROL_EXPORT GeometryLineString : public GeometryCurve
+    class QMAPCONTROL_EXPORT GeometryLineString : public Geometry
     {
         Q_OBJECT
     public:
@@ -50,11 +50,10 @@ namespace qmapcontrol
         /*!
          * The constructor of a LineString takes a list of points to form a line.
          * @param points The list of Geometry Points.
-         * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryLineString(const std::vector<std::shared_ptr<GeometryPoint>>& points, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryLineString(const std::vector<PointWorldCoord>& points, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Disable copy constructor.
         ///GeometryLineString(const GeometryLineString&) = delete; @todo re-add once MSVC supports default/delete syntax.
@@ -69,26 +68,19 @@ namespace qmapcontrol
          * Fetches the list of points that form a line.
          * @return the list of points that form a line.
          */
-        std::vector<std::shared_ptr<GeometryPoint>> points() const;
+        std::vector<PointWorldCoord> points() const;
 
         /*!
          * Add a point to the end of the line.
          * @param point The point to add to the end of the line.
          */
-        void addPoint(const std::shared_ptr<GeometryPoint>& point);
+        void addPoint(const PointWorldCoord& point);
 
         /*!
          * Sets the points to use for the LineString.
          * @param points The points to use for the LineString.
          */
-        void setPoints(const std::vector<std::shared_ptr<GeometryPoint>>& points);
-
-        /*!
-         * When a mouse press event touches points within a LineString,
-         * this function contains the points that were actually touched.
-         * @return the points that were touched.
-         */
-        std::vector<std::shared_ptr<GeometryPoint>> touchedPoints() const;
+        void setPoints(const std::vector<PointWorldCoord>& points);
 
     public:
         /*!
@@ -123,9 +115,6 @@ namespace qmapcontrol
 
     private:
         /// The points that the linestring is made up of.
-        std::vector<std::shared_ptr<GeometryPoint>>	m_points;
-
-        /// The points that were touched on the last mouse press event.
-        std::vector<std::shared_ptr<GeometryPoint>> m_touched_points;
+        std::vector<PointWorldCoord> m_points;
     };
 }

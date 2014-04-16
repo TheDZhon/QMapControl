@@ -17,15 +17,14 @@ DEFINES += QMAPCONTROL_LIBRARY
 HEADERS +=                                      \
     qmapcontrol_global.h                        \
     Geometry.h                                  \
-    GeometryCurve.h                             \
     GeometryLineString.h                        \
     GeometryPoint.h                             \
     GeometryPointArrow.h                        \
     GeometryPointCircle.h                       \
     GeometryPointImage.h                        \
     GeometryPointImageFixed.h                   \
-    GeometryPointWidget.h                       \
     GeometryPolygon.h                           \
+    GeometryWidget.h                            \
     GPS_Position.h                              \
     ImageManager.h                              \
     Layer.h                                     \
@@ -48,15 +47,14 @@ HEADERS +=                                      \
 # Add source files.
 SOURCES +=                                      \
     Geometry.cpp                                \
-    GeometryCurve.cpp                           \
     GeometryLineString.cpp                      \
     GeometryPoint.cpp                           \
     GeometryPointArrow.cpp                      \
     GeometryPointCircle.cpp                     \
     GeometryPointImage.cpp                      \
     GeometryPointImageFixed.cpp                 \
-    GeometryPointWidget.cpp                     \
     GeometryPolygon.cpp                         \
+    GeometryWidget.cpp                          \
     GPS_Position.cpp                            \
     ImageManager.cpp                            \
     Layer.cpp                                   \

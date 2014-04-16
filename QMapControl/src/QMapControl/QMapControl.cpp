@@ -1093,18 +1093,18 @@ namespace qmapcontrol
     PointWorldCoord QMapControl::calculateMapFocusPoint(const std::vector<PointWorldCoord>& points_coord)
     {
         // Sum totals.
-        double sum_x = 0.0;
-        double sum_y = 0.0;
+        double sum_longitudes = 0.0;
+        double sum_latitudes = 0.0;
 
-        // Loop through the coordiantes to sum the x and y's.
+        // Loop through the coordiantes to sum the longitude and latitude's.
         for(const auto& coordinate : points_coord)
         {
-            sum_x += coordinate.x();
-            sum_y += coordinate.y();
+            sum_longitudes += coordinate.longitude();
+            sum_latitudes += coordinate.latitude();
         }
 
-        // Return the calculated map focus point = mean of x and y.
-        return PointWorldCoord(sum_x / points_coord.size(), sum_y / points_coord.size());
+        // Return the calculated map focus point = mean of longitude and latitude.
+        return PointWorldCoord(sum_longitudes / points_coord.size(), sum_latitudes / points_coord.size());
     }
 
     void QMapControl::scrollView(const PointPx& delta_px)

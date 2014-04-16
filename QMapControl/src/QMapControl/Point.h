@@ -43,10 +43,10 @@ namespace qmapcontrol
     public:
         PointCoord(const qreal& longitude, const qreal& latitude) : m_raw_point(longitude, latitude) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
         inline QPointF rawPoint() const { return m_raw_point; }
-        inline qreal x() const { return m_raw_point.x(); }
-        inline qreal y() const { return m_raw_point.y(); }
-        inline void setX(const qreal& x) { m_raw_point.setX(x); }
-        inline void setY(const qreal& y) { m_raw_point.setY(y); }
+        inline qreal longitude() const { return m_raw_point.x(); }
+        inline qreal latitude() const { return m_raw_point.y(); }
+        inline void setLongitude(const qreal& longitude) { m_raw_point.setX(longitude); }
+        inline void setLatitude(const qreal& latitude) { m_raw_point.setY(latitude); }
 
         inline bool operator==(const PointCoord& p) { return m_raw_point == p.rawPoint(); }
         inline bool operator!=(const PointCoord& p)  { return m_raw_point != p.rawPoint(); }

@@ -42,7 +42,7 @@ public slots:
      * @param time The GPS time.
      * @param point The GPS position.
      */
-    void updatePosition(float time, QPointF point);
+    void updatePosition(float time, PointWorldCoord point);
 
 private:
     /// The main map control.

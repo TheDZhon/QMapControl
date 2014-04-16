@@ -42,7 +42,7 @@
 #include "qmapcontrol_global.h"
 #include "MapAdapter.h"
 #include "Geometry.h"
-#include "GeometryPointWidget.h"
+#include "GeometryWidget.h"
 #include "QuadTreeContainer.h"
 
 namespace qmapcontrol
@@ -142,7 +142,7 @@ namespace qmapcontrol
          * Returns the Geometry QWidgets from this Layer (Use this instead of the member variable for thread-safety).
          * @return a list of geometry widgets that are on this Layer.
          */
-        const std::set<std::shared_ptr<GeometryPointWidget>> getGeometryWidgets() const;
+        const std::set<std::shared_ptr<GeometryWidget>> getGeometryWidgets() const;
 
         /*!
          * Set if a Geometry object is on this Layer.
@@ -243,7 +243,7 @@ namespace qmapcontrol
         mutable QReadWriteLock m_geometries_mutex;
 
         /// List of geometry widgets draw by this layer.
-        std::set<std::shared_ptr<GeometryPointWidget>> m_geometry_widgets;
+        std::set<std::shared_ptr<GeometryWidget>> m_geometry_widgets;
 
         /// Mutex to protect geometry widgets.
         mutable QReadWriteLock m_geometry_widgets_mutex;

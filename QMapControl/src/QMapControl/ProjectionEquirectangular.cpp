@@ -54,8 +54,8 @@ namespace qmapcontrol
     PointWorldPx ProjectionEquirectangular::toPointWorldPx(const PointWorldCoord& point_coord, const int& zoom) const
     {
         // Convert from coordinate to pixel by - top/left delta, then ratio of coords per pixel.
-        const qreal x_px((point_coord.x() + 180.0) * (tilesX(zoom) * ImageManager::get().tileSizePx()) / 360.0);
-        const qreal y_px(-(point_coord.y() - 90.0) * (tilesY(zoom) * ImageManager::get().tileSizePx()) / 180.0);
+        const qreal x_px((point_coord.longitude() + 180.0) * (tilesX(zoom) * ImageManager::get().tileSizePx()) / 360.0);
+        const qreal y_px(-(point_coord.latitude() - 90.0) * (tilesY(zoom) * ImageManager::get().tileSizePx()) / 180.0);
 
         // Return the converted point (x/y pixel point - 0,0 is screen top left).
         return PointWorldPx(x_px, y_px);

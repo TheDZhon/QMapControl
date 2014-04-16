@@ -5,7 +5,8 @@
 #include <QtCore/QPointF>
 
 // QMapControl includes.
-#include <QMapControl/gps_position.h>
+#include <QMapControl/Point.h>
+#include <QMapControl/GPS_Position.h>
 
 using namespace qmapcontrol;
 
@@ -61,7 +62,7 @@ signals:
      * @param time The GPS time.
      * @param point The GPS position.
      */
-    void new_position(float time, QPointF point);
+    void new_position(float time, PointWorldCoord point);
 
 private:
     /*!

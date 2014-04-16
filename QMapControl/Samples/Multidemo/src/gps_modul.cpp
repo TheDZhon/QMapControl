@@ -59,7 +59,7 @@ void GPS_Modul::tick()
         m_y += 0.1;
 
         // Emit that we have moved the point.
-        emit positionChanged(QPointF(m_x ,m_y));
+        emit positionChanged(PointWorldCoord(m_x ,m_y));
     }
 
     // Are we still running?

@@ -33,96 +33,122 @@
 
 namespace qmapcontrol
 {
-    GeometryPoint::GeometryPoint(const PointWorldCoord& point_coord, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
-        : Geometry(Geometry::GeometryType::GeometryPoint, pen, zoom_minimum, zoom_maximum),
-          m_point_coord(point_coord),
-          m_widget(nullptr),
-          m_pixmap(),
-          m_alignment_type(AlignmentType::Middle),
-          m_base_zoom(-1),
-          m_base_size_px(0.0, 0.0),
-          m_draw_minimum_px(-1.0, -1.0),
-          m_draw_maximum_px(-1.0, -1.0),
-          m_metadata_displayed_key(""),
-          m_metadata_displayed_zoom_minimum(10),
-          m_metadata_displayed_offset_px(5.0)
-    {
-
-    }
-
-
-    GeometryPoint::GeometryPoint(const qreal& longitude, const qreal& latitude, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
-        : Geometry(Geometry::GeometryType::GeometryPoint, pen, zoom_minimum, zoom_maximum),
+    GeometryPoint::GeometryPoint(const qreal& longitude, const qreal& latitude, const QPixmap& pixmap, const int& zoom_minimum, const int& zoom_maximum)
+        : Geometry(Geometry::GeometryType::GeometryPoint, zoom_minimum, zoom_maximum),
           m_point_coord(PointWorldCoord(longitude, latitude)),
-          m_widget(nullptr),
-          m_pixmap(),
-          m_alignment_type(AlignmentType::Middle),
-          m_base_zoom(-1),
-          m_base_size_px(0.0, 0.0),
-          m_draw_minimum_px(-1.0, -1.0),
-          m_draw_maximum_px(-1.0, -1.0),
-          m_metadata_displayed_key(""),
-          m_metadata_displayed_zoom_minimum(10),
-          m_metadata_displayed_offset_px(5.0)
-    {
-
-    }
-
-    GeometryPoint::GeometryPoint(const PointWorldCoord& point_coord, const QPixmap& pixmap, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
-        : Geometry(Geometry::GeometryType::GeometryPoint, pen, zoom_minimum, zoom_maximum),
-          m_point_coord(point_coord),
-          m_widget(nullptr),
-          m_pixmap(pixmap),
+          m_pixmap(std::make_shared<QPixmap>(pixmap)),
           m_alignment_type(AlignmentType::Middle),
           m_base_zoom(-1),
           m_base_size_px(pixmap.size()),
           m_draw_minimum_px(-1.0, -1.0),
-          m_draw_maximum_px(-1.0, -1.0),
-          m_metadata_displayed_key(""),
-          m_metadata_displayed_zoom_minimum(10),
-          m_metadata_displayed_offset_px(5.0)
+          m_draw_maximum_px(-1.0, -1.0)
     {
 
     }
 
-    GeometryPoint::GeometryPoint(const PointWorldCoord& point_coord, QWidget* widget, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
-        : Geometry(Geometry::GeometryType::GeometryPointWidget, pen, zoom_minimum, zoom_maximum),
+    GeometryPoint::GeometryPoint(const PointWorldCoord& point_coord, const QPixmap& pixmap, const int& zoom_minimum, const int& zoom_maximum)
+        : Geometry(Geometry::GeometryType::GeometryPoint, zoom_minimum, zoom_maximum),
           m_point_coord(point_coord),
-          m_widget(widget),
-          m_pixmap(),
+          m_pixmap(std::make_shared<QPixmap>(pixmap)),
           m_alignment_type(AlignmentType::Middle),
           m_base_zoom(-1),
-          m_base_size_px(widget->size()),
+          m_base_size_px(pixmap.size()),
           m_draw_minimum_px(-1.0, -1.0),
-          m_draw_maximum_px(-1.0, -1.0),
-          m_metadata_displayed_key(""),
-          m_metadata_displayed_zoom_minimum(10),
-          m_metadata_displayed_offset_px(5.0)
+          m_draw_maximum_px(-1.0, -1.0)
     {
-        // Do we have a widget?
-        if(m_widget != nullptr)
-        {
-            // Set the visibility of the widget as well.
-            m_widget->setVisible(true);
-        }
-    }
 
-    qreal GeometryPoint::longitude() const
-    {
-        // Return the longitude coordinate (x).
-        return m_point_coord.x();
-    }
-
-    qreal GeometryPoint::latitude() const
-    {
-        // Return the latitude coordinate (y).
-        return m_point_coord.y();
     }
 
     PointWorldCoord GeometryPoint::coord() const
     {
         // Return the longitude/latitude coordinate (x/y).
         return m_point_coord;
+    }
+
+    void GeometryPoint::setCoord(const PointWorldCoord& point)
+    {
+        // Has the point change.
+        if(m_point_coord != point)
+        {
+            // Set the new point.
+            m_point_coord = point;
+
+            // Emit that we need to redraw to display this change.
+            emit requestRedraw();
+
+            // Emit that the position has changed.
+            emit positionChanged(this);
+        }
+    }
+
+    QPixmap& GeometryPoint::getPixmap() const
+    {
+        // Return the pixmap.
+        return *(m_pixmap.get());
+    }
+
+    void GeometryPoint::setPixmap(const std::shared_ptr<QPixmap>& pixmap)
+    {
+        // Set the pixmap.
+        m_pixmap = pixmap;
+
+        // Was a valid pixmap set?
+        if(pixmap != nullptr)
+        {
+            // Update the base size.
+            m_base_size_px = pixmap->size();
+        }
+
+        // Emit that we need to redraw to display this change.
+        emit requestRedraw();
+    }
+
+    void GeometryPoint::setPixmap(const QPixmap& pixmap)
+    {
+        // Set the pixmap.
+        m_pixmap = std::make_shared<QPixmap>(pixmap);
+
+        // Update the base size.
+        m_base_size_px = pixmap.size();
+
+        // Emit that we need to redraw to display this change.
+        emit requestRedraw();
+    }
+
+    void GeometryPoint::setPen(const std::shared_ptr<QPen>& pen)
+    {
+        // Set the pen to draw with.
+        Geometry::setPen(pen);
+
+        // Update the pixmap.
+        updatePixmap();
+    }
+
+    void GeometryPoint::setPen(const QPen& pen)
+    {
+        // Set the pen to draw with.
+        Geometry::setPen(pen);
+
+        // Update the pixmap.
+        updatePixmap();
+    }
+
+    void GeometryPoint::setBrush(const std::shared_ptr<QBrush>& brush)
+    {
+        // Set the brush to draw with.
+        Geometry::setBrush(brush);
+
+        // Update the pixmap.
+        updatePixmap();
+    }
+
+    void GeometryPoint::setBrush(const QBrush& brush)
+    {
+        // Set the brush to draw with.
+        Geometry::setBrush(brush);
+
+        // Update the pixmap.
+        updatePixmap();
     }
 
     void GeometryPoint::setAlignmentType(const AlignmentType& alignment_type)
@@ -149,79 +175,6 @@ namespace qmapcontrol
         m_draw_maximum_px = size_px;
     }
 
-    QPixmap GeometryPoint::getPixmap() const
-    {
-        // Return the pixmap.
-        return m_pixmap;
-    }
-
-    void GeometryPoint::setPixmap(const QPixmap& pixmap)
-    {
-        // Set the pixmap.
-        m_pixmap = pixmap;
-
-        // Update the base size.
-        m_base_size_px = pixmap.size();
-
-        // Emit that we need to redraw to display this change.
-        emit requestRedraw();
-    }
-
-    QWidget* GeometryPoint::getWidget() const
-    {
-        // Return the widget.
-        return m_widget;
-    }
-
-    void GeometryPoint::setPen(const QPen& pen)
-    {
-        // Set the pen.
-        Geometry::setPen(pen);
-
-        // Update the pixmap.
-        updatePixmap();
-    }
-
-    void GeometryPoint::setCoord(const PointWorldCoord& point)
-    {
-        // Has the point change.
-        if(m_point_coord != point)
-        {
-            // Set the new point.
-            m_point_coord = point;
-
-            // Emit that we need to redraw to display this change.
-            emit requestRedraw();
-
-            // Emit that the position has chnaged.
-            emit positionChanged(this);
-        }
-    }
-
-    void GeometryPoint::setVisible(const bool& enabled)
-    {
-        // Set the visibility.
-        Geometry::setVisible(enabled);
-
-        // Do we have a widget?
-        if(m_widget != nullptr)
-        {
-            // Set the visibility of the widget as well.
-            m_widget->setVisible(enabled);
-        }
-    }
-
-    void GeometryPoint::setMetadataDisplayed(const std::string& key, const int& zoom_minimum, const double& offset_px)
-    {
-        // Set the meta-data key to use.
-        m_metadata_displayed_key = key;
-        m_metadata_displayed_zoom_minimum = zoom_minimum;
-        m_metadata_displayed_offset_px = offset_px;
-
-        // Emit that we need to redraw to display this change.
-        emit requestRedraw();
-    }
-
     QRectF GeometryPoint::boundingBox(const int& controller_zoom) const
     {
         // Calculate the world point in pixels.
@@ -231,7 +184,7 @@ namespace qmapcontrol
         const QSizeF object_size_px = calculateGeometrySizePx(controller_zoom);
 
         // Calculate the top-left point.
-        const PointWorldPx top_left_point_px = calculateTopLeftPoint(point_px, object_size_px);
+        const PointWorldPx top_left_point_px = calculateTopLeftPoint(point_px, m_alignment_type, object_size_px);
 
         // Calculate the bottom-right point.
         const PointWorldPx bottom_right_point_px(top_left_point_px.x() + object_size_px.width(), top_left_point_px.y() + object_size_px.height());
@@ -273,13 +226,8 @@ namespace qmapcontrol
         // Check the geometry is visible.
         if(isVisible(controller_zoom))
         {
-            // Do we have a widget?
-            if(m_widget != nullptr)
-            {
-                // @note To draw Widget points, call the moveWidget() function instead with the required offsets.
-            }
             // Do we have a pixmap?
-            else if(m_pixmap.size().isEmpty() == false)
+            if(m_pixmap != nullptr && m_pixmap->size().isEmpty() == false)
             {
                 // Calculate the world point in pixels.
                 const PointWorldPx point_px(projection::get().toPointWorldPx(m_point_coord, controller_zoom));
@@ -288,19 +236,19 @@ namespace qmapcontrol
                 const QSizeF pixmap_size_px(calculateGeometrySizePx(controller_zoom));
 
                 // Calculate the pixmap rect to draw within.
-                const QRectF pixmap_rect(calculateTopLeftPoint(point_px, pixmap_size_px).rawPoint(), pixmap_size_px);
+                const QRectF pixmap_rect(calculateTopLeftPoint(point_px, m_alignment_type, pixmap_size_px).rawPoint(), pixmap_size_px);
 
                 // Does the pixmap rect intersect within the backbuffer rect?
                 if(backbuffer_rect_px.intersects(pixmap_rect))
                 {
                     // Draw the pixmap.
-                    painter->drawPixmap(pixmap_rect, m_pixmap, QRectF());
+                    painter->drawPixmap(pixmap_rect, getPixmap(), QRectF());
 
                     // Do we have a meta-data value and should we display it at this zoom?
                     if(controller_zoom >= m_metadata_displayed_zoom_minimum && getMetadata(m_metadata_displayed_key).isNull() == false)
                     {
                         // Draw the text next to the point with an offset.
-                        painter->drawText(pixmap_rect.topRight() + QPointF(m_metadata_displayed_offset_px, -m_metadata_displayed_offset_px), getMetadata(m_metadata_displayed_key).toString());
+                        painter->drawText(pixmap_rect.topRight() + QPointF(m_metadata_displayed_alignment_offset_px, -m_metadata_displayed_alignment_offset_px), getMetadata(m_metadata_displayed_key).toString());
                     }
                 }
             }
@@ -323,29 +271,10 @@ namespace qmapcontrol
                     if(controller_zoom >= m_metadata_displayed_zoom_minimum && getMetadata(m_metadata_displayed_key).isNull() == false)
                     {
                         // Draw the text next to the point with an offset.
-                        painter->drawText((point_px + PointPx(m_metadata_displayed_offset_px, -m_metadata_displayed_offset_px)).rawPoint(), getMetadata(m_metadata_displayed_key).toString());
+                        painter->drawText((point_px + PointPx(m_metadata_displayed_alignment_offset_px, -m_metadata_displayed_alignment_offset_px)).rawPoint(), getMetadata(m_metadata_displayed_key).toString());
                     }
                 }
             }
-        }
-    }
-
-    void GeometryPoint::moveWidget(const PointPx& offset_px, const int& controller_zoom)
-    {
-        // Check the geometry is visible and a widget exists.
-        if(isVisible(controller_zoom) && m_widget != nullptr)
-        {
-            // Translate the point into the current world pixel point, and remove the offset.
-            const PointWorldPx point_px(projection::get().toPointWorldPx(m_point_coord, controller_zoom) - offset_px);
-
-            // Update the object size for the widget size for this controller zoom.
-            const QSizeF widget_size_px(calculateGeometrySizePx(controller_zoom));
-
-            // Calculate the top-left point.
-            const PointWorldPx top_left_point_px(calculateTopLeftPoint(PointWorldPx(point_px.x(), point_px.y()), widget_size_px));
-
-            // Set the new location of the geometry.
-            m_widget->setGeometry(top_left_point_px.x(), top_left_point_px.y(), widget_size_px.width(), widget_size_px.height());
         }
     }
 
@@ -362,18 +291,11 @@ namespace qmapcontrol
         // Get the object size (default to point - ie: no size).
         QSizeF return_size_px(1.0, 1.0);
 
-        // Do we not have a point? (widget/pixmap)
-        if(m_widget != nullptr || m_pixmap.size().isEmpty() == false)
+        // Do we have a pixmap?
+        if(m_pixmap != nullptr && m_pixmap->size().isEmpty() == false)
         {
             // Get the pixmap size.
-            return_size_px = m_pixmap.size();
-
-            // Do we have a widget?
-            if(m_widget != nullptr)
-            {
-                // Widget size it is!
-                return_size_px = m_widget->size();
-            }
+            return_size_px = m_pixmap->size();
 
             // Do we have a base zoom set?
             if(m_base_zoom > 0)
@@ -417,64 +339,6 @@ namespace qmapcontrol
 
         // Return the size.
         return return_size_px;
-    }
-
-    PointWorldPx GeometryPoint::calculateTopLeftPoint(const PointWorldPx& point_px, const QSizeF geometry_size_px) const
-    {
-        // Default world point to return.
-        PointWorldPx top_left_point_px(point_px);
-
-        // Check the alignment type and apply the required deltas to move the point to top-left.
-        switch(m_alignment_type)
-        {
-            case AlignmentType::Middle:
-            {
-                // Move x/y from the middle to top-left.
-                top_left_point_px.setX(point_px.x() - (geometry_size_px.width() / 2.0));
-                top_left_point_px.setY(point_px.y() - (geometry_size_px.height() / 2.0));
-                break;
-            }
-            case AlignmentType::TopLeft:
-            {
-                // Already at top-left.
-                break;
-            }
-            case AlignmentType::TopRight:
-            {
-                // Move x from the top-right to top-left.
-                top_left_point_px.setX(point_px.x() - geometry_size_px.width());
-                break;
-            }
-            case AlignmentType::TopMiddle:
-            {
-                // Move x from the top-center to top-left.
-                top_left_point_px.setX(point_px.x() - (geometry_size_px.width() / 2.0));
-                break;
-            }
-            case AlignmentType::BottomLeft:
-            {
-                // Move y from the bottom-left to top-left.
-                top_left_point_px.setY(point_px.y() - geometry_size_px.height());
-                break;
-            }
-            case AlignmentType::BottomRight:
-            {
-                // Move x/y from the bottom-right to top-left.
-                top_left_point_px.setX(point_px.x() - geometry_size_px.width());
-                top_left_point_px.setY(point_px.y() - geometry_size_px.height());
-                break;
-            }
-            case AlignmentType::BottomMiddle:
-            {
-                // Move x/y from the bottom-middle to top-left.
-                top_left_point_px.setX(point_px.x() - (geometry_size_px.width() / 2.0));
-                top_left_point_px.setY(point_px.y() - geometry_size_px.height());
-                break;
-            }
-        }
-
-        // Return the top-left point.
-        return top_left_point_px;
     }
 
 }

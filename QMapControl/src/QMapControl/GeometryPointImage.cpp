@@ -27,14 +27,14 @@
 
 namespace qmapcontrol
 {
-    GeometryPointImage::GeometryPointImage(const PointWorldCoord& point_coord, const std::string& filename, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
-        : GeometryPoint(point_coord, QPixmap(filename.c_str()), pen, zoom_minimum, zoom_maximum)
+    GeometryPointImage::GeometryPointImage(const PointWorldCoord& point_coord, const std::string& filename, const int& zoom_minimum, const int& zoom_maximum)
+        : GeometryPoint(point_coord, QPixmap(filename.c_str()), zoom_minimum, zoom_maximum)
     {
 
     }
 
-    GeometryPointImage::GeometryPointImage(const PointWorldCoord& point_coord, const QPixmap& pixmap, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
-        : GeometryPoint(point_coord, pixmap, pen, zoom_minimum, zoom_maximum)
+    GeometryPointImage::GeometryPointImage(const PointWorldCoord& point_coord, const QPixmap& pixmap, const int& zoom_minimum, const int& zoom_maximum)
+        : GeometryPoint(point_coord, pixmap, zoom_minimum, zoom_maximum)
     {
 
     }

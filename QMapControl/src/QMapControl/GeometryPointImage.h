@@ -47,22 +47,20 @@ namespace qmapcontrol
          * This constructor creates a point which will display a pixmap from the image file.
          * @param point_coord The longitude/latitude coordinate (x/y).
          * @param filename The image file to draw.
-         * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPointImage(const PointWorldCoord& point_coord, const std::string& filename, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPointImage(const PointWorldCoord& point_coord, const std::string& filename, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Constructor.
         /*!
          * This constructor creates a point which will display a pixmap.
          * @param point_coord The longitude/latitude coordinate (x/y).
          * @param pixmap The pixmap to draw.
-         * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPointImage(const PointWorldCoord& point_coord, const QPixmap& pixmap, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPointImage(const PointWorldCoord& point_coord, const QPixmap& pixmap, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Disable copy constructor.
         ///GeometryPointImage(const GeometryPointImage&) = delete; @todo re-add once MSVC supports default/delete syntax.

@@ -4,10 +4,15 @@
 #include <QtCore/QObject>
 #include <QtCore/QPointF>
 
+// QMapControl includes.
+#include <QMapControl/Point.h>
+
 /**
  * @author Kai Winter <kaiwinter@gmx.de>
  * @author Chris Stylianou <chris5287@gmail.com>
  */
+
+using namespace qmapcontrol;
 
 class GPS_Modul : public QObject
 {
@@ -50,7 +55,7 @@ signals:
      * Signal emitted when the position changes.
      * @param point The new position.
      */
-    void positionChanged(QPointF point);
+    void positionChanged(PointWorldCoord point);
 
 private:
     /// Whether the GPS Modul is running.

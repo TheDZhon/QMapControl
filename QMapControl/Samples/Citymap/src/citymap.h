@@ -6,8 +6,8 @@
 
 // QMapControl includes.
 #include <QMapControl/QMapControl.h>
-#include <QMapControl/GeometryPoint.h>
 #include <QMapControl/GeometryLineString.h>
+#include <QMapControl/GeometryWidget.h>
 #include <QMapControl/Layer.h>
 
 // Local includes.
@@ -93,14 +93,14 @@ private slots:
      * @param mouse_event The QMouseEvent.
      * @param press_coordinate The location of note required.
      */
-    void writeNote(QMouseEvent* mouse_event, QPointF press_coordinate);
+    void writeNote(QMouseEvent* mouse_event, PointWorldCoord press_coordinate);
 
     /*!
      * Slot called to finish adding the note.
      * @param mouse_event The QMouseEvent.
      * @param press_coordinate The location of note required.
      */
-    void hideNote(QMouseEvent* mouse_event, QPointF press_coordinate);
+    void hideNote(QMouseEvent* mouse_event, PointWorldCoord press_coordinate);
 
     /*!
      * Slot called to start editing a geometry.
@@ -118,7 +118,7 @@ private slots:
      * @param mouse_event The QMouseEvent.
      * @param press_coordinate The location of mouse press required.
      */
-    void calculateDistanceClick(QMouseEvent* mouse_event, QPointF press_coordinate);
+    void calculateDistanceClick(QMouseEvent* mouse_event, PointWorldCoord press_coordinate);
 
     /*!
      * Slot called to change the map provider.
@@ -203,16 +203,16 @@ private:
     bool m_mode_distance_calculating;
 
     /// The distance calculating start point.
-    QPointF m_coord_start;
+    PointWorldCoord m_coord_start;
 
     /// The distance calculating end point.
-    QPointF m_coord_end;
+    PointWorldCoord m_coord_end;
 
     /// Text edit widget.
     QTextEdit* m_text_edit;
 
     /// Geometry to manage text edit widget.
-    std::shared_ptr<GeometryPoint> m_geometry_text_edit;
+    std::shared_ptr<GeometryWidget> m_geometry_text_edit;
 
     /// The currently selected geometry.
     Geometry* m_selected_geometry;

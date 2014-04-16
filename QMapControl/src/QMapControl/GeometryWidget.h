@@ -35,55 +35,53 @@
 
 namespace qmapcontrol
 {
-    //! A geometric point to draw objects into maps.
+    //! A geometric point to draw widgets into maps.
     /*!
-     * This class can be used to draw your custom QPixmap or other QWidgets (see GeometryPointWidget) into maps.
-     * You can instantiate a Point with any Pixmap you want. The objects cares about collision detection (for clickable objects).
-     *
-     * Points emit click events, if the containing layer receives clickevents (the default).
-     *
-     * To create "zoomable objects" (objects that increases size on zooming), a base level has to be set.
-     * The base level is the zoom level on which the point´s pixmap gets displayed on full size.
-     * On lower zoom levels it gets displayed smaller and on higher zoom levels larger.
-     * A minimal size can be set as well as a maximum size.
-     * @see setBaselevel, setDrawMinimumPx, setDrawMaximumPx.
-     *
-     * @author Kai Winter <kaiwinter@gmx.de>
-     * @author Chris Stylianou <chris5287@gmail.com>
-     */
-    class QMAPCONTROL_EXPORT GeometryPoint : public Geometry
+    * This class can be used to draw your QWidgets into maps.
+    *
+    * But keep in mind, that widgets always are drawn on top of all layers.
+    * You also have to handle click events yourself.
+    *
+    * @author Kai Winter <kaiwinter@gmx.de>
+    * @author Chris Stylianou <chris5287@gmail.com>
+    */
+    class QMAPCONTROL_EXPORT GeometryWidget : public Geometry
     {
         Q_OBJECT
     public:
         //! Constructor.
         /*!
-         * This constructor creates a point which will display the given pixmap/point.
-         * @param longitude The longitude coordinate (x).
-         * @param latitude The latitude coordinate (y).
-         * @param pixmap The pixmap to be displayed by this point.
-         * @param zoom_minimum The minimum zoom level to show this geometry at.
-         * @param zoom_maximum The maximum zoom level to show this geometry at.
-         */
-        GeometryPoint(const qreal& longitude, const qreal& latitude, const QPixmap& pixmap = QPixmap(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        * This constructor creates a point which will display the given widget.
+        * @note IMPORTANT: You have to set the QMapControl as parent to the widget before this is constructed.
+        * @note IMPORTANT: You have to set the size of the widget before this is constructed.
+        * @param longitude The longitude coordinate (x).
+        * @param latitude The latitude coordinate (y).
+        * @param widget The widget to be displayed by this point.
+        * @param zoom_minimum The minimum zoom level to show this geometry at.
+        * @param zoom_maximum The maximum zoom level to show this geometry at.
+        */
+        GeometryWidget(const qreal& longitude, const qreal& latitude, QWidget* widget, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Constructor.
         /*!
-         * This constructor creates a point which will display the given pixmap/point.
-         * @param point_coord The longitude/latitude coordinate (x/y).
-         * @param pixmap The pixmap to be displayed by this point.
-         * @param zoom_minimum The minimum zoom level to show this geometry at.
-         * @param zoom_maximum The maximum zoom level to show this geometry at.
-         */
-        GeometryPoint(const PointWorldCoord& point_coord, const QPixmap& pixmap = QPixmap(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        * This constructor creates a point which will display the given widget.
+        * @note IMPORTANT: You have to set the QMapControl as parent to the widget before this is constructed.
+        * @note IMPORTANT: You have to set the size of the widget before this is constructed.
+        * @param point_coord The longitude/latitude coordinate (x/y).
+        * @param widget The widget to be displayed by this point.
+        * @param zoom_minimum The minimum zoom level to show this geometry at.
+        * @param zoom_maximum The maximum zoom level to show this geometry at.
+        */
+        GeometryWidget(const PointWorldCoord& point_coord, QWidget* widget, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Disable copy constructor.
-        ///GeometryPoint(const GeometryPoint&) = delete; @todo re-add once MSVC supports default/delete syntax.
+        ///GeometryPointWidget(const GeometryPointWidget&) = delete; @todo re-add once MSVC supports default/delete syntax.
 
         //! Disable copy assignment.
-        ///GeometryPoint& operator=(const GeometryPoint&) = delete; @todo re-add once MSVC supports default/delete syntax.
+        ///GeometryPointWidget& operator=(const GeometryPointWidget&) = delete; @todo re-add once MSVC supports default/delete syntax.
 
         //! Destructor.
-        virtual ~GeometryPoint() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
+        virtual ~GeometryWidget() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
 
         /*!
          * Fetches the longitude/latitude coordinate (x/y).
@@ -98,49 +96,19 @@ namespace qmapcontrol
         void setCoord(const PointWorldCoord& point);
 
         /*!
-         * Fetches the geometry's pixmap.
-         * @return the geometry's pixmap.
+         * Fetches the widget.
+         * @return The geometry's widget.
          */
-        QPixmap& getPixmap() const;
+        QWidget* getWidget() const;
 
         /*!
-         * Set the pixmap to draw.
-         * @param pixmap The pixmap to draw.
+         * Set the visibility of the geometry.
+         * @param enabled Whether to make the geometry visible.
          */
-        void setPixmap(const std::shared_ptr<QPixmap>& pixmap);
+        virtual void setVisible(const bool& enabled) final;
 
         /*!
-         * Set the pixmap to draw.
-         * @param pixmap The pixmap to draw.
-         */
-        void setPixmap(const QPixmap& pixmap);
-
-        /*!
-         * Sets the pen to draw the geometry with (outline).
-         * @param pen The QPen to used for drawing.
-         */
-        void setPen(const std::shared_ptr<QPen>& pen) final;
-
-        /*!
-         * Sets the pen to draw the geometry with (outline).
-         * @param pen The QPen to used for drawing.
-         */
-        void setPen(const QPen& pen) final;
-
-        /*!
-         * Sets the brush to draw the geometry with (fill).
-         * @param brush The QBrush to used for drawing.
-         */
-        void setBrush(const std::shared_ptr<QBrush>& brush) final;
-
-        /*!
-         * Sets the brush to draw the geometry with (fill).
-         * @param brush The QBrush to used for drawing.
-         */
-        void setBrush(const QBrush& brush) final;
-
-        /*!
-         * Set the alignment type to use when drawing the geometry pixmap.
+         * Set the alignment type to use when drawing the geometry.
          * @param alignment_type The alignment type to set.
          */
         void setAlignmentType(const AlignmentType& alignment_type = AlignmentType::Middle);
@@ -151,23 +119,30 @@ namespace qmapcontrol
          * On lower zoom levels, it will be drawn smaller.
          * On higher zoom levels, it will be drawn larger.
          * @see setMinsize, setMaxsize
-         * @param zoom The zoom level where the pixmap will be drawn at its real size.
+         * @param zoom The zoom level where the point will be drawn at its real size.
          */
         void setBaseZoom(const int& zoom = -1);
 
         /*!
-         * Set the minimum size a pixmap can be drawn.
+         * Set the minimum size a point/widget/pixmap can be drawn.
          * Set to 'QSizeF(-1.0, -1.0)' to disable the limitation.
-         * @param size The minimum size to draw a pixmap.
+         * @param size The minimum size to draw a point/widget/pixmap.
          */
         void setDrawMinimumPx(const QSizeF& size_px = QSizeF(-1.0, -1.0));
 
         /*!
-         * Set the maximum size a pixmap can be drawn.
+         * Set the maximum size a point/widget/pixmap can be drawn.
          * Set to 'QSizeF(-1.0, -1.0)' to disable the limitation.
-         * @param size The maximal size to draw a pixmap.
+         * @param size The maximal size to draw a point/widget/pixmap.
          */
         void setDrawMaximumPx(const QSizeF& size_px = QSizeF(-1.0, -1.0));
+
+        /*!
+         * Draws the geometry's widget to the screen.
+         * @param offset_px The offset in pixels to remove from the coordinate pixel point.
+         * @param controller_zoom The current controller zoom.
+         */
+        void moveWidget(const PointPx& offset_px, const int& controller_zoom);
 
     public:
         /*!
@@ -193,19 +168,7 @@ namespace qmapcontrol
          */
         virtual void draw(QPainter* painter, const QRectF& backbuffer_rect_px, const int& controller_zoom) override;
 
-    protected:
-        /*!
-         * Updates the pixmap.
-         */
-        virtual void updatePixmap();
-
     private:
-        //! Disable copy constructor.
-        GeometryPoint(const GeometryPoint&); /// @todo remove once MSVC supports default/delete syntax.
-
-        //! Disable copy assignment.
-        GeometryPoint& operator=(const GeometryPoint&); /// @todo remove once MSVC supports default/delete syntax.
-
         /*!
          * Calculates the geometry size (widget/pixmap) in pixels for the given controller zoom.
          * @param controller_zoom The current controller zoom.
@@ -214,11 +177,18 @@ namespace qmapcontrol
         QSizeF calculateGeometrySizePx(const int& controller_zoom) const;
 
     private:
+        //! Disable copy constructor.
+        GeometryWidget(const GeometryWidget&); /// @todo remove once MSVC supports default/delete syntax.
+
+        //! Disable copy assignment.
+        GeometryWidget& operator=(const GeometryWidget&); /// @todo remove once MSVC supports default/delete syntax.
+
+    private:
         /// The x/y coordinate (longitude/latitude).
         PointWorldCoord m_point_coord;
 
-        /// The associated pixmap to draw.
-        std::shared_ptr<QPixmap> m_pixmap;
+        /// The associated widget to draw.
+        QWidget* m_widget;
 
         /// The alignment type to use when drawing.
         AlignmentType m_alignment_type;

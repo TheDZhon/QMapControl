@@ -11,7 +11,7 @@
 #include <QMapControl/MapAdapterYahoo.h>
 #include <QMapControl/MapAdapterGoogle.h>
 #include <QMapControl/GeometryPointImage.h>
-#include <QMapControl/GeometryPointWidget.h>
+#include <QMapControl/GeometryWidget.h>
 
 /*!
  * This demo application shows more features of the QMapControl.
@@ -69,7 +69,7 @@ Citymap::Citymap(QWidget* parent)
     // Create a text edit geometry widget (and hide for now).
     m_text_edit = new QTextEdit(m_map_control);
     m_text_edit->setGeometry(0,0,200,100);
-    m_geometry_text_edit = std::make_shared<GeometryPointWidget>(PointWorldCoord(0.0, 0.0), m_text_edit);
+    m_geometry_text_edit = std::make_shared<GeometryWidget>(PointWorldCoord(0.0, 0.0), m_text_edit);
     m_geometry_text_edit->setAlignmentType(GeometryPoint::AlignmentType::TopLeft);
     m_geometry_text_edit->setVisible(false);
     m_layer_notes->addGeometry(m_geometry_text_edit);
@@ -161,52 +161,55 @@ void Citymap::addTours()
     pen.setWidth(5);
 
     // Add the points of the sights tour.
-    std::vector<std::shared_ptr<GeometryPoint>> points;
-    points.emplace_back(std::make_shared<GeometryPoint>(8.26015, 50.0015));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.2617, 50.0012));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.26423, 50.0002));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.26698, 50.0024));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.27065, 50.0012));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.27152, 50.0016));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.27225, 50.0004));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.27333, 49.9994));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.26946, 49.9983));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.27105, 49.9973));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.27024, 49.9972));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.26833, 49.9958));
+    std::vector<PointWorldCoord> points;
+    points.emplace_back(8.26015, 50.0015);
+    points.emplace_back(8.2617, 50.0012);
+    points.emplace_back(8.26423, 50.0002);
+    points.emplace_back(8.26698, 50.0024);
+    points.emplace_back(8.27065, 50.0012);
+    points.emplace_back(8.27152, 50.0016);
+    points.emplace_back(8.27225, 50.0004);
+    points.emplace_back(8.27333, 49.9994);
+    points.emplace_back(8.26946, 49.9983);
+    points.emplace_back(8.27105, 49.9973);
+    points.emplace_back(8.27024, 49.9972);
+    points.emplace_back(8.26833, 49.9958);
 
     // Create the sights tour as a Line String and add it to the notes layer.
-    m_tour_sights = std::make_shared<GeometryLineString>(points, pen);
+    m_tour_sights = std::make_shared<GeometryLineString>(points);
+    m_tour_sights->setPen(pen);
     m_layer_tours->addGeometry(m_tour_sights);
 
     // Add the points of the pub tour.
     points.clear();
-    points.emplace_back(std::make_shared<GeometryPoint>(8.2606, 50.0051));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.2602, 50.0050));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.2598, 50.0044));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.2569, 50.0057));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.2595, 50.0083));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.2587, 50.0086));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.2589, 50.0100));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.2590, 50.0105));
+    points.emplace_back(8.2606, 50.0051);
+    points.emplace_back(8.2602, 50.0050);
+    points.emplace_back(8.2598, 50.0044);
+    points.emplace_back(8.2569, 50.0057);
+    points.emplace_back(8.2595, 50.0083);
+    points.emplace_back(8.2587, 50.0086);
+    points.emplace_back(8.2589, 50.0100);
+    points.emplace_back(8.2590, 50.0105);
 
     // Create the pub tour as a Line String and add it to the notes layer.
-    m_tour_pubs = std::make_shared<GeometryLineString>(points, pen);
+    m_tour_pubs = std::make_shared<GeometryLineString>(points);
+    m_tour_pubs->setPen(pen);
     m_layer_tours->addGeometry(m_tour_pubs);
 
     // Add the points of the museum tour.
     points.clear();
-    points.emplace_back(std::make_shared<GeometryPoint>(8.25987, 50.0018));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.26192, 50.0019));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.26301, 50.0031));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.26459, 50.0026));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.26601, 50.004));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.26781, 50.0033));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.27052, 50.0054));
-    points.emplace_back(std::make_shared<GeometryPoint>(8.2697, 50.0059));
+    points.emplace_back(8.25987, 50.0018);
+    points.emplace_back(8.26192, 50.0019);
+    points.emplace_back(8.26301, 50.0031);
+    points.emplace_back(8.26459, 50.0026);
+    points.emplace_back(8.26601, 50.004);
+    points.emplace_back(8.26781, 50.0033);
+    points.emplace_back(8.27052, 50.0054);
+    points.emplace_back(8.2697, 50.0059);
 
     // Create the museum tour as a Line String and add it to the notes layer.
-    m_tour_museums = std::make_shared<GeometryLineString>(points, pen);
+    m_tour_museums = std::make_shared<GeometryLineString>(points);
+    m_tour_museums->setPen(pen);
     m_layer_tours->addGeometry(m_tour_museums);
 }
 
@@ -477,18 +480,20 @@ void Citymap::calculateDistanceClick(QMouseEvent* evnt, PointWorldCoord press_co
         m_coord_end = press_coordinate;
 
         // Convert the coordinate degrees into radians.
-        const double start_x(m_coord_start.x() * (M_PI / 180.0));
-        const double start_y(m_coord_start.y() * (M_PI / 180.0));
-        const double end_x(m_coord_end.x() * (M_PI / 180.0));
-        const double end_y(m_coord_end.y() * (M_PI / 180.0));
+        const double start_longitude(m_coord_start.longitude() * (M_PI / 180.0));
+        const double start_latitude(m_coord_start.latitude() * (M_PI / 180.0));
+        const double end_longitude(m_coord_end.longitude() * (M_PI / 180.0));
+        const double end_latitude(m_coord_end.latitude() * (M_PI / 180.0));
 
         // Calculate the distance between the two points (Spherical law of cosines).
         const double radius(6371.0); // Earth's mean Radius in km.
-        const double distance = std::acos(std::sin(start_y) * std::sin(end_y) + std::cos(start_y) * std::cos(end_y) * std::cos(end_x - start_x)) * radius;
+        const double distance = std::acos(std::sin(start_latitude) * std::sin(end_latitude) + std::cos(start_latitude) * std::cos(end_latitude) * std::cos(end_longitude - start_longitude)) * radius;
 
         // Draw a line string to show the distance.
-        std::vector<std::shared_ptr<GeometryPoint>> points;
-        points.emplace_back(std::make_shared<GeometryPoint>(m_coord_start));
+        std::vector<PointWorldCoord> points;
+        points.push_back(m_coord_start);
+        points.push_back(m_coord_end);
+        m_layer_notes->addGeometry(std::make_shared<GeometryLineString>(points));
         QPixmap* pixmap = new QPixmap(100,20);
         pixmap->fill(Qt::transparent);
         QPainter painter(pixmap);
@@ -497,8 +502,7 @@ void Citymap::calculateDistanceClick(QMouseEvent* evnt, PointWorldCoord press_co
         painter.end();
         std::shared_ptr<GeometryPoint> point_end(std::make_shared<GeometryPoint>(m_coord_end, *pixmap));
         point_end->setAlignmentType(GeometryPoint::AlignmentType::BottomLeft);
-        points.push_back(point_end);
-        m_layer_notes->addGeometry(std::make_shared<GeometryLineString>(points));
+        m_layer_notes->addGeometry(point_end);
 
         // Reset the points.
         m_coord_start = PointWorldCoord(0.0, 0.0);

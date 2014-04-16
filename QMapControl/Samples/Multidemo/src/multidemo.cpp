@@ -9,8 +9,8 @@
 #include <QMapControl/GeometryLineString.h>
 #include <QMapControl/GeometryPointArrow.h>
 #include <QMapControl/GeometryPointCircle.h>
-#include <QMapControl/GeometryPointWidget.h>
 #include <QMapControl/GeometryPolygon.h>
+#include <QMapControl/GeometryWidget.h>
 #include <QMapControl/MapAdapterGoogle.h>
 #include <QMapControl/MapAdapterYahoo.h>
 #include <QMapControl/MapAdapterWMS.h>
@@ -90,37 +90,59 @@ void Multidemo::setupMaps()
     QPen pen(QColor(255, 0, 0, 100));
     pen.setWidth(2);
     std::vector<std::shared_ptr<GeometryPoint>> points;
-    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.259959, 50.001781), pen));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.259959, 50.001781)));
+    points.back()->setPen(pen);
     points.back()->setMetadata("name", "Mainz, Hauptbahnhof");
-    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.263758, 49.998917), pen));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.263758, 49.998917)));
+    points.back()->setPen(pen);
     points.back()->setMetadata("name", "Mainz, Münsterplatz");
-    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.265812, 50.001952), pen));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.265812, 50.001952)));
+    points.back()->setPen(pen);
     points.back()->setMetadata("name", "Mainz, Neubrunnenplatz");
-    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.2688, 50.004015), pen));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.2688, 50.004015)));
+    points.back()->setPen(pen);
     points.back()->setMetadata("name", "Mainz, Bauhofstraße LRP");
-    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.272845, 50.00495), pen));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.272845, 50.00495)));
+    points.back()->setPen(pen);
     points.back()->setMetadata("name", "Mainz, Landtag");
-    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.272845, 50.00495), pen));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.272845, 50.00495)));
+    points.back()->setPen(pen);
     points.back()->setMetadata("name", "Mainz, Brückenplatz");
-    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.280349, 50.008173), pen));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.280349, 50.008173)));
+    points.back()->setPen(pen);
     points.back()->setMetadata("name", "Mainz, Brückenkopf");
-    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.273573, 50.016315), pen));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.273573, 50.016315)));
+    points.back()->setPen(pen);
     points.back()->setMetadata("name", "Wiesbaden-Mainz-Kastel, Eleonorenstraße");
-    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.275145, 50.016992), pen));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.275145, 50.016992)));
+    points.back()->setPen(pen);
     points.back()->setMetadata("name", "Wiesbaden-Mainz-Kastel, Johannes-Goßner-Straße");
-    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.270476, 50.021426), pen));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.270476, 50.021426)));
+    points.back()->setPen(pen);
     points.back()->setMetadata("name", "Wiesbaden-Mainz-Kastel, Ruthof");
-    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.266445, 50.025913), pen));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.266445, 50.025913)));
+    points.back()->setPen(pen);
     points.back()->setMetadata("name", "Wiesbaden-Mainz-Kastel, Mudra Kaserne");
-    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.260378, 50.030345), pen));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.260378, 50.030345)));
+    points.back()->setPen(pen);
     points.back()->setMetadata("name", "Wiesbaden-Mainz-Amoneburg, Dyckerhoffstraße");
 
-    // Add the GeometryPoints to GeoemtryLineString.
+    // A QPen also can use transparency.
     pen = QPen(QColor(0, 0, 255, 100));
     pen.setWidth(5);
-    //    QBrush brush(Qt::red);
-    //    std::shared_ptr<GeometryPolygon> line_string(std::make_shared<GeometryPolygon>(points, brush, pen));
-    std::shared_ptr<GeometryLineString> line_string(std::make_shared<GeometryLineString>(points, pen));
+
+    // Add the GeometryPoints to GeoemtryLineString.
+    std::vector<PointWorldCoord> raw_points;
+    for(const auto& point : points)
+    {
+        // Add the point.
+        raw_points.push_back(point->coord());
+
+        // Also add the point to the custom layer.
+        layer_geometries->addGeometry(point);
+    }
+    std::shared_ptr<GeometryLineString> line_string(std::make_shared<GeometryLineString>(raw_points));
+    line_string->setPen(pen);
     line_string->setMetadata("name", "Busline 54");
 
     // Add the GeoemtryLineString to the Geometry layer.
@@ -135,14 +157,15 @@ void Multidemo::setupMaps()
 
 
     // Create a GeometryArrow with a heading set.
-    std::shared_ptr<GeometryPointArrow> arrow_point(std::make_shared<GeometryPointArrow>(PointWorldCoord(-20.0, 20.0), 0, 15, QPen(Qt::red)));
+    std::shared_ptr<GeometryPointArrow> arrow_point(std::make_shared<GeometryPointArrow>(PointWorldCoord(-20.0, 20.0), 0, 15));
+    arrow_point->setPen(QPen(Qt::red));
     arrow_point->setHeading(92.4);
     layer_geometries->addGeometry(arrow_point);
 
 
     // Create a GeometryPoint with a PushButton widget.
     QPushButton* pb = new QPushButton("test button", m_map_control);
-    std::shared_ptr<GeometryPoint> widget_point(std::make_shared<GeometryPointWidget>(PointWorldCoord(-20.0, -20.0), pb));
+    std::shared_ptr<GeometryWidget> widget_point(std::make_shared<GeometryWidget>(PointWorldCoord(-20.0, -20.0), pb));
     widget_point->setAlignmentType(GeometryPoint::AlignmentType::TopLeft);
     widget_point->setMetadata("name", ".");
     widget_point->setBaseZoom(3);
@@ -346,38 +369,11 @@ void Multidemo::geometriesSelectedEvent(std::map<std::string, std::vector<std::s
 
 void Multidemo::geometryClickEvent(Geometry* geometry)
 {
-    // Is it a GeometryLineString.
-    if(geometry->getGeometryType() == Geometry::GeometryType::GeometryLineString)
-    {
-        // GeometryLineString contain multi points, use touchedPoints() to find which points were actually touched.
-        std::vector<std::shared_ptr<GeometryPoint>> touched_points = static_cast<GeometryLineString*>(geometry)->touchedPoints();
-
-        // Loop through each point.
-        for(const auto& point : touched_points)
-        {
-            // Display a message box with the point's details.
-            QMessageBox::information(this, geometry->getMetadata("name").toString(), point->getMetadata("name").toString());
-        }
-    }
-    // Is it a GeometryPolygon.
-    if(geometry->getGeometryType() == Geometry::GeometryType::GeometryPolygon)
-    {
-        // GeometryPolygon contain multi points, use touchedPoints() to find which points were actually touched.
-        std::vector<std::shared_ptr<GeometryPoint>> touched_points = static_cast<GeometryPolygon*>(geometry)->touchedPoints();
-
-        // Loop through each point.
-        for(const auto& point : touched_points)
-        {
-            // Display a message box with the point's details.
-            QMessageBox::information(this, geometry->getMetadata("name").toString(), point->getMetadata("name").toString());
-        }
-    }
     // Is it a GeometryPoint.
-    else if(geometry->getGeometryType() == Geometry::GeometryType::GeometryPoint)
+    if(geometry->getGeometryType() == Geometry::GeometryType::GeometryPoint)
     {
         // Display a message box with the point's details.
-        QString message = QString("Position: ").append(QString().setNum(((GeometryPoint*)geometry)->longitude())).append(QString("/")).append(QString().setNum(((GeometryPoint*)geometry)->latitude()));
-        QMessageBox::information(this, geometry->getMetadata("name").toString(), message);
+        QMessageBox::information(this, geometry->getMetadata("name").toString(), geometry->getMetadata("name").toString());
     }
 }
 

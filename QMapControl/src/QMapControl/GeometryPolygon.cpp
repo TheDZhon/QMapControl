@@ -30,42 +30,26 @@
 
 namespace qmapcontrol
 {
-    GeometryPolygon::GeometryPolygon(const std::vector< std::shared_ptr<GeometryPoint> >& points, const QBrush& brush, const QPen& pen, const int& zoom_minimum, const int& zoom_maximum)
-        : Geometry(Geometry::GeometryType::GeometryPolygon, pen, zoom_minimum, zoom_maximum),
-          m_points(points),
-          m_brush(brush)
+    GeometryPolygon::GeometryPolygon(const std::vector<PointWorldCoord>& points, const int& zoom_minimum, const int& zoom_maximum)
+        : Geometry(Geometry::GeometryType::GeometryPolygon, zoom_minimum, zoom_maximum),
+          m_points(points)
     {
 
     }
 
-    void GeometryPolygon::setBrush(const QBrush& brush)
-    {
-        // Set the brush to use.
-        m_brush = brush;
-
-        // Emit that we need to redraw to display this change.
-        emit requestRedraw();
-    }
-
-    std::vector< std::shared_ptr<GeometryPoint> > GeometryPolygon::points() const
+    std::vector<PointWorldCoord> GeometryPolygon::points() const
     {
         // Return the points.
         return m_points;
     }
 
-    void GeometryPolygon::setPoints(const std::vector< std::shared_ptr<GeometryPoint> >& points)
+    void GeometryPolygon::setPoints(const std::vector<PointWorldCoord>& points)
     {
         // Set the new points.
         m_points = points;
 
         // Emit that we need to redraw to display this change.
         emit requestRedraw();
-    }
-
-    std::vector< std::shared_ptr<GeometryPoint> > GeometryPolygon::touchedPoints() const
-    {
-        // Return the touched points.
-        return m_touched_points;
     }
 
     QRectF GeometryPolygon::boundingBox(const int& /*controller_zoom*/) const
@@ -77,7 +61,7 @@ namespace qmapcontrol
         for(const auto& point : m_points)
         {
             // Add the point to be drawn.
-            polygon.append(point->coord().rawPoint());
+            polygon.append(point.rawPoint());
         }
 
         // Return the bounding box.
@@ -86,38 +70,38 @@ namespace qmapcontrol
 
     bool GeometryPolygon::touches(const QGraphicsItem& area_px, const int& controller_zoom)
     {
-        /// @TODO check this!?!?!
+        /// @todo change to world coordinates.
 
         // Default return success.
         bool return_touches(false);
 
-        // Clear previous touches result.
-        m_touched_points.clear();
+//        // Clear previous touches result.
+//        m_touched_points.clear();
 
-        // Check the geometry is visible.
-        if(isVisible(controller_zoom))
-        {
-            // Loop through each point.
-            for(const auto& point : m_points)
-            {
-                // Does the touch area contain the point?
-                if(point->touches(area_px, controller_zoom))
-                {
-                    // Add the point to the touches list.
-                    m_touched_points.push_back(point);
+//        // Check the geometry is visible.
+//        if(isVisible(controller_zoom))
+//        {
+//            // Loop through each point.
+//            for(const auto& point : m_points)
+//            {
+//                // Does the touch area contain the point?
+//                if(point->touches(area_px, controller_zoom))
+//                {
+//                    // Add the point to the touches list.
+//                    m_touched_points.push_back(point);
 
-                    // Set that we have touched.
-                    return_touches = true;
-                }
-            }
+//                    // Set that we have touched.
+//                    return_touches = true;
+//                }
+//            }
 
-            // Did we find at least one geometry touching?
-            if(return_touches)
-            {
-                // Emit that the geometry has been clicked.
-                emit geometryClicked(this);
-            }
-        }
+//            // Did we find at least one geometry touching?
+//            if(return_touches)
+//            {
+//                // Emit that the geometry has been clicked.
+//                emit geometryClicked(this);
+//            }
+//        }
 
         // Return our success.
         return return_touches;
@@ -135,7 +119,7 @@ namespace qmapcontrol
             for(const auto& point : m_points)
             {
                 // Add the point to be drawn.
-                polygon.append(projection::get().toPointWorldPx(point->coord(), controller_zoom).rawPoint());
+                polygon.append(projection::get().toPointWorldPx(point, controller_zoom).rawPoint());
             }
 
             // Does the polygon intersect with the backbuffer rect?

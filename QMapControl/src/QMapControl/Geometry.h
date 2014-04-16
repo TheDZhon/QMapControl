@@ -36,9 +36,11 @@
 
 // STL includes.
 #include <map>
+#include <memory>
 
 // Local includes.
 #include "qmapcontrol_global.h"
+#include "Point.h"
 
 namespace qmapcontrol
 {
@@ -46,7 +48,7 @@ namespace qmapcontrol
     /*!
      * Geometry is the root class of the hierarchy. Geometry is an abstract (non-instantiable) class.
      *
-     * This class and the derived classes Point, Curve and LineString are leant on the Simple
+     * This class and the derived classes Point and LineString are leant on the Simple
      * Feature Specification of the Open Geospatial Consortium.
      * @see www.opengeospatial.com
      *
@@ -60,16 +62,33 @@ namespace qmapcontrol
         //! Geometry types.
         enum class GeometryType
         {
-            /// GeometryCurve.
-            ///GeometryCurve,
             /// GeometryLineString.
             GeometryLineString,
             /// GeometryPoint.
             GeometryPoint,
-            /// Geometry that manages a QWidget.
-            GeometryPointWidget,
             /// GeometryPolygon.
-            GeometryPolygon
+            GeometryPolygon,
+            /// Geometry that manages a QWidget.
+            GeometryWidget
+        };
+
+        //! Alignment types.
+        enum class AlignmentType
+        {
+            /// Align on middle point.
+            Middle,
+            /// Align on top left point.
+            TopLeft,
+            /// Align on top right point.
+            TopRight,
+            /// Align on top middle point.
+            TopMiddle,
+            /// Align on bottom left point.
+            BottomLeft,
+            /// Align on bottom right point.
+            BottomRight,
+            /// Align on bottom middle point.
+            BottomMiddle
         };
 
     public:
@@ -83,17 +102,66 @@ namespace qmapcontrol
         virtual ~Geometry() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
 
         /*!
+         * Fetches whether the geometry is visible.
+         * @param controller_zoom The current controller zoom.
+         * @return whether the geometry is visible.
+         */
+        bool isVisible(const int& controller_zoom) const;
+
+        /*!
+         * Set the visibility of the geometry.
+         * @param enabled Whether to make the geometry visible.
+         */
+        virtual void setVisible(const bool& enabled);
+
+        /*!
          * Fetches the geometry type.
          * @return the geometry type.
          */
         GeometryType getGeometryType() const;
 
         /*!
+         * Fetches the pen to draw the geometry with (outline).
+         * @return the QPen to used for drawing.
+         */
+        const QPen& getPen();
+
+        /*!
+         * Sets the pen to draw the geometry with (outline).
+         * @param pen The QPen to used for drawing.
+         */
+        virtual void setPen(const std::shared_ptr<QPen>& pen);
+
+        /*!
+         * Sets the pen to draw the geometry with (outline).
+         * @param pen The QPen to used for drawing.
+         */
+        virtual void setPen(const QPen& pen);
+
+        /*!
+         * Fetches the brush to draw the geometry with (fill).
+         * @return the QBrush to used for drawing.
+         */
+        const QBrush& getBrush();
+
+        /*!
+         * Sets the brush to draw the geometry with (fill).
+         * @param brush The QBrush to used for drawing.
+         */
+        virtual void setBrush(const std::shared_ptr<QBrush>& brush);
+
+        /*!
+         * Sets the brush to draw the geometry with (fill).
+         * @param brush The QBrush to used for drawing.
+         */
+        virtual void setBrush(const QBrush& brush);
+
+        /*!
          * Fetches a meta-data value.
          * @param key The meta-data key.
          * @return the meta-data value.
          */
-        QVariant getMetadata(const std::string& key) const;
+        QVariant& getMetadata(const std::string& key);
 
         /*!
          * Set a meta-data key/value.
@@ -103,30 +171,22 @@ namespace qmapcontrol
         void setMetadata(const std::string& key, const QVariant& value);
 
         /*!
-         * Fetches the pen to draw the geometry with.
-         * @return the QPen to used for drawing.
+         * Set the meta-data value to display with the geometry.
+         * @param key The meta-data's key for the value to display.
+         * @param zoom_minimum The minimum zoom to display the meta-data value at.
+         * @param alignment_type The alignment type to use when displaying the meta-data value.
+         * @param alignment_offset_px The offset that the meta-data value is displayed from in pixels.
          */
-        const QPen& getPen() const;
+        void setMetadataDisplayed(const std::string& key, const int& zoom_minimum = 10, const AlignmentType& alignment_type = AlignmentType::TopRight, const double& alignment_offset_px = 5.0);
 
         /*!
-         * Sets the pen to draw the geometry with.
-         * @param pen The QPen to used for drawing.
+         * Calculates the top-left world point in pixels after the alignment type has been applied.
+         * @param point_px The world point in pixels to align.
+         * @param alignment_type The alignment type of the world point.
+         * @param geometry_size_px The geometry object (widget/pixmap) at this zoom level.
+         * @return the top-left world point in pixels.
          */
-        virtual void setPen(const QPen& pen);
-
-        /*!
-         * Fetches whether the geometry is visible.
-         * @param controller_zoom The current controller zoom.
-         * @return whether the geometry is visible.
-         */
-        bool isVisible(const int& controller_zoom) const;
-
-    public slots:
-        /*!
-         * Set the visibility of the geometry.
-         * @param enabled Whether to make the geometry visible.
-         */
-        virtual void setVisible(const bool& enabled);
+        PointWorldPx calculateTopLeftPoint(const PointWorldPx& point_px, const AlignmentType& alignment_type, const QSizeF& geometry_size_px) const;
 
     public:
         /*!
@@ -157,11 +217,10 @@ namespace qmapcontrol
         /*!
          * This construct a Geometry.
          * @param geometry_type The geometry type.
-         * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        Geometry(const GeometryType& geometry_type, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        Geometry(const GeometryType& geometry_type, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
     signals:
         /*!
@@ -195,16 +254,32 @@ namespace qmapcontrol
         /// The geometry type.
         const GeometryType m_geometry_type;
 
-        /// The pen to use when drawing a geometry.
-        QPen m_pen;
-
         /// Minimum zoom level to show this geometry.
         int m_zoom_minimum;
 
         /// Maximum zoom level to show this geometry.
         int m_zoom_maximum;
 
+        /// The pen to use when drawing a geometry.
+        std::shared_ptr<QPen> m_pen;
+
+        /// The brush to use when drawing a geometry.
+        std::shared_ptr<QBrush> m_brush;
+
         /// Meta-data storage.
         std::map<std::string, QVariant> m_metadata;
+
+    protected:
+        /// The meta-data's key for the value to display.
+        std::string m_metadata_displayed_key;
+
+        /// The minimum zoom to display the meta-data value at.
+        int m_metadata_displayed_zoom_minimum;
+
+        /// The alignment type to use when displaying the meta-data value.
+        AlignmentType m_metadata_displayed_alignment_type;
+
+        /// The offset that the meta-data value is displayed from in pixels.
+        double m_metadata_displayed_alignment_offset_px;
     };
 }

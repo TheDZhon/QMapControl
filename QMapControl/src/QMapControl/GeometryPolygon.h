@@ -31,7 +31,7 @@
 // Local includes.
 #include "qmapcontrol_global.h"
 #include "Geometry.h"
-#include "GeometryPoint.h"
+#include "Point.h"
 
 namespace qmapcontrol
 {
@@ -49,12 +49,10 @@ namespace qmapcontrol
         /*!
          * The constructor of a Polygon takes a list of points to form a polygon.
          * @param points The list of Geometry Points.
-         * @param brush The brush to draw with.
-         * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPolygon(const std::vector<std::shared_ptr<GeometryPoint>>& points, const QBrush& brush = QBrush(), const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPolygon(const std::vector<PointWorldCoord>& points, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Disable copy constructor.
         ///GeometryPolygon(const GeometryPolygon&) = delete; @todo re-add once MSVC supports default/delete syntax.
@@ -66,29 +64,16 @@ namespace qmapcontrol
         virtual ~GeometryPolygon() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
 
         /*!
-         * Set the brush to use (fill).
-         * @param brush The brush to set.
-         */
-        void setBrush(const QBrush& brush);
-
-        /*!
          * Fetches the list of points that form the polygon.
          * @return the list of points that form the polygon.
          */
-        std::vector<std::shared_ptr<GeometryPoint>> points() const;
+        std::vector<PointWorldCoord> points() const;
 
         /*!
          * Sets the points to use for the Polygon.
          * @param points The points to use for the Polygon.
          */
-        void setPoints(const std::vector<std::shared_ptr<GeometryPoint>>& points);
-
-        /*!
-         * When a mouse press event touches points within a Polygon,
-         * this function contains the points that were actually touched.
-         * @return the points that were touched.
-         */
-        std::vector<std::shared_ptr<GeometryPoint>> touchedPoints() const;
+        void setPoints(const std::vector<PointWorldCoord>& points);
 
     public:
         /*!
@@ -123,10 +108,7 @@ namespace qmapcontrol
 
     private:
         /// The points that the polygon is made up of.
-        std::vector<std::shared_ptr<GeometryPoint>>	m_points;
-
-        /// The points that were touched on the last mouse press event.
-        std::vector<std::shared_ptr<GeometryPoint>> m_touched_points;
+        std::vector<PointWorldCoord> m_points;
 
         /// The brush to use (fill).
         QBrush m_brush;

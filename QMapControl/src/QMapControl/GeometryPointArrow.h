@@ -48,11 +48,10 @@ namespace qmapcontrol
          * This constructor creates a point which will display a pixmap with a circle.
          * @param point_coord The longitude/latitude coordinate (x/y).
          * @param size_px The arrow size in pixels.
-         * @param pen The pen to draw with.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPointArrow(const PointWorldCoord& point_coord, const qreal& heading, const int& size_px, const QPen& pen = QPen(), const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPointArrow(const PointWorldCoord& point_coord, const qreal& heading, const int& size_px, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Disable copy constructor.
         ///GeometryPointArrow(const GeometryPointArrow&) = delete; @todo re-add once MSVC supports default/delete syntax.

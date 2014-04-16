@@ -101,21 +101,21 @@ private slots:
      * @param press_coordinate The corresponding world coordinate of the mouse press.
      * @param release_coordinate The corresponding world coordinate of the mouse release.
      */
-    void main_mouseEventReleaseCoordinate(QMouseEvent* mouse_event, QPointF press_coordinate, QPointF release_coordinate);
+    void main_mouseEventReleaseCoordinate(QMouseEvent* mouse_event, PointWorldCoord press_coordinate, PointWorldCoord release_coordinate);
 
     /*!
      * Slot to handle mouse release events in the main map control.
      * @param mouse_event The QMouseEvent that occured.
      * @param press_coordinate The corresponding world coordinate of the mouse press.
      */
-    void main_mouseEventPressCoordinate(QMouseEvent* mouse_event, QPointF press_coordinate);
+    void main_mouseEventPressCoordinate(QMouseEvent* mouse_event, PointWorldCoord press_coordinate);
 
     /*!
      * Slot to handle mouse press events in the "mini" map control.
      * @param mouse_event The QMouseEvent that occured.
      * @param press_coordinate The corresponding world coordinate of the mouse press.
      */
-    void mini_mouseEventPressCoordinate(QMouseEvent* mouse_event, QPointF press_coordinate);
+    void mini_mouseEventPressCoordinate(QMouseEvent* mouse_event, PointWorldCoord press_coordinate);
 
 private:
     /// The main map control.

@@ -59,8 +59,8 @@ namespace qmapcontrol
             xtile = n * ((lon_deg + 180) / 360) : floor the answer?
             ytile = n * (1 - (log(tan(lat_rad) + sec(lat_rad)) / π)) / 2 : floor the answer?
          */
-        const qreal x_px((tilesX(zoom) * ImageManager::get().tileSizePx()) * ((point_coord.x() + 180.0) / 360.0));
-        const qreal y_px((tilesY(zoom) * ImageManager::get().tileSizePx()) * (1.0 - (std::log(std::tan(point_coord.y() * M_PI / 180.0) + (1.0 / std::cos(point_coord.y() * M_PI / 180.0))) / M_PI )) / 2.0);
+        const qreal x_px((tilesX(zoom) * ImageManager::get().tileSizePx()) * ((point_coord.longitude() + 180.0) / 360.0));
+        const qreal y_px((tilesY(zoom) * ImageManager::get().tileSizePx()) * (1.0 - (std::log(std::tan(point_coord.latitude() * M_PI / 180.0) + (1.0 / std::cos(point_coord.latitude() * M_PI / 180.0))) / M_PI )) / 2.0);
 
         // Return the converted point (x/y pixel point - 0,0 is screen top left).
         return PointWorldPx(x_px, y_px);
