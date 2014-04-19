@@ -367,7 +367,7 @@ void Multidemo::geometriesSelectedEvent(std::map<std::string, std::vector<std::s
     }
 }
 
-void Multidemo::geometryClickEvent(Geometry* geometry)
+void Multidemo::geometryClickEvent(const Geometry* geometry)
 {
     // Is it a GeometryPoint.
     if(geometry->getGeometryType() == Geometry::GeometryType::GeometryPoint)

@@ -75,13 +75,13 @@ private slots:
      * Slot called when a geometry is clicked.
      * @param geometry The geometry that was clicked.
      */
-    void geometryClicked(Geometry* geometry);
+    void geometryClicked(const Geometry* geometry);
 
     /*!
      * Slot called when a pub geometry is clicked.
      * @param geometry The geometry that was clicked.
      */
-    void geometryClickedPub(Geometry* geometry);
+    void geometryClickedPub(const Geometry* geometry);
 
     /*!
      * Slot called to start adding a note.
@@ -106,7 +106,7 @@ private slots:
      * Slot called to start editing a geometry.
      * @param geometry The geometry to edit.
      */
-    void editNote(Geometry* geometry);
+    void editNote(const Geometry* geometry);
 
     /*!
      * Slot called to start calculating distances.

@@ -34,7 +34,9 @@
 #include <utility>
 
 // Local includes.
+#include "GeometryLineString.h"
 #include "GeometryPoint.h"
+#include "GeometryPolygon.h"
 #include "ImageManager.h"
 #include "Projection.h"
 
@@ -311,12 +313,12 @@ namespace qmapcontrol
             if(partial)
             {
                 // Check whether the geometry bounding box is partially contained by the viewport rect.
-                return_visible = getViewportRect().intersects(geometry->boundingBox(m_current_zoom));
+                return_visible = getViewportRect().intersects(geometry->boundingBox(m_current_zoom).rawRect());
             }
             else
             {
                 // Check whether the geometry bounding box is totally contained by the viewport rect.
-                return_visible = getViewportRect().contains(geometry->boundingBox(m_current_zoom));
+                return_visible = getViewportRect().contains(geometry->boundingBox(m_current_zoom).rawRect());
             }
         }
 
@@ -699,26 +701,49 @@ namespace qmapcontrol
                 bottom_right_px = toPointWorldPx(m_mouse_position_pressed_px + mouse_diff);
             }
 
-            // Construct area to check.
-            // Default to rect.
-            std::unique_ptr<QGraphicsItem> area_px(new QGraphicsRectItem(QRectF(top_left_px.rawPoint(), bottom_right_px.rawPoint())));
+            // Convert to world coordinates.
+            const PointWorldCoord top_left_coord(projection::get().toPointWorldCoord(top_left_px, m_current_zoom));
+            const PointWorldCoord bottom_right_coord(projection::get().toPointWorldCoord(bottom_right_px, m_current_zoom));
+
+            // Construct geometry to compare against (default is polygon/rect).
+            std::unique_ptr<Geometry> geometry_to_compare(new GeometryPolygon({top_left_coord, bottom_right_coord}));
             if(mouse_mode == QMapControl::MouseButtonMode::SelectLine)
             {
-                // Line check.
-                area_px.reset(new QGraphicsLineItem(top_left_px.x(), top_left_px.y(), bottom_right_px.x(), bottom_right_px.y()));
-
                 // Set the line with a 'fuzzy-factor' around it using the pen.
                 /// @TODO expose the fuzzy factor as a setting.
                 const qreal fuzzy_factor_px = 5.0;
-                QPen line_pen(static_cast<QGraphicsLineItem*>(area_px.get())->pen());
+                QPen line_pen;
                 line_pen.setWidthF(fuzzy_factor_px);
-                static_cast<QGraphicsLineItem*>(area_px.get())->setPen(line_pen);
+
+                // Create line string geometry.
+                geometry_to_compare.reset(new GeometryLineString({top_left_coord, bottom_right_coord}));
+                geometry_to_compare->setPen(line_pen);
             }
             else if(mouse_mode == QMapControl::MouseButtonMode::SelectEllipse)
             {
-                // Ellipse check.
-                area_px.reset(new QGraphicsEllipseItem(QRectF(top_left_px.rawPoint(), bottom_right_px.rawPoint())));
+                /// @todo!
             }
+
+//            // Construct area to check.
+//            // Default to rect.
+//            std::unique_ptr<QGraphicsItem> area_px(new QGraphicsRectItem(QRectF(top_left_px.rawPoint(), bottom_right_px.rawPoint())));
+//            if(mouse_mode == QMapControl::MouseButtonMode::SelectLine)
+//            {
+//                // Line check.
+//                area_px.reset(new QGraphicsLineItem(top_left_px.x(), top_left_px.y(), bottom_right_px.x(), bottom_right_px.y()));
+
+//                // Set the line with a 'fuzzy-factor' around it using the pen.
+//                /// @TODO expose the fuzzy factor as a setting.
+//                const qreal fuzzy_factor_px = 5.0;
+//                QPen line_pen(static_cast<QGraphicsLineItem*>(area_px.get())->pen());
+//                line_pen.setWidthF(fuzzy_factor_px);
+//                static_cast<QGraphicsLineItem*>(area_px.get())->setPen(line_pen);
+//            }
+//            else if(mouse_mode == QMapControl::MouseButtonMode::SelectEllipse)
+//            {
+//                // Ellipse check.
+//                area_px.reset(new QGraphicsEllipseItem(QRectF(top_left_px.rawPoint(), bottom_right_px.rawPoint())));
+//            }
 
             // Collection of selected geometries.
             std::map<std::string, std::vector<std::shared_ptr<Geometry>>> selected_geometries;
@@ -730,11 +755,11 @@ namespace qmapcontrol
                 if(layer->isVisible(m_current_zoom))
                 {
                     // Loop through each geometry for the layer.
-                    for(const auto& geometry : layer->getGeometries(QRectF(projection::get().toPointWorldCoord(top_left_px, m_current_zoom).rawPoint(), projection::get().toPointWorldCoord(bottom_right_px, m_current_zoom).rawPoint())))
-                    {
+                    for(const auto& geometry : layer->getGeometries(RectWorldCoord(top_left_coord, bottom_right_coord))){
                         // Does the geometry touch our area rect?
                         /// @TODO look at using coordinates instead of pixel areas?
-                        if(geometry->touches(*(area_px.get()), m_current_zoom))
+//                        if(geometry->touches(*(area_px.get()), m_current_zoom))
+                        if(geometry->touches(geometry_to_compare.get(), m_current_zoom))
                         {
                             // Add the geometry to the selected collection.
                             selected_geometries[layer->getName()].push_back(geometry);
@@ -1427,7 +1452,7 @@ namespace qmapcontrol
             // Calculate the new backbuffer rect (based on the saved backbuffer map focus point).
             // Note: m_viewport_center_px is the same as (m_viewport_size_px / 2)
             const PointPx viewport_offset_px(m_viewport_size_px.width() / 2.0, m_viewport_size_px.height() / 2.0);
-            RectWorldPx backbuffer_rect_px(toPointWorldPx(PointViewportPx(0, 0) - viewport_offset_px, backbuffer_map_focus_px), toPointWorldPx(PointViewportPx(m_viewport_size_px.width(), m_viewport_size_px.height()) + viewport_offset_px, backbuffer_map_focus_px));
+            const RectWorldPx backbuffer_rect_px(toPointWorldPx(PointViewportPx(0, 0) - viewport_offset_px, backbuffer_map_focus_px), toPointWorldPx(PointViewportPx(m_viewport_size_px.width(), m_viewport_size_px.height()) + viewport_offset_px, backbuffer_map_focus_px));
 
             // Translate to the backbuffer top/left point.
             painter_back_buffer.translate(-backbuffer_rect_px.topLeftPx().rawPoint());
@@ -1436,7 +1461,7 @@ namespace qmapcontrol
             for(const auto& layer : getLayers())
             {
                 // Draw the layer to the backbuffer.
-                layer->draw(&painter_back_buffer, backbuffer_rect_px, m_current_zoom);
+                layer->draw(painter_back_buffer, backbuffer_rect_px, m_current_zoom);
             }
 
             // Undo the backbuffer top/left point translation.
@@ -1453,14 +1478,14 @@ namespace qmapcontrol
 
     /// Private slots...
     // Geometry management.
-    void QMapControl::geometryPositionChanged(Geometry* geometry)
+    void QMapControl::geometryPositionChanged(const Geometry* geometry)
     {
         // Is it a point geometry?
         if(geometry->getGeometryType() == Geometry::GeometryType::GeometryPoint)
         {
             // Calculate the delta between the current map focus and the new geometry position.
             const PointWorldPx start_px(projection::get().toPointWorldPx(m_map_focus_coord, m_current_zoom));
-            const PointWorldPx dest_px(projection::get().toPointWorldPx(static_cast<GeometryPoint*>(geometry)->coord(), m_current_zoom));
+            const PointWorldPx dest_px(projection::get().toPointWorldPx(static_cast<const GeometryPoint*>(geometry)->coord(), m_current_zoom));
             const PointPx delta_px(dest_px - start_px);
 
             // Scroll the view

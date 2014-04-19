@@ -88,23 +88,23 @@ namespace qmapcontrol
          * @param controller_zoom The current controller zoom.
          * @return the bounding box.
          */
-        virtual QRectF boundingBox(const int& controller_zoom) const final;
+        RectWorldCoord boundingBox(const int& controller_zoom) const final;
 
         /*!
-         * Checks if any geometries are located inside the specified area.
-         * @param area_px The polygon area in pixels to check for points.
+         * Checks if the geometry touches (intersects) with another geometry.
+         * @param geometry_coord The geometry to check against.
          * @param controller_zoom The current controller zoom.
-         * @return whether the geometries are located inside the specified area.
+         * @return whether the geometries touch (intersects).
          */
-        virtual bool touches(const QGraphicsItem& area_px, const int& controller_zoom) override;
+        bool touches(const Geometry* geometry_coord, const int& controller_zoom) const final;
 
         /*!
          * Draws the geometry to a pixmap using the provided painter.
          * @param painter The painter that will draw to the pixmap.
-         * @param backbuffer_rect_px Only draw geometries that are contained in the backbuffer rect (pixels).
+         * @param backbuffer_rect_coord Only draw geometries that are contained in the backbuffer rect (coord).
          * @param controller_zoom The current controller zoom.
          */
-        virtual void draw(QPainter* painter, const QRectF& backbuffer_rect_px, const int& controller_zoom) override;
+        void draw(QPainter& painter, const RectWorldCoord& backbuffer_rect_coord, const int& controller_zoom) final;
 
     private:
         //! Disable copy constructor.

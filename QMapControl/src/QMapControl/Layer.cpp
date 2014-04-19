@@ -39,7 +39,7 @@ namespace qmapcontrol
 {
     Layer::Layer(const std::string& name, const int& zoom_minimum, const int& zoom_maximum, QObject* parent)
         : QObject(parent),
-          m_geometries(50, QRectF(QPointF(-180.0, 90.0), QPointF(180.0, -90.0))),
+          m_geometries(50, RectWorldCoord(PointWorldCoord(-180.0, 90.0), PointWorldCoord(180.0, -90.0))),
           m_visible(true),
           m_mouse_events_enabled(true),
           m_name(name),
@@ -133,7 +133,7 @@ namespace qmapcontrol
         m_mouse_events_enabled = enable;
     }
 
-    const std::set< std::shared_ptr<Geometry> > Layer::getGeometries(const QRectF& range_coord) const
+    const std::set< std::shared_ptr<Geometry> > Layer::getGeometries(const RectWorldCoord& range_coord) const
     {
         // Gain a read lock to protect the geometries container.
         QReadLocker locker(&m_geometries_mutex);
@@ -399,17 +399,19 @@ namespace qmapcontrol
                 const PointWorldPx mouse_point_px(projection::get().toPointWorldPx(mouse_point_coord, controller_zoom));
 
                 // Calculate a rect around the mouse point with a 'fuzzy-factor' around it in pixels.
-                const QGraphicsRectItem mouse_area_px(mouse_point_px.x() - fuzzy_factor_px, mouse_point_px.y() - fuzzy_factor_px, (fuzzy_factor_px * 2.0), (fuzzy_factor_px * 2.0));
+                const RectWorldPx mouse_rect_px(PointWorldPx(mouse_point_px.x() - fuzzy_factor_px, mouse_point_px.y() - fuzzy_factor_px), PointWorldPx(mouse_point_px.x() + fuzzy_factor_px, mouse_point_px.y() + fuzzy_factor_px));
 
                 // Calculate a rect around the mouse point with a 'fuzzy-factor' around it in coordinates.
-                /// @todo fix!
-                const QRectF mouse_area_coord(projection::get().toPointWorldCoord(PointWorldPx(mouse_area_px.rect().left(), mouse_area_px.rect().top()), controller_zoom).rawPoint(), projection::get().toPointWorldCoord(PointWorldPx(mouse_area_px.rect().right(), mouse_area_px.rect().bottom()), controller_zoom).rawPoint());
+                const RectWorldCoord mouse_rect_coord(projection::get().toPointWorldCoord(mouse_rect_px.topLeftPx(), controller_zoom), projection::get().toPointWorldCoord(mouse_rect_px.bottomRightPx(), controller_zoom));
+
+                // Create a QGraphicsRectItem to perform touches check, as required.
+                const GeometryPolygon touches_rect_coord({ mouse_rect_coord.topLeftCoord(), mouse_rect_coord.bottomRightCoord() });
 
                 // Check each geometry to see it is contained in our touch area.
-                for(const auto& geometry : getGeometries(mouse_area_coord))
+                for(const auto& geometry : getGeometries(mouse_rect_coord))
                 {
                     // Does it touch? (Will emit if it does).
-                    if(geometry->touches(mouse_area_px, controller_zoom))
+                    if(geometry->touches(&touches_rect_coord, controller_zoom))
                     {
                         // Emit that the geometry has been clicked.
                         emit geometryClicked(geometry.get());
@@ -419,7 +421,7 @@ namespace qmapcontrol
         }
     }
 
-    void Layer::draw(QPainter* painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const
+    void Layer::draw(QPainter& painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const
     {
         // Check the layer is visible.
         if(isVisible(controller_zoom))
@@ -427,8 +429,11 @@ namespace qmapcontrol
             // Draw map adapters.
             drawMapAdapters(painter, backbuffer_rect_px, controller_zoom);
 
+            // Calculate the world coordinates.
+            const RectWorldCoord backbuffer_rect_coord(projection::get().toPointWorldCoord(backbuffer_rect_px.topLeftPx(), controller_zoom), projection::get().toPointWorldCoord(backbuffer_rect_px.bottomRightPx(), controller_zoom));
+
             // Draw geometries.
-            drawGeometries(painter, backbuffer_rect_px, controller_zoom);
+            drawGeometries(painter, backbuffer_rect_coord, controller_zoom);
         }
     }
 
@@ -446,7 +451,7 @@ namespace qmapcontrol
         }
     }
 
-    void Layer::drawMapAdapters(QPainter* painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const
+    void Layer::drawMapAdapters(QPainter& painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const
     {
         // For each map in the layer.
         for(const auto& map_adapter : getMapAdapters())
@@ -481,7 +486,7 @@ namespace qmapcontrol
                             const QRectF tile_rect_px(QPointF(i * tile_size_px.width(), j * tile_size_px.height()), tile_size_px);
 
                             // Draw the tile.
-                            painter->drawPixmap(tile_rect_px.topLeft(), ImageManager::get().getImage(map_adapter->tileQuery(i, j, controller_zoom)));
+                            painter.drawPixmap(tile_rect_px.topLeft(), ImageManager::get().getImage(map_adapter->tileQuery(i, j, controller_zoom)));
                         }
                     }
                 }
@@ -531,23 +536,19 @@ namespace qmapcontrol
         }
     }
 
-    void Layer::drawGeometries(QPainter* painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const
+    void Layer::drawGeometries(QPainter& painter, const RectWorldCoord& backbuffer_rect_coord, const int& controller_zoom) const
     {
         // Save the current painter's state.
-        painter->save();
-
-        // Calculate the range (convert backbuffer rect to coordinates).
-        /// @todo fix!
-        const QRectF range(projection::get().toPointWorldCoord(backbuffer_rect_px.topLeftPx(), controller_zoom).rawPoint(), projection::get().toPointWorldCoord(backbuffer_rect_px.bottomRightPx(), controller_zoom).rawPoint());
+        painter.save();
 
         // Loop through each geometry and draw it.
-        for(const auto& geometry : getGeometries(range))
+        for(const auto& geometry : getGeometries(backbuffer_rect_coord))
         {
             // Draw the geometry (this will not move widgets).
-            geometry->draw(painter, backbuffer_rect_px.rawRect(), controller_zoom);
+            geometry->draw(painter, backbuffer_rect_coord, controller_zoom);
         }
 
         // Restore the painter's state.
-        painter->restore();
+        painter.restore();
     }
 }

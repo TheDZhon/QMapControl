@@ -543,7 +543,7 @@ namespace qmapcontrol
          * Called when a geometry changes its position.
          * @param geometry The geometry that change position.
          */
-        void geometryPositionChanged(Geometry* geometry);
+        void geometryPositionChanged(const Geometry* geometry);
 
         // Map management.
         /*!
@@ -571,7 +571,7 @@ namespace qmapcontrol
          * Signal emitted when a geometry is clicked.
          * @param geometry The clicked Geometry.
          */
-        void geometryClicked(Geometry* geometry);
+        void geometryClicked(const Geometry* geometry);
 
         /*!
          * Signal emitted when geometries are selected (see MouseButtonModes).

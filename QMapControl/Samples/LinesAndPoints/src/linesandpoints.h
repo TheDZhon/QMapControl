@@ -38,7 +38,7 @@ public slots:
      * Called when a geometry is clicked.
      * @param geometry The clicked Geometry.
      */
-    void geometryClickEvent(Geometry* geometry);
+    void geometryClickEvent(const Geometry* geometry);
 
 private:
     /// The main map control.

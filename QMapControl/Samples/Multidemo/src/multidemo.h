@@ -93,7 +93,7 @@ private slots:
      * Slot to handle a geometry that has been clicked.
      * @param geometry The geometry that has been clicked.
      */
-    void geometryClickEvent(Geometry* geometry);
+    void geometryClickEvent(const Geometry* geometry);
 
     /*!
      * Slot to handle mouse press events in the main map control.

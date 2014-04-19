@@ -29,6 +29,7 @@
 #include <cmath>
 
 // Local includes.
+#include "GeometryPolygon.h"
 #include "Projection.h"
 
 namespace qmapcontrol
@@ -139,6 +140,7 @@ namespace qmapcontrol
         // Check the geometry is visible and a widget exists.
         if(isVisible(controller_zoom) && m_widget != nullptr)
         {
+            /// @todo move where offset is applied to the setGeometry function!
             // Translate the point into the current world pixel point, and remove the offset.
             const PointWorldPx point_px(projection::get().toPointWorldPx(m_point_coord, controller_zoom) - offset_px);
 
@@ -153,31 +155,80 @@ namespace qmapcontrol
         }
     }
 
-    QRectF GeometryWidget::boundingBox(const int& /*controller_zoom*/) const
+    RectWorldCoord GeometryWidget::boundingBox(const int& controller_zoom) const
     {
-        // Default bounding box.
-        QRectF return_box;
+        // Translate the point into the current world pixel point, and remove the offset.
+        const PointWorldPx point_px(projection::get().toPointWorldPx(m_point_coord, controller_zoom));
 
-        /// @todo implement....
+        // Update the object size for the widget size for this controller zoom.
+        const QSizeF widget_size_px(calculateGeometrySizePx(controller_zoom));
 
-        // Return the bounding box.
-        return return_box;
+        // Calculate the top-left and bottom-right points.
+        const PointWorldPx top_left_point_px(calculateTopLeftPoint(point_px, m_alignment_type, widget_size_px));
+        const PointWorldPx bottom_right_px(top_left_point_px.x() + widget_size_px.width(), top_left_point_px.y() + widget_size_px.height());
+
+        // Returnt the bounding box in world coordinates.
+        return RectWorldCoord(projection::get().toPointWorldCoord(top_left_point_px, controller_zoom), projection::get().toPointWorldCoord(bottom_right_px, controller_zoom));
     }
 
-    bool GeometryWidget::touches(const QGraphicsItem& /*area_px*/, const int& /*controller_zoom*/)
+    bool GeometryWidget::touches(const Geometry* geometry_coord, const int& controller_zoom) const
     {
-        /// @todo change to world coordinates.
-
         // Default return success.
         bool return_touches(false);
 
-        /// @todo implement....
+        // Check we are visible and the geometry to compare against is valid.
+        if(isVisible(controller_zoom) && geometry_coord != nullptr)
+        {
+            // Switch to the correct geometry type.
+            switch(geometry_coord->getGeometryType())
+            {
+                case GeometryType::GeometryLineString:
+                {
+                    /// @todo Line String calculation.
+
+                    // Finished.
+                    break;
+                }
+                case GeometryType::GeometryPoint:
+                case GeometryType::GeometryWidget:
+                {
+                    // Check if the bounding boxes intersect.
+                    if(geometry_coord->boundingBox(controller_zoom).rawRect().intersects(boundingBox(controller_zoom).rawRect()))
+                    {
+                        // Set that we have touched.
+                        return_touches = true;
+                    }
+
+                    // Finished.
+                    break;
+                }
+                case GeometryType::GeometryPolygon:
+                {
+                    // Check if the poylgon intersects with our bounding box.
+                    if(static_cast<const GeometryPolygon*>(geometry_coord)->toQPolygonF().intersected(boundingBox(controller_zoom).rawRect()).empty() == false)
+                    {
+                        // Set that we have touched.
+                        return_touches = true;
+                    }
+
+                    // Finished.
+                    break;
+                }
+            }
+
+            // Have we touched?
+            if(return_touches)
+            {
+                // Emit that the geometry has been clicked.
+                emit geometryClicked(this);
+            }
+        }
 
         // Return our success.
         return return_touches;
     }
 
-    void GeometryWidget::draw(QPainter* /*painter*/, const QRectF& /*backbuffer_rect_px*/, const int& /*controller_zoom*/)
+    void GeometryWidget::draw(QPainter& /*painter*/, const RectWorldCoord& /*backbuffer_rect_coord*/, const int& /*controller_zoom*/)
     {
         // Do nothing.
     }

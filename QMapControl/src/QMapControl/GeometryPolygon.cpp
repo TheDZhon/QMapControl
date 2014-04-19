@@ -52,7 +52,23 @@ namespace qmapcontrol
         emit requestRedraw();
     }
 
-    QRectF GeometryPolygon::boundingBox(const int& /*controller_zoom*/) const
+    const QPolygonF GeometryPolygon::toQPolygonF() const
+    {
+        // The QPolygonF to return.
+        QPolygonF return_polygon;
+
+        // Loop through each point to add it to the QPolygonF.
+        for(const auto& point : m_points)
+        {
+            // Add the point.
+            return_polygon.append(point.rawPoint());
+        }
+
+        // Return the QPolygonF.
+        return return_polygon;
+    }
+
+    RectWorldCoord GeometryPolygon::boundingBox(const int& /*controller_zoom*/) const
     {
         // Create a polygon of the points.
         QPolygonF polygon;
@@ -65,74 +81,92 @@ namespace qmapcontrol
         }
 
         // Return the bounding box.
-        return polygon.boundingRect();
+        return RectWorldCoord::fromQRectF(polygon.boundingRect());
     }
 
-    bool GeometryPolygon::touches(const QGraphicsItem& area_px, const int& controller_zoom)
+    bool GeometryPolygon::touches(const Geometry* geometry_coord, const int& controller_zoom) const
     {
-        /// @todo change to world coordinates.
-
         // Default return success.
         bool return_touches(false);
 
-//        // Clear previous touches result.
-//        m_touched_points.clear();
+        // Check we are visible and the geometry to compare against is valid.
+        if(isVisible(controller_zoom) && geometry_coord != nullptr)
+        {
+            // Switch to the correct geometry type.
+            switch(geometry_coord->getGeometryType())
+            {
+                case GeometryType::GeometryLineString:
+                {
+                    /// @todo Line String calculation.
 
-//        // Check the geometry is visible.
-//        if(isVisible(controller_zoom))
-//        {
-//            // Loop through each point.
-//            for(const auto& point : m_points)
-//            {
-//                // Does the touch area contain the point?
-//                if(point->touches(area_px, controller_zoom))
-//                {
-//                    // Add the point to the touches list.
-//                    m_touched_points.push_back(point);
+                    // Finished.
+                    break;
+                }
+                case GeometryType::GeometryPoint:
+                case GeometryType::GeometryWidget:
+                {
+                    // Check if the polygon (bounding box) intersects with our polygon.
+                    if(QPolygonF(geometry_coord->boundingBox(controller_zoom).rawRect()).intersected(toQPolygonF()).empty() == false)
+                    {
+                        // Set that we have touched.
+                        return_touches = true;
+                    }
 
-//                    // Set that we have touched.
-//                    return_touches = true;
-//                }
-//            }
+                    // Finished.
+                    break;
+                }
+                case GeometryType::GeometryPolygon:
+                {
+                    // Check if the poylgons intersect.
+                    if(static_cast<const GeometryPolygon*>(geometry_coord)->toQPolygonF().intersected(toQPolygonF()).empty() == false)
+                    {
+                        // Set that we have touched.
+                        return_touches = true;
+                    }
 
-//            // Did we find at least one geometry touching?
-//            if(return_touches)
-//            {
-//                // Emit that the geometry has been clicked.
-//                emit geometryClicked(this);
-//            }
-//        }
+                    // Finished.
+                    break;
+                }
+            }
+
+            // Have we touched?
+            if(return_touches)
+            {
+                // Emit that the geometry has been clicked.
+                emit geometryClicked(this);
+            }
+        }
 
         // Return our success.
         return return_touches;
     }
 
-    void GeometryPolygon::draw(QPainter* painter, const QRectF& backbuffer_rect_px, const int& controller_zoom)
+    void GeometryPolygon::draw(QPainter& painter, const RectWorldCoord& backbuffer_rect_coord, const int& controller_zoom)
     {
         // Check the geometry is visible.
         if(isVisible(controller_zoom))
         {
-            // Create a polygon of the points.
-            QPolygonF polygon;
-
-            // Loop through each point to add to the polygon.
-            for(const auto& point : m_points)
-            {
-                // Add the point to be drawn.
-                polygon.append(projection::get().toPointWorldPx(point, controller_zoom).rawPoint());
-            }
-
             // Does the polygon intersect with the backbuffer rect?
-            if(QPolygonF(backbuffer_rect_px).intersected(polygon).empty() == false)
+            if(QPolygonF(backbuffer_rect_coord.rawRect()).intersected(toQPolygonF()).empty() == false)
             {
+                // Create a polygon of the points.
+                QPolygonF polygon;
+
+                // Loop through each point to add to the polygon.
+                for(const auto& point : m_points)
+                {
+                    // Add the point to be drawn.
+                    polygon.append(projection::get().toPointWorldPx(point, controller_zoom).rawPoint());
+                }
+
                 // Set the pen to use.
-                painter->setPen(getPen());
+                painter.setPen(getPen());
 
                 // Set the brush to use.
-                painter->setBrush(m_brush);
+                painter.setBrush(m_brush);
 
                 // Draw the polygon line.
-                painter->drawPolygon(polygon);
+                painter.drawPolygon(polygon);
             }
         }
     }

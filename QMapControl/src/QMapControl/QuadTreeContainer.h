@@ -27,7 +27,6 @@
 
 // Qt includes.
 #include <QtCore/QPointF>
-#include <QtCore/QRectF>
 
 // STD includes.
 #include <memory>
@@ -36,6 +35,7 @@
 
 // Local includes.
 #include "qmapcontrol_global.h"
+#include "Point.h"
 
 /*!
  * @author Chris Stylianou <chris5287@gmail.com>
@@ -55,7 +55,7 @@ namespace qmapcontrol
          * @param capacity The number of items this quad tree container can store before it's children are created/used.
          * @param boundary_coord The bounding box area that this quad tree container covers in coordinates.
          */
-        QuadTreeContainer(const size_t& capacity, const QRectF& boundary_coord)
+        QuadTreeContainer(const size_t& capacity, const RectWorldCoord& boundary_coord)
             : m_capacity(capacity),
               m_boundary_coord(boundary_coord)
         {
@@ -77,16 +77,16 @@ namespace qmapcontrol
          * @param return_points The objects that are within the specified range are added to this.
          * @param range_coord The bounding box range.
          */
-        void query(std::set<T>& return_points, const QRectF& range_coord) const
+        void query(std::set<T>& return_points, const RectWorldCoord& range_coord) const
         {
             // Does the range intersect with our boundary.
-            if(range_coord.intersects(m_boundary_coord))
+            if(range_coord.rawRect().intersects(m_boundary_coord.rawRect()))
             {
                 // Check whether any of our points are contained in the range.
                 for(const auto& point : m_points)
                 {
                     // Is the point contained by the query range.
-                    if(range_coord.contains(point.first))
+                    if(range_coord.rawRect().contains(point.first))
                     {
                         // Add to the return points.
                         return_points.insert(point.second);
@@ -117,7 +117,7 @@ namespace qmapcontrol
             bool success(false);
 
             // Does this boundary contain the point?
-            if(m_boundary_coord.contains(point_coord))
+            if(m_boundary_coord.rawRect().contains(point_coord))
             {
                 // Have we reached our capacity?
                 if(m_points.size() < m_capacity)
@@ -181,7 +181,7 @@ namespace qmapcontrol
         void erase(const QPointF& point_coord, const T& object)
         {
             // Does this boundary contain the point?
-            if(m_boundary_coord.contains(point_coord))
+            if(m_boundary_coord.rawRect().contains(point_coord))
             {
                 // Check whether any of our points are contained in the range.
                 auto itr_point = m_points.begin();
@@ -240,22 +240,22 @@ namespace qmapcontrol
         void subdivide()
         {
             // Calculate half the size of the boundary.
-            const QSizeF half_size = m_boundary_coord.size() / 2.0;
+            const QSizeF half_size = m_boundary_coord.rawRect().size() / 2.0;
 
             // Construct the north east child.
-            const QRectF north_east(m_boundary_coord.left() + half_size.width(), m_boundary_coord.top(), half_size.width(), half_size.height());
+            const RectWorldCoord north_east(RectWorldCoord::fromQRectF(QRectF(m_boundary_coord.rawRect().left() + half_size.width(), m_boundary_coord.rawRect().top(), half_size.width(), half_size.height())));
             m_child_north_east.reset(new QuadTreeContainer<T>(m_capacity, north_east));
 
             // Construct the north west child.
-            const QRectF north_west(m_boundary_coord.left(), m_boundary_coord.top(), half_size.width(), half_size.height());
+            const RectWorldCoord north_west(RectWorldCoord::fromQRectF(QRectF(m_boundary_coord.rawRect().left(), m_boundary_coord.rawRect().top(), half_size.width(), half_size.height())));
             m_child_north_west.reset(new QuadTreeContainer<T>(m_capacity, north_west));
 
             // Construct the south east child.
-            const QRectF south_east(m_boundary_coord.left() + half_size.width(), m_boundary_coord.top() + half_size.height(), half_size.width(), half_size.height());
+            const RectWorldCoord south_east(RectWorldCoord::fromQRectF(QRectF(m_boundary_coord.rawRect().left() + half_size.width(), m_boundary_coord.rawRect().top() + half_size.height(), half_size.width(), half_size.height())));
             m_child_south_east.reset(new QuadTreeContainer<T>(m_capacity, south_east));
 
             // Construct the south west child.
-            const QRectF south_west(m_boundary_coord.left(), m_boundary_coord.top() + half_size.height(), half_size.width(), half_size.height());
+            const RectWorldCoord south_west(RectWorldCoord::fromQRectF(QRectF(m_boundary_coord.rawRect().left(), m_boundary_coord.rawRect().top() + half_size.height(), half_size.width(), half_size.height())));
             m_child_south_west.reset(new QuadTreeContainer<T>(m_capacity, south_west));
         }
 
@@ -264,7 +264,7 @@ namespace qmapcontrol
         const size_t m_capacity;
 
         /// Boundary of this quad tree node.
-        const QRectF m_boundary_coord;
+        const RectWorldCoord m_boundary_coord;
 
         /// Points in this quad tree node.
         std::vector<std::pair<QPointF, T>> m_points;

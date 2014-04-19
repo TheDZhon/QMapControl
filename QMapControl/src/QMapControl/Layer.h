@@ -136,7 +136,7 @@ namespace qmapcontrol
          * @param range_coord The bounding box range to limit the geometries that are fetched in coordinates.
          * @return a list of geometries that are on this Layer within the bounding box range.
          */
-        const std::set<std::shared_ptr<Geometry>> getGeometries(const QRectF& range_coord) const;
+        const std::set<std::shared_ptr<Geometry>> getGeometries(const RectWorldCoord& range_coord) const;
 
         /*!
          * Returns the Geometry QWidgets from this Layer (Use this instead of the member variable for thread-safety).
@@ -185,7 +185,7 @@ namespace qmapcontrol
          * @param backbuffer_rect_px Only draw map tiles/geometries that are contained in the backbuffer rect (pixels).
          * @param controller_zoom The current controller zoom.
          */
-        void draw(QPainter* painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const;
+        void draw(QPainter& painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const;
 
         /*!
          * Moves any geometries that represent a widget, as these are not drawn to the actually pixmap.
@@ -201,22 +201,22 @@ namespace qmapcontrol
          * @param backbuffer_rect_px Only draw map tiles that are contained in the backbuffer rect (pixels).
          * @param controller_zoom The current controller zoom.
          */
-        void drawMapAdapters(QPainter* painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const;
+        void drawMapAdapters(QPainter& painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const;
 
         /*!
          * Draws each geometry to a pixmap using the provided painter.
          * @param painter The painter that will draw to the pixmap.
-         * @param backbuffer_rect_px Only draw geometries that are contained in the backbuffer rect (pixels).
+         * @param backbuffer_rect_coord Only draw geometries that are contained in the backbuffer rect (coords).
          * @param controller_zoom The current controller zoom.
          */
-        void drawGeometries(QPainter* painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const;
+        void drawGeometries(QPainter& painter, const RectWorldCoord& backbuffer_rect_coord, const int& controller_zoom) const;
 
     signals:
         /*!
          * Signal emitted when a geometry is clicked.
          * @param geometry The clicked Geometry.
          */
-        void geometryClicked(Geometry* geometry);
+        void geometryClicked(const Geometry* geometry);
 
         /*!
          * Signal emitted when a change has occurred that requires the layer to be redrawn.

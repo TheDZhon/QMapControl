@@ -64,8 +64,13 @@ namespace qmapcontrol
     {
     public:
         RectWorldCoord(const PointWorldCoord& top_left, const PointWorldCoord& bottom_right) : m_raw_rect(top_left.rawPoint(), bottom_right.rawPoint()) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
-        inline PointWorldCoord topLeftPx() const { return PointWorldCoord(m_raw_rect.x(), m_raw_rect.y()); }
-        inline PointWorldCoord bottomRightPx() const { return PointWorldCoord(m_raw_rect.x() + m_raw_rect.width(), m_raw_rect.y() + m_raw_rect.height()); }
+        inline QRectF rawRect() const { return m_raw_rect; }
+        inline PointWorldCoord topLeftCoord() const { return PointWorldCoord(m_raw_rect.x(), m_raw_rect.y()); }
+        inline PointWorldCoord bottomRightCoord() const { return PointWorldCoord(m_raw_rect.x() + m_raw_rect.width(), m_raw_rect.y() + m_raw_rect.height()); }
+    public:
+        static RectWorldCoord fromQRectF(const QRectF& rect) { return RectWorldCoord(rect); }
+    private:
+        RectWorldCoord(const QRectF& rect) : m_raw_rect(rect) { }
     private:
         QRectF m_raw_rect;
     };

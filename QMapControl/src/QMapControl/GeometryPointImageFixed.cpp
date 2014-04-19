@@ -46,19 +46,25 @@ namespace qmapcontrol
         setAlignmentType(AlignmentType::TopLeft);
     }
 
-    void GeometryPointImageFixed::draw(QPainter* painter, const QRectF& backbuffer_rect_px, const int& controller_zoom)
+    RectWorldCoord GeometryPointImageFixed::boundingBox(const int& /*controller_zoom*/) const
+    {
+        // Return the bound box.
+        return RectWorldCoord(coord(), m_bottom_right_coord);
+    }
+
+    void GeometryPointImageFixed::draw(QPainter& painter, const RectWorldCoord& backbuffer_rect_coord, const int& controller_zoom)
     {
         // Check the geometry is visible.
         if(isVisible(controller_zoom))
         {
-            // Calculate the image rect pixels.
-            const QRectF image_rect_px(projection::get().toPointWorldPx(coord(), controller_zoom).rawPoint(), projection::get().toPointWorldPx(m_bottom_right_coord, controller_zoom).rawPoint());
-
             // Does the image rect intersect with the backbuffer rect?
-            if(backbuffer_rect_px.intersects(image_rect_px))
+            if(backbuffer_rect_coord.rawRect().intersects(boundingBox(controller_zoom).rawRect()))
             {
+                // Calculate the image rect pixels.
+                const RectWorldPx image_rect_px(projection::get().toPointWorldPx(coord(), controller_zoom), projection::get().toPointWorldPx(m_bottom_right_coord, controller_zoom));
+
                 // Draw the pixmap.
-                painter->drawPixmap(image_rect_px, getPixmap(), QRectF());
+                painter.drawPixmap(image_rect_px.rawRect(), getPixmap(), QRectF());
             }
         }
     }

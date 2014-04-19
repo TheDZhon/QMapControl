@@ -29,7 +29,10 @@
 #include <cmath>
 
 // Local includes.
+#include "GeometryPolygon.h"
 #include "Projection.h"
+
+#include <QDebug>
 
 namespace qmapcontrol
 {
@@ -175,45 +178,74 @@ namespace qmapcontrol
         m_draw_maximum_px = size_px;
     }
 
-    QRectF GeometryPoint::boundingBox(const int& controller_zoom) const
+    RectWorldCoord GeometryPoint::boundingBox(const int& controller_zoom) const
     {
         // Calculate the world point in pixels.
-        const PointWorldPx point_px = projection::get().toPointWorldPx(m_point_coord, controller_zoom);
+        const PointWorldPx point_px(projection::get().toPointWorldPx(m_point_coord, controller_zoom));
 
         // Calculate the current size for this controller zoom.
-        const QSizeF object_size_px = calculateGeometrySizePx(controller_zoom);
+        const QSizeF object_size_px(calculateGeometrySizePx(controller_zoom));
 
         // Calculate the top-left point.
-        const PointWorldPx top_left_point_px = calculateTopLeftPoint(point_px, m_alignment_type, object_size_px);
+        const PointWorldPx top_left_point_px(calculateTopLeftPoint(point_px, m_alignment_type, object_size_px));
 
         // Calculate the bottom-right point.
         const PointWorldPx bottom_right_point_px(top_left_point_px.x() + object_size_px.width(), top_left_point_px.y() + object_size_px.height());
 
         // Return the converted coord points.
-        return QRectF(projection::get().toPointWorldCoord(top_left_point_px, controller_zoom).rawPoint(), projection::get().toPointWorldCoord(bottom_right_point_px, controller_zoom).rawPoint());
+        return RectWorldCoord(projection::get().toPointWorldCoord(top_left_point_px, controller_zoom), projection::get().toPointWorldCoord(bottom_right_point_px, controller_zoom));
     }
 
-    bool GeometryPoint::touches(const QGraphicsItem& area_px, const int& controller_zoom)
+    bool GeometryPoint::touches(const Geometry* geometry_coord, const int& controller_zoom) const
     {
-        /// @TODO This does not take into account the size of each GeometryPoint (ie: if it is a pixmap/widget instead of a point).
-
         // Default return success.
         bool return_touches(false);
 
-        // Check the geometry is visible.
-        if(isVisible(controller_zoom))
+        // Check we are visible and the geometry to compare against is valid.
+        if(isVisible(controller_zoom) && geometry_coord != nullptr)
         {
-            // Convert the geometry coord to pixels (quicker than converting polygon area into coords)
-            const PointWorldPx point_px(projection::get().toPointWorldPx(m_point_coord, controller_zoom));
+            // Switch to the correct geometry type.
+            switch(geometry_coord->getGeometryType())
+            {
+                case GeometryType::GeometryLineString:
+                {
+                    /// @todo Line String calculation.
 
-            // Is the geometry pixel contain within the polygon area?
-            if(area_px.contains(point_px.rawPoint()))
+                    // Finished.
+                    break;
+                }
+                case GeometryType::GeometryPoint:
+                case GeometryType::GeometryWidget:
+                {
+                    // Check if the bounding boxes intersect.
+                    if(geometry_coord->boundingBox(controller_zoom).rawRect().intersects(boundingBox(controller_zoom).rawRect()))
+                    {
+                        // Set that we have touched.
+                        return_touches = true;
+                    }
+
+                    // Finished.
+                    break;
+                }
+                case GeometryType::GeometryPolygon:
+                {
+                    // Check if the poylgon intersects with our bounding box.
+                    if(static_cast<const GeometryPolygon*>(geometry_coord)->toQPolygonF().intersected(boundingBox(controller_zoom).rawRect()).empty() == false)
+                    {
+                        // Set that we have touched.
+                        return_touches = true;
+                    }
+
+                    // Finished.
+                    break;
+                }
+            }
+
+            // Have we touched?
+            if(return_touches)
             {
                 // Emit that the geometry has been clicked.
                 emit geometryClicked(this);
-
-                // Set that we have touched.
-                return_touches = true;
             }
         }
 
@@ -221,7 +253,7 @@ namespace qmapcontrol
         return return_touches;
     }
 
-    void GeometryPoint::draw(QPainter* painter, const QRectF& backbuffer_rect_px, const int& controller_zoom)
+    void GeometryPoint::draw(QPainter& painter, const RectWorldCoord& backbuffer_rect_coord, const int& controller_zoom)
     {
         // Check the geometry is visible.
         if(isVisible(controller_zoom))
@@ -229,49 +261,48 @@ namespace qmapcontrol
             // Do we have a pixmap?
             if(m_pixmap != nullptr && m_pixmap->size().isEmpty() == false)
             {
-                // Calculate the world point in pixels.
-                const PointWorldPx point_px(projection::get().toPointWorldPx(m_point_coord, controller_zoom));
-
-                // Update the object size for the pixmap size for this controller zoom.
-                const QSizeF pixmap_size_px(calculateGeometrySizePx(controller_zoom));
-
-                // Calculate the pixmap rect to draw within.
-                const QRectF pixmap_rect(calculateTopLeftPoint(point_px, m_alignment_type, pixmap_size_px).rawPoint(), pixmap_size_px);
-
-                // Does the pixmap rect intersect within the backbuffer rect?
-                if(backbuffer_rect_px.intersects(pixmap_rect))
+                // Check if the bounding boxes intersect.
+                const RectWorldCoord pixmap_rect_coord(boundingBox(controller_zoom));
+                if(backbuffer_rect_coord.rawRect().intersects(pixmap_rect_coord.rawRect()))
                 {
+                    // Calculate the pixmap rect to draw within.
+                    const RectWorldPx pixmap_rect_px(projection::get().toPointWorldPx(pixmap_rect_coord.topLeftCoord(), controller_zoom), projection::get().toPointWorldPx(pixmap_rect_coord.bottomRightCoord(), controller_zoom));
+
                     // Draw the pixmap.
-                    painter->drawPixmap(pixmap_rect, getPixmap(), QRectF());
+                    painter.drawPixmap(pixmap_rect_px.rawRect(), getPixmap(), QRectF());
 
                     // Do we have a meta-data value and should we display it at this zoom?
                     if(controller_zoom >= m_metadata_displayed_zoom_minimum && getMetadata(m_metadata_displayed_key).isNull() == false)
                     {
+                        /// @todo calculate correct alignment for metadata displayed offset.
+
                         // Draw the text next to the point with an offset.
-                        painter->drawText(pixmap_rect.topRight() + QPointF(m_metadata_displayed_alignment_offset_px, -m_metadata_displayed_alignment_offset_px), getMetadata(m_metadata_displayed_key).toString());
+                        painter.drawText(pixmap_rect_px.rawRect().topRight() + QPointF(m_metadata_displayed_alignment_offset_px, -m_metadata_displayed_alignment_offset_px), getMetadata(m_metadata_displayed_key).toString());
                     }
                 }
             }
             // We can just draw the point.
             else
             {
-                // Calculate the point in pixels.
-                const PointWorldPx point_px(projection::get().toPointWorldPx(m_point_coord, controller_zoom));
-
                 // Is the point within the backbuffer rect?
-                if(backbuffer_rect_px.contains(point_px.rawPoint()))
+                if(backbuffer_rect_coord.rawRect().contains(m_point_coord.rawPoint()))
                 {
+                    // Calculate the point in pixels.
+                    const PointWorldPx point_px(projection::get().toPointWorldPx(m_point_coord, controller_zoom));
+
                     // Set the pen to use.
-                    painter->setPen(getPen());
+                    painter.setPen(getPen());
 
                     // Draw the point.
-                    painter->drawPoint(point_px.rawPoint());
+                    painter.drawPoint(point_px.rawPoint());
 
                     // Do we have a meta-data value and should we display it at this zoom?
                     if(controller_zoom >= m_metadata_displayed_zoom_minimum && getMetadata(m_metadata_displayed_key).isNull() == false)
                     {
+                        /// @todo calculate correct alignment for metadata displayed offset.
+
                         // Draw the text next to the point with an offset.
-                        painter->drawText((point_px + PointPx(m_metadata_displayed_alignment_offset_px, -m_metadata_displayed_alignment_offset_px)).rawPoint(), getMetadata(m_metadata_displayed_key).toString());
+                        painter.drawText((point_px + PointPx(m_metadata_displayed_alignment_offset_px, -m_metadata_displayed_alignment_offset_px)).rawPoint(), getMetadata(m_metadata_displayed_key).toString());
                     }
                 }
             }

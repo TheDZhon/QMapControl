@@ -27,8 +27,8 @@
 
 // Qt includes.
 #include <QtCore/QObject>
-#include <QtCore/QRectF>
 #include <QtCore/QVariant>
+#include <QtGui/QBrush>
 #include <QtGui/QPainter>
 #include <QtGui/QPen>
 
@@ -37,6 +37,7 @@
 // STL includes.
 #include <map>
 #include <memory>
+#include <string>
 
 // Local includes.
 #include "qmapcontrol_global.h"
@@ -62,11 +63,11 @@ namespace qmapcontrol
         //! Geometry types.
         enum class GeometryType
         {
-            /// GeometryLineString.
+            /// Geometry that represents a line string.
             GeometryLineString,
-            /// GeometryPoint.
+            /// Geometry that represents a point.
             GeometryPoint,
-            /// GeometryPolygon.
+            /// Geometry that represents a polygon.
             GeometryPolygon,
             /// Geometry that manages a QWidget.
             GeometryWidget
@@ -118,7 +119,7 @@ namespace qmapcontrol
          * Fetches the geometry type.
          * @return the geometry type.
          */
-        GeometryType getGeometryType() const;
+        const GeometryType& getGeometryType() const;
 
         /*!
          * Fetches the pen to draw the geometry with (outline).
@@ -161,7 +162,7 @@ namespace qmapcontrol
          * @param key The meta-data key.
          * @return the meta-data value.
          */
-        QVariant& getMetadata(const std::string& key);
+        QVariant& getMetadata(const std::string& key) const;
 
         /*!
          * Set a meta-data key/value.
@@ -194,23 +195,23 @@ namespace qmapcontrol
          * @param controller_zoom The current controller zoom.
          * @return the bounding box.
          */
-        virtual QRectF boundingBox(const int& controller_zoom) const = 0;
+        virtual RectWorldCoord boundingBox(const int& controller_zoom) const = 0;
 
         /*!
-         * Checks if any geometries are located inside the specified area.
-         * @param area_px The polygon area in pixels to check for points.
+         * Checks if the geometry touches (intersects) with another geometry.
+         * @param geometry_coord The geometry to check against.
          * @param controller_zoom The current controller zoom.
-         * @return whether the geometries are located inside the specified area.
+         * @return whether the geometries touch (intersects).
          */
-        virtual bool touches(const QGraphicsItem& area_px, const int& controller_zoom) = 0;
+        virtual bool touches(const Geometry* geometry_coord, const int& controller_zoom) const = 0;
 
         /*!
          * Draws the geometry to a pixmap using the provided painter.
          * @param painter The painter that will draw to the pixmap.
-         * @param backbuffer_rect_px Only draw geometries that are contained in the backbuffer rect (pixels).
+         * @param backbuffer_rect_coord Only draw geometries that are contained in the backbuffer rect (coord).
          * @param controller_zoom The current controller zoom.
          */
-        virtual void draw(QPainter* painter, const QRectF& backbuffer_rect_px, const int& controller_zoom) = 0;
+        virtual void draw(QPainter& painter, const RectWorldCoord& backbuffer_rect_coord, const int& controller_zoom) = 0;
 
     protected:
         //! Constructor.
@@ -227,13 +228,13 @@ namespace qmapcontrol
          * Signal emitted when a geometry is clicked.
          * @param geometry The clicked Geometry.
          */
-        void geometryClicked(Geometry* geometry);
+        void geometryClicked(const Geometry* geometry) const;
 
         /*!
          * Signal emitted when a geometry changes its position.
          * @param geometry The geometry that change position.
          */
-        void positionChanged(Geometry* geometry);
+        void positionChanged(const Geometry* geometry) const;
 
         /*!
          * Signal emitted when a change has occurred that requires the layer to be redrawn.
@@ -267,7 +268,7 @@ namespace qmapcontrol
         std::shared_ptr<QBrush> m_brush;
 
         /// Meta-data storage.
-        std::map<std::string, QVariant> m_metadata;
+        mutable std::map<std::string, QVariant> m_metadata;
 
     protected:
         /// The meta-data's key for the value to display.

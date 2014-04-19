@@ -213,7 +213,7 @@ void Citymap::addTours()
     m_layer_tours->addGeometry(m_tour_museums);
 }
 
-void Citymap::geometryClicked(Geometry* geometry)
+void Citymap::geometryClicked(const Geometry* geometry)
 {
     // Check clicks aren't being ignore and we aren't in the middle of adding a note.
     if(m_mode_distance_calculating == false && m_mode_note_adding == false)
@@ -250,7 +250,7 @@ void Citymap::geometryClicked(Geometry* geometry)
     }
 }
 
-void Citymap::geometryClickedPub(Geometry* geometry)
+void Citymap::geometryClickedPub(const Geometry* geometry)
 {
     // Check clicks aren't being ignore and we aren't in the middle of adding a note.
     if(m_mode_distance_calculating == false && m_mode_note_adding == false)
@@ -430,23 +430,27 @@ void Citymap::hideNote(QMouseEvent* mouse_event, PointWorldCoord /*press_coordin
     }
 }
 
-void Citymap::editNote(Geometry* geometry)
+void Citymap::editNote(const Geometry* geometry)
 {
-    // Set that we are editing the note.
-    m_mode_note_adding = true;
-
     // Record the geometry as the currently selected.
-    m_selected_geometry = geometry;
+    m_selected_geometry = const_cast<Geometry*>(geometry);
 
-    // Set the text edit to the current note contents.
-    m_text_edit->setPlainText(m_selected_geometry->getMetadata("notes").toString());
+    // Did we get a GeometryPoint?
+    if(m_selected_geometry->getGeometryType() == Geometry::GeometryType::GeometryPoint)
+    {
+        // Set that we are editing the note.
+        m_mode_note_adding = true;
 
-    // Show the text edit geometry and move to the geometry coordinates.
-    m_geometry_text_edit->setCoord(static_cast<GeometryPoint*>(geometry)->coord());
-    m_geometry_text_edit->setVisible(true);
+        // Set the text edit to the current note contents.
+        m_text_edit->setPlainText(m_selected_geometry->getMetadata("notes").toString());
 
-    // Connect signal/slot to capture the next mouse double click to hide the note.
-    QObject::connect(m_map_control, &QMapControl::mouseEventDoubleClickCoordinate, this, &Citymap::hideNote);
+        // Show the text edit geometry and move to the geometry coordinates.
+        m_geometry_text_edit->setCoord(static_cast<GeometryPoint*>(m_selected_geometry)->coord());
+        m_geometry_text_edit->setVisible(true);
+
+        // Connect signal/slot to capture the next mouse double click to hide the note.
+        QObject::connect(m_map_control, &QMapControl::mouseEventDoubleClickCoordinate, this, &Citymap::hideNote);
+    }
 }
 
 void Citymap::calculateDistance()

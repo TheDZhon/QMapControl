@@ -76,12 +76,19 @@ namespace qmapcontrol
 
     public:
         /*!
+         * The bounding box in world coordinates.
+         * @param controller_zoom The current controller zoom.
+         * @return the bounding box.
+         */
+        RectWorldCoord boundingBox(const int& controller_zoom) const final;
+
+        /*!
          * Draws the geometry to a pixmap using the provided painter.
          * @param painter The painter that will draw to the pixmap.
-         * @param backbuffer_rect_px Only draw geometries that are contained in the backbuffer rect (pixels).
+         * @param backbuffer_rect_coord Only draw geometries that are contained in the backbuffer rect (coord).
          * @param controller_zoom The current controller zoom.
          */
-        virtual void draw(QPainter* painter, const QRectF& backbuffer_rect_px, const int& controller_zoom) override;
+        void draw(QPainter& painter, const RectWorldCoord& backbuffer_rect_coord, const int& controller_zoom) final;
 
     private:
         //! Disable copy constructor.

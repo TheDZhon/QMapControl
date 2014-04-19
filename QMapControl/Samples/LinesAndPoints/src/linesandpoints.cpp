@@ -110,7 +110,7 @@ LinesAndPoints::LinesAndPoints(QWidget *parent)
     setCentralWidget(m_map_control);
 }
 
-void LinesAndPoints::geometryClickEvent(Geometry* geometry)
+void LinesAndPoints::geometryClickEvent(const Geometry* geometry)
 {
     // Is it a GeometryPoint.
     if(geometry->getGeometryType() == Geometry::GeometryType::GeometryPoint)

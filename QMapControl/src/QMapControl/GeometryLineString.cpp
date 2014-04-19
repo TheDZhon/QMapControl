@@ -61,7 +61,7 @@ namespace qmapcontrol
         emit requestRedraw();
     }
 
-    QRectF GeometryLineString::boundingBox(const int& /*controller_zoom*/) const
+    RectWorldCoord GeometryLineString::boundingBox(const int& /*controller_zoom*/) const
     {
         // Create a polygon of the points.
         QPolygonF polygon_line;
@@ -74,10 +74,10 @@ namespace qmapcontrol
         }
 
         // Return the bounding box.
-        return polygon_line.boundingRect();
+        return RectWorldCoord::fromQRectF(polygon_line.boundingRect());
     }
 
-    bool GeometryLineString::touches(const QGraphicsItem& area_px, const int& controller_zoom)
+    bool GeometryLineString::touches(const Geometry* geometry_coord, const int& controller_zoom) const
     {
         /// @todo change to world coordinates.
 
@@ -116,10 +116,8 @@ namespace qmapcontrol
         return return_touches;
     }
 
-    void GeometryLineString::draw(QPainter* painter, const QRectF& backbuffer_rect_px, const int& controller_zoom)
+    void GeometryLineString::draw(QPainter& painter, const RectWorldCoord& backbuffer_rect_coord, const int& controller_zoom)
     {
-        /// @todo change to world coordinates.
-
         // Check the geometry is visible.
         if(isVisible(controller_zoom))
         {
@@ -130,17 +128,27 @@ namespace qmapcontrol
             for(const auto& point : m_points)
             {
                 // Add the point to be drawn.
-                polygon_line.append(projection::get().toPointWorldPx(point, controller_zoom).rawPoint());
+                polygon_line.append(point.rawPoint());
             }
 
             // Does the polygon intersect with the backbuffer rect?
-            if(QPolygonF(backbuffer_rect_px).intersected(polygon_line).empty() == false)
+            if(QPolygonF(backbuffer_rect_coord.rawRect()).intersected(polygon_line).empty() == false)
             {
+                // Create a polygon of the points.
+                QPolygonF polygon_line_px;
+
+                // Loop through each point to add to the polygon.
+                for(const auto& point : m_points)
+                {
+                    // Add the point to be drawn.
+                    polygon_line_px.append(projection::get().toPointWorldPx(point, controller_zoom).rawPoint());
+                }
+
                 // Set the pen to use.
-                painter->setPen(getPen());
+                painter.setPen(getPen());
 
                 // Draw the polygon line.
-                painter->drawPolyline(polygon_line);
+                painter.drawPolyline(polygon_line_px);
             }
         }
     }
