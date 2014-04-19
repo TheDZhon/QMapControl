@@ -8,6 +8,8 @@
 #include <QMapControl/GeometryPointCircle.h>
 #include <QMapControl/GeometryPointImage.h>
 #include <QMapControl/GeometryPolygon.h>
+#include <QMapControl/LayerGeometry.h>
+#include <QMapControl/LayerMapAdapter.h>
 #include <QMapControl/MapAdapterGoogle.h>
 
 /*!
@@ -26,13 +28,11 @@ LinesAndPoints::LinesAndPoints(QWidget *parent)
     // Create a new QMapControl.
     m_map_control = new QMapControl(QSizeF(480.0, 640.0));
 
-    // Create a custom layer.
-    std::shared_ptr<Layer> custom_layer(std::make_shared<Layer>("Custom Layer"));
+    // Create/add a layer with the default Google map adapter.
+    m_map_control->addLayer(std::make_shared<LayerMapAdapter>("Map", std::make_shared<MapAdapterGoogle>()));
 
-    // Add a map adapter (OSM) to the custom layer.
-    custom_layer->addMapAdapter(std::make_shared<MapAdapterGoogle>());
-
-    // Add the custom layer.
+    // Create/add the custom layer.
+    std::shared_ptr<LayerGeometry> custom_layer(std::make_shared<LayerGeometry>("Custom Layer"));
     m_map_control->addLayer(custom_layer);
 
     // Create a LineString of different points.
@@ -98,7 +98,7 @@ LinesAndPoints::LinesAndPoints(QWidget *parent)
     custom_layer->addGeometry(line_string);
 
     // Connect click events of the layer to this object.
-    QObject::connect(custom_layer.get(), &Layer::geometryClicked, this, &LinesAndPoints::geometryClickEvent);
+    QObject::connect(custom_layer.get(), &LayerGeometry::geometryClicked, this, &LinesAndPoints::geometryClickEvent);
 
     // Sets the view to the interesting area.
     std::vector<PointWorldCoord> view_points;

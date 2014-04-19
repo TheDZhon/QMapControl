@@ -28,16 +28,22 @@
 namespace qmapcontrol
 {
     Geometry::Geometry(const GeometryType& geometry_type, const int& zoom_minimum, const int& zoom_maximum)
-        : m_visible(true),
-          m_geometry_type(geometry_type),
+        : m_geometry_type(geometry_type),
           m_zoom_minimum(zoom_minimum),
           m_zoom_maximum(zoom_maximum),
+          m_visible(true),
           m_metadata_displayed_key(""),
           m_metadata_displayed_zoom_minimum(10),
           m_metadata_displayed_alignment_type(AlignmentType::TopRight),
           m_metadata_displayed_alignment_offset_px(5.0)
     {
 
+    }
+
+    const Geometry::GeometryType& Geometry::getGeometryType() const
+    {
+        // Return the geometry type.
+        return m_geometry_type;
     }
 
     bool Geometry::isVisible(const int& controller_zoom) const
@@ -67,12 +73,6 @@ namespace qmapcontrol
             // Emit that we need to redraw to display this change.
             emit requestRedraw();
         }
-    }
-
-    const Geometry::GeometryType& Geometry::getGeometryType() const
-    {
-        // Return the geometry type.
-        return m_geometry_type;
     }
 
     const QPen& Geometry::getPen()

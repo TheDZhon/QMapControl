@@ -38,6 +38,7 @@
 #include "GeometryPoint.h"
 #include "GeometryPolygon.h"
 #include "ImageManager.h"
+#include "LayerGeometry.h"
 #include "Projection.h"
 
 namespace qmapcontrol
@@ -233,8 +234,14 @@ namespace qmapcontrol
             removeLayer(layer->getName());
 
             // Connect signals as required.
-            QObject::connect(layer.get(), &Layer::geometryClicked, this, &QMapControl::geometryClicked);
             QObject::connect(layer.get(), &Layer::requestRedraw, this, &QMapControl::requestRedraw);
+
+            // Is it a geometry layer?
+            if(layer->getLayerType() == Layer::LayerType::LayerGeometry)
+            {
+                // Connect the geometry clicked signal/slot.
+                QObject::connect(static_cast<LayerGeometry*>(layer.get()), &LayerGeometry::geometryClicked, this, &QMapControl::geometryClicked);
+            }
 
             // Scope the locker to ensure the mutex is release as soon as possible.
             {
@@ -707,7 +714,7 @@ namespace qmapcontrol
             const PointWorldCoord bottom_right_coord(projection::get().toPointWorldCoord(bottom_right_px, m_current_zoom));
 
             // Construct geometry to compare against (default is polygon/rect).
-            std::unique_ptr<Geometry> geometry_to_compare(new GeometryPolygon({top_left_coord, bottom_right_coord}));
+            std::unique_ptr<Geometry> geometry_to_compare_coord(new GeometryPolygon({top_left_coord, bottom_right_coord}));
             if(mouse_mode == QMapControl::MouseButtonMode::SelectLine)
             {
                 // Set the line with a 'fuzzy-factor' around it using the pen.
@@ -717,8 +724,8 @@ namespace qmapcontrol
                 line_pen.setWidthF(fuzzy_factor_px);
 
                 // Create line string geometry.
-                geometry_to_compare.reset(new GeometryLineString({top_left_coord, bottom_right_coord}));
-                geometry_to_compare->setPen(line_pen);
+                geometry_to_compare_coord.reset(new GeometryLineString({top_left_coord, bottom_right_coord}));
+                geometry_to_compare_coord->setPen(line_pen);
             }
             else if(mouse_mode == QMapControl::MouseButtonMode::SelectEllipse)
             {
@@ -752,15 +759,15 @@ namespace qmapcontrol
             // Loop through each layer to check geometries touches.
             for(const auto& layer : getLayers())
             {
-                // Is the layer visible?
-                if(layer->isVisible(m_current_zoom))
+                // Is it a geometry layer and is it visible?
+                if(layer->getLayerType() == Layer::LayerType::LayerGeometry && layer->isVisible(m_current_zoom))
                 {
                     // Loop through each geometry for the layer.
-                    for(const auto& geometry : layer->getGeometries(RectWorldCoord(top_left_coord, bottom_right_coord))){
+                    for(const auto& geometry : std::static_pointer_cast<LayerGeometry>(layer)->getGeometries(RectWorldCoord(top_left_coord, bottom_right_coord)))
+                    {
                         // Does the geometry touch our area rect?
-                        /// @TODO look at using coordinates instead of pixel areas?
 //                        if(geometry->touches(*(area_px.get()), m_current_zoom))
-                        if(geometry->touches(geometry_to_compare.get(), m_current_zoom))
+                        if(geometry->touches(geometry_to_compare_coord.get(), m_current_zoom))
                         {
                             // Add the geometry to the selected collection.
                             selected_geometries[layer->getName()].push_back(geometry);
@@ -1416,8 +1423,12 @@ namespace qmapcontrol
         // Loop through the layers to update the Geometries that have widgets as well.
         for(const auto& layer : getLayers())
         {
-            // Tell the layer to move its geometry widgets.
-            layer->moveGeometryWidgets(mapFocusPointWorldPx() - m_viewport_center_px, m_current_zoom);
+            // Is it a geometry layer?
+            if(layer->getLayerType() == Layer::LayerType::LayerGeometry)
+            {
+                // Tell the layer to move its geometry widgets.
+                std::static_pointer_cast<LayerGeometry>(layer)->moveGeometryWidgets(mapFocusPointWorldPx() - m_viewport_center_px, m_current_zoom);
+            }
         }
 
         // Schedule a repaint.

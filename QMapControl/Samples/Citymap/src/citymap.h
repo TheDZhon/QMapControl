@@ -9,6 +9,7 @@
 #include <QMapControl/GeometryLineString.h>
 #include <QMapControl/GeometryWidget.h>
 #include <QMapControl/Layer.h>
+#include <QMapControl/LayerGeometry.h>
 
 // Local includes.
 #include "dialogs.h"
@@ -134,19 +135,19 @@ private:
     std::shared_ptr<Layer> m_layer_yahoo_streets;
 
     /// The layer to display/store notes.
-    std::shared_ptr<Layer> m_layer_notes;
+    std::shared_ptr<LayerGeometry> m_layer_notes;
 
     /// The layer to display/store sights.
-    std::shared_ptr<Layer> m_layer_sights;
+    std::shared_ptr<LayerGeometry> m_layer_sights;
 
     /// The layer to display/store pubs.
-    std::shared_ptr<Layer> m_layer_pubs;
+    std::shared_ptr<LayerGeometry> m_layer_pubs;
 
     /// The layer to display/store museums.
-    std::shared_ptr<Layer> m_layer_museum;
+    std::shared_ptr<LayerGeometry> m_layer_museum;
 
     /// The layer to display/store tours.
-    std::shared_ptr<Layer> m_layer_tours;
+    std::shared_ptr<LayerGeometry> m_layer_tours;
 
     /// The geometry to represent a sight tour.
     std::shared_ptr<GeometryLineString> m_tour_sights;

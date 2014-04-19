@@ -1,7 +1,7 @@
 #include "mapviewer.h"
 
 // QMapControl includes.
-#include <QMapControl/Layer.h>
+#include <QMapControl/LayerMapAdapter.h>
 #include <QMapControl/MapAdapterOSM.h>
 
 /*!
@@ -17,14 +17,8 @@ Mapviewer::Mapviewer(QWidget* parent)
     // Create a new QMapControl.
     m_map_control = new QMapControl(QSizeF(380.0, 540.0));
 
-    // Create a layer.
-    std::shared_ptr<Layer> layer(std::make_shared<Layer>("OpenStreetMap-Layer"));
-
-    // Add a map adapter (OSM) to the layer.
-    layer->addMapAdapter(std::make_shared<MapAdapterOSM>());
-
-    // Add the layer to the QMapControl
-    m_map_control->addLayer(layer);
+    // Create/add a layer with the default OSM map adapter.
+    m_map_control->addLayer(std::make_shared<LayerMapAdapter>("OpenStreetMap-Layer", std::make_shared<MapAdapterOSM>()));
 
     // Show QMapControl in QMainWindow.
     setCentralWidget(m_map_control);

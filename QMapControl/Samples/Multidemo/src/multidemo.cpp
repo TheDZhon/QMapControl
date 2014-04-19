@@ -11,6 +11,8 @@
 #include <QMapControl/GeometryPointCircle.h>
 #include <QMapControl/GeometryPolygon.h>
 #include <QMapControl/GeometryWidget.h>
+#include <QMapControl/LayerGeometry.h>
+#include <QMapControl/LayerMapAdapter.h>
 #include <QMapControl/MapAdapterGoogle.h>
 #include <QMapControl/MapAdapterYahoo.h>
 #include <QMapControl/MapAdapterWMS.h>
@@ -60,13 +62,11 @@ void Multidemo::setupMaps()
 //    std::shared_ptr<MapAdapter> map_adapter(std::make_shared<MapAdapterYahoo>());
     std::shared_ptr<MapAdapter> map_adapter(std::make_shared<MapAdapterGoogle>(MapAdapterGoogle::GoogleLayerType::MAPS));
 
-    // Create a layer for the map adapter and add it to the QMapControl.
-    std::shared_ptr<Layer> layer_map(std::make_shared<Layer>("Map Layer"));
-    layer_map->addMapAdapter(map_adapter);
-    m_map_control->addLayer(layer_map);
+    // Create/add a layer with the selected map adapter.
+    m_map_control->addLayer(std::make_shared<LayerMapAdapter>("Map Layer", map_adapter));
 
     // Create a layer to store geometries.
-    std::shared_ptr<Layer> layer_geometries(std::make_shared<Layer>("Geometry Layer"));
+    std::shared_ptr<LayerGeometry> layer_geometries(std::make_shared<LayerGeometry>("Geometry Layer"));
     m_map_control->addLayer(layer_geometries);
 
 
@@ -80,10 +80,8 @@ void Multidemo::setupMaps()
     m_mini_map_control->setMouseButtonLeft(QMapControl::MouseButtonMode::None, false);
     m_mini_map_control->setMouseButtonRight(QMapControl::MouseButtonMode::None, false);
 
-    // Create a layer for the map adapter and add it to the "mini" QMapControl.
-    std::shared_ptr<Layer> layer_mini_map(std::make_shared<Layer>("Mini Map Layer"));
-    layer_mini_map->addMapAdapter(map_adapter);
-    m_mini_map_control->addLayer(layer_mini_map);
+    // Create/add a layer with the selected map adapter for the "mini" QMapControl.
+    m_mini_map_control->addLayer(std::make_shared<LayerMapAdapter>("Mini Map Layer", map_adapter));
 
 
     // Create some GeometryPoints to add to a GeometryLineString.
@@ -394,7 +392,7 @@ void Multidemo::main_mouseEventPressCoordinate(QMouseEvent* mouse_event, PointWo
         if(m_button_add_point->isChecked())
         {
             // Add a GeometryPointCircle with a radius of 10.0 pixels.
-            m_map_control->getLayer("Geometry Layer")->addGeometry(std::make_shared<GeometryPointCircle>(press_coordinate, 10.0));
+            std::static_pointer_cast<LayerGeometry>(m_map_control->getLayer("Geometry Layer"))->addGeometry(std::make_shared<GeometryPointCircle>(press_coordinate, 10.0));
         }
     }
 }

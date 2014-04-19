@@ -28,6 +28,8 @@ HEADERS +=                                      \
     GPS_Position.h                              \
     ImageManager.h                              \
     Layer.h                                     \
+    LayerGeometry.h                             \
+    LayerMapAdapter.h                           \
     MapAdapter.h                                \
     MapAdapterGoogle.h                          \
     MapAdapterOSM.h                             \
@@ -58,6 +60,8 @@ SOURCES +=                                      \
     GPS_Position.cpp                            \
     ImageManager.cpp                            \
     Layer.cpp                                   \
+    LayerGeometry.cpp                           \
+    LayerMapAdapter.cpp                         \
     MapAdapter.cpp                              \
     MapAdapterGoogle.cpp                        \
     MapAdapterOSM.cpp                           \

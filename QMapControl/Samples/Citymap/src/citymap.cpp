@@ -7,11 +7,12 @@
 #include <cmath>
 
 // QMapControl includes.
+#include <QMapControl/GeometryPointImage.h>
+#include <QMapControl/GeometryWidget.h>
+#include <QMapControl/LayerMapAdapter.h>
 #include <QMapControl/MapAdapterOSM.h>
 #include <QMapControl/MapAdapterYahoo.h>
 #include <QMapControl/MapAdapterGoogle.h>
-#include <QMapControl/GeometryPointImage.h>
-#include <QMapControl/GeometryWidget.h>
 
 /*!
  * This demo application shows more features of the QMapControl.
@@ -34,19 +35,16 @@ Citymap::Citymap(QWidget* parent)
     // Show QMapControl in QMainWindow.
     setCentralWidget(m_map_control);
 
-    // Create a layer with the default OSM map adapter.
-    std::shared_ptr<Layer> map_layer(std::make_shared<Layer>("Map"));
-    map_layer->addMapAdapter(std::make_shared<MapAdapterOSM>());
-    m_map_control->addLayer(map_layer);
+    // Create/add a layer with the default OSM map adapter.
+    m_map_control->addLayer(std::make_shared<LayerMapAdapter>("Map", std::make_shared<MapAdapterOSM>()));
 
     // Create a layer for the Yahoo streets overlay (hide it by default).
-    m_layer_yahoo_streets = std::make_shared<Layer>("Yahoo: Street Overlay");
-    m_layer_yahoo_streets->addMapAdapter(std::make_shared<MapAdapterYahoo>(QUrl("http://us.maps3.yimg.com/aerial.maps.yimg.com/png?v=2.2&t=h&s=256&x=%x&y=%y&z=%zoom")));
+    m_layer_yahoo_streets = std::make_shared<LayerMapAdapter>("Yahoo: Street Overlay", std::make_shared<MapAdapterYahoo>(QUrl("http://us.maps3.yimg.com/aerial.maps.yimg.com/png?v=2.2&t=h&s=256&x=%x&y=%y&z=%zoom")));
     m_layer_yahoo_streets->setVisible(false);
     m_map_control->addLayer(m_layer_yahoo_streets);
 
     // Create a layer for notes/distance measurements.
-    m_layer_notes = std::make_shared<Layer>("Notes");
+    m_layer_notes = std::make_shared<LayerGeometry>("Notes");
     m_map_control->addLayer(m_layer_notes);
 
     // Add sights, pubs, museums and tours.
@@ -60,7 +58,7 @@ Citymap::Citymap(QWidget* parent)
     createMenus();
 
     // Add signal/slot to connect notes layer to edit method.
-    QObject::connect(m_layer_notes.get(), &Layer::geometryClicked, this, &Citymap::editNote);
+    QObject::connect(m_layer_notes.get(), &LayerGeometry::geometryClicked, this, &Citymap::editNote);
 
     // Set the map focus and zoom to Mainz.
     m_map_control->setMapFocusPoint(PointWorldCoord(8.26, 50.0));
@@ -78,7 +76,7 @@ Citymap::Citymap(QWidget* parent)
 void Citymap::addSights()
 {
     // Create the sights layer.
-    m_layer_sights = std::make_shared<Layer>("Sights");
+    m_layer_sights = std::make_shared<LayerGeometry>("Sights");
     m_map_control->addLayer(m_layer_sights);
 
     // Create the "Mainzer Dom" sight and add it to the layer.
@@ -100,13 +98,13 @@ void Citymap::addSights()
     m_layer_sights->addGeometry(quitin);
 
     // Connect signal/slot to handle sights being clicked.
-    QObject::connect(m_layer_sights.get(), &Layer::geometryClicked, this, &Citymap::geometryClicked);
+    QObject::connect(m_layer_sights.get(), &LayerGeometry::geometryClicked, this, &Citymap::geometryClicked);
 }
 
 void Citymap::addPubs()
 {
     // Create the pubs layer.
-    m_layer_pubs = std::make_shared<Layer>("Pubs");
+    m_layer_pubs = std::make_shared<LayerGeometry>("Pubs");
     m_map_control->addLayer(m_layer_pubs);
 
     // Create the "Bagatelle" pub and add it to the layer.
@@ -125,13 +123,13 @@ void Citymap::addPubs()
     m_layer_pubs->addGeometry(krokodil);
 
     // Connect signal/slot to handle pubs being clicked.
-    QObject::connect(m_layer_pubs.get(), &Layer::geometryClicked, this, &Citymap::geometryClickedPub);
+    QObject::connect(m_layer_pubs.get(), &LayerGeometry::geometryClicked, this, &Citymap::geometryClickedPub);
 }
 
 void Citymap::addMuseums()
 {
     // Create the museums layer.
-    m_layer_museum = std::make_shared<Layer>("Museums");
+    m_layer_museum = std::make_shared<LayerGeometry>("Museums");
     m_map_control->addLayer(m_layer_museum);
 
     // Create the "rgzm" pub and add it to the layer.
@@ -147,13 +145,13 @@ void Citymap::addMuseums()
     m_layer_museum->addGeometry(lm);
 
     // Connect signal/slot to handle sights being clicked.
-    QObject::connect(m_layer_museum.get(), &Layer::geometryClicked, this, &Citymap::geometryClicked);
+    QObject::connect(m_layer_museum.get(), &LayerGeometry::geometryClicked, this, &Citymap::geometryClicked);
 }
 
 void Citymap::addTours()
 {
     // Create the tours layer.
-    m_layer_tours = std::make_shared<Layer>("Tours");
+    m_layer_tours = std::make_shared<LayerGeometry>("Tours");
     m_map_control->addLayer(m_layer_tours);
 
     // Create a pen to draw.
@@ -528,31 +526,31 @@ void Citymap::mapProviderSelected(QAction* action)
     m_layer_yahoo_streets->setVisible(false);
 
     // Create a replacement map layer.
-    std::shared_ptr<Layer> map_layer(std::make_shared<Layer>("Map"));
+    std::shared_ptr<LayerMapAdapter> map_layer(std::make_shared<LayerMapAdapter>("Map"));
 
     // Set the map to Google.
     if(action == m_action_google_map)
     {
         // Set the map adapter to Google.
-        map_layer->addMapAdapter(std::make_shared<MapAdapterGoogle>());
+        map_layer->setMapAdapter(std::make_shared<MapAdapterGoogle>());
     }
     // Set the map to OSM.
     else if(action == m_action_osm)
     {
         // Set the map adapter to OSM.
-        map_layer->addMapAdapter(std::make_shared<MapAdapterOSM>());
+        map_layer->setMapAdapter(std::make_shared<MapAdapterOSM>());
     }
     // Set the map to Yahoo 'map'.
     else if(action == m_action_yahoo_map)
     {
         // Set the map adapter to Yahoo 'map'.
-        map_layer->addMapAdapter(std::make_shared<MapAdapterYahoo>());
+        map_layer->setMapAdapter(std::make_shared<MapAdapterYahoo>());
     }
     // Set the map to Yahoo 'satellite'.
     else if(action == m_action_yahoo_satellite)
     {
         // Set the map adapter to Yahoo 'satellite'.
-        map_layer->addMapAdapter(std::make_shared<MapAdapterYahoo>(QUrl("http://us.maps3.yimg.com/aerial.maps.yimg.com/png?v=1.7&t=a&s=256&x=%x&y=%y&z=%zoom")));
+        map_layer->setMapAdapter(std::make_shared<MapAdapterYahoo>(QUrl("http://us.maps3.yimg.com/aerial.maps.yimg.com/png?v=1.7&t=a&s=256&x=%x&y=%y&z=%zoom")));
 
         // Enable the yahoo street layer action.
         m_action_yahoo_streets->setEnabled(true);

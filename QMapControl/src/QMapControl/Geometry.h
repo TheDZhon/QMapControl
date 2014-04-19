@@ -92,6 +92,16 @@ namespace qmapcontrol
             BottomMiddle
         };
 
+    protected:
+        //! Constructor.
+        /*!
+         * This construct a Geometry.
+         * @param geometry_type The geometry type.
+         * @param zoom_minimum The minimum zoom level to show this geometry at.
+         * @param zoom_maximum The maximum zoom level to show this geometry at.
+         */
+        Geometry(const GeometryType& geometry_type, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+
     public:
         //! Disable copy constructor.
         ///Geometry(const Geometry&) = delete; @todo re-add once MSVC supports default/delete syntax.
@@ -101,6 +111,12 @@ namespace qmapcontrol
 
         //! Destructor.
         virtual ~Geometry() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
+
+        /*!
+         * Fetches the geometry type.
+         * @return the geometry type.
+         */
+        const GeometryType& getGeometryType() const;
 
         /*!
          * Fetches whether the geometry is visible.
@@ -114,12 +130,6 @@ namespace qmapcontrol
          * @param enabled Whether to make the geometry visible.
          */
         virtual void setVisible(const bool& enabled);
-
-        /*!
-         * Fetches the geometry type.
-         * @return the geometry type.
-         */
-        const GeometryType& getGeometryType() const;
 
         /*!
          * Fetches the pen to draw the geometry with (outline).
@@ -213,16 +223,6 @@ namespace qmapcontrol
          */
         virtual void draw(QPainter& painter, const RectWorldCoord& backbuffer_rect_coord, const int& controller_zoom) = 0;
 
-    protected:
-        //! Constructor.
-        /*!
-         * This construct a Geometry.
-         * @param geometry_type The geometry type.
-         * @param zoom_minimum The minimum zoom level to show this geometry at.
-         * @param zoom_maximum The maximum zoom level to show this geometry at.
-         */
-        Geometry(const GeometryType& geometry_type, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
-
     signals:
         /*!
          * Signal emitted when a geometry is clicked.
@@ -249,9 +249,6 @@ namespace qmapcontrol
         Geometry& operator=(const Geometry&); /// @todo remove once MSVC supports default/delete syntax.
 
     private:
-        /// Whether the geometry is visible.
-        bool m_visible;
-
         /// The geometry type.
         const GeometryType m_geometry_type;
 
@@ -260,6 +257,9 @@ namespace qmapcontrol
 
         /// Maximum zoom level to show this geometry.
         int m_zoom_maximum;
+
+        /// Whether the geometry is visible.
+        bool m_visible;
 
         /// The pen to use when drawing a geometry.
         std::shared_ptr<QPen> m_pen;

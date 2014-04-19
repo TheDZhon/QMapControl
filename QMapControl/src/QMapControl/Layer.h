@@ -27,32 +27,24 @@
 
 // Qt includes.
 #include <QtCore/QObject>
-#include <QtCore/QPoint>
-#include <QtCore/QReadWriteLock>
-#include <QtCore/QRect>
-#include <QtCore/QSize>
+#include <QtCore/QVariant>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QPainter>
 
 // STL includes.
-#include <memory>
-#include <set>
+#include <map>
+#include <string>
 
 // Local includes.
 #include "qmapcontrol_global.h"
-#include "MapAdapter.h"
-#include "Geometry.h"
-#include "GeometryWidget.h"
-#include "QuadTreeContainer.h"
+#include "Point.h"
 
 namespace qmapcontrol
 {
     //! Layer class
     /*!
-     * Layer can display map and geometries (both static and dynamic).
-     * - Maps and static geometries get "baked" onto a pixmap and are not redrawn until the user pans the view to a new
-     * area not covered by the visible viewport.
-     * - Dynamic geometries and always redrawn when the user pans the view (or geometry requests a redraw).
+     * Layer can display "stuff".
+     * See the specialised layer types to display each type of stuff (eg: MapAdapters, Geometries, etc...).
      *
      * @author Kai Winter <kaiwinter@gmx.de>
      * @author Chris Stylianou <chris5287@gmail.com>
@@ -61,16 +53,30 @@ namespace qmapcontrol
     {
         Q_OBJECT
     public:
+        //! Layer types.
+        enum class LayerType
+        {
+            /// Layer that draws a MapAdapter.
+            LayerMapAdapter,
+            /// Layer that draws Geometries.
+            LayerGeometry,
+            /// Layer that draws ESRI Shapefiles.
+            //LayerESRIShapefile
+        };
+
+    protected:
         //! Layer constructor
         /*!
          * This is used to construct a layer.
+         * @param layer_type The layer type.
          * @param name The name of the layer.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          * @param parent QObject parent ownership.
          */
-        Layer(const std::string& name, const int& zoom_minimum = 0, const int& zoom_maximum = 17, QObject* parent = 0);
+        Layer(const LayerType& layer_type, const std::string& name, const int& zoom_minimum = 0, const int& zoom_maximum = 17, QObject* parent = 0);
 
+    public:
         //! Disable copy constructor.
         ///Layer(const Layer&) = delete; @todo re-add once MSVC supports default/delete syntax.
 
@@ -79,6 +85,12 @@ namespace qmapcontrol
 
         //! Destructor.
         virtual ~Layer() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
+
+        /*!
+         * Fetches the layer type.
+         * @return the layer type.
+         */
+        LayerType getLayerType() const;
 
         /*!
          * Returns the layer's name.
@@ -101,21 +113,9 @@ namespace qmapcontrol
         void setMetadata(const std::string& key, const QVariant& value);
 
         /*!
-         * Returns the Map Adapters from this Layer (Use this instead of the member variable for thread-safety).
-         * @return a list of map adapters that are on this Layer.
-         */
-        const std::vector<std::shared_ptr<MapAdapter>> getMapAdapters() const;
-
-        /*!
-         * Add a Map Adater to this layer.
-         * @param map_adapter The Map Adapter to add.
-         */
-        void addMapAdapter(const std::shared_ptr<MapAdapter>& map_adapter);
-
-        /*!
          * Whether the layer is currently visible.
          * @param controller_zoom The current controller zoom.
-         * @return if the layer is visible.
+         * @return whether the layer is visible.
          */
         bool isVisible(const int& controller_zoom) const;
 
@@ -126,50 +126,16 @@ namespace qmapcontrol
         void setVisible(const bool& visible);
 
         /*!
+         * Whether mouse events are currently enabled.
+         * @return whether mouse events are enabled.
+         */
+        bool isMouseEventsEnabled() const;
+
+        /*!
          * Set whether the layer should handle mouse events.
          * @param enable Whether the layer should handle mouse events.
          */
-        void enableMouseEvents(const bool& enable);
-
-        /*!
-         * Returns the Geometry objects from this Layer (Use this instead of the member variable for thread-safety).
-         * @param range_coord The bounding box range to limit the geometries that are fetched in coordinates.
-         * @return a list of geometries that are on this Layer within the bounding box range.
-         */
-        const std::set<std::shared_ptr<Geometry>> getGeometries(const RectWorldCoord& range_coord) const;
-
-        /*!
-         * Returns the Geometry QWidgets from this Layer (Use this instead of the member variable for thread-safety).
-         * @return a list of geometry widgets that are on this Layer.
-         */
-        const std::set<std::shared_ptr<GeometryWidget>> getGeometryWidgets() const;
-
-        /*!
-         * Set if a Geometry object is on this Layer.
-         * @param geometry The geometry we are looking for.
-         * @param controller_zoom The current controller zoom.
-         * @return whether the geometry is in this layer.
-         */
-        bool containsGeometry(const std::shared_ptr<Geometry>& geometry, const int& controller_zoom) const;
-
-        /*!
-         * Adds a Geometry object to this Layer.
-         * @param geometry The new geometry to add.
-         * @param disable_redraw Whether to disable the redraw call after the geometry is added.
-         */
-        void addGeometry(const std::shared_ptr<Geometry>& geometry, const bool& disable_redraw = false);
-
-        /*!
-         * Removes a Geometry object from this Layer.
-         * @param geometry The geometry to remove.
-         * @param disable_redraw Whether to disable the redraw call after the geometry is removed.
-         */
-        void removeGeometry(const std::shared_ptr<Geometry>& geometry, const bool& disable_redraw = false);
-
-        /*!
-         * Removes all Geometry objects from this Layer.
-         */
-        void clearGeometries();
+        void setMouseEventsEnabled(const bool& enable);
 
         /*!
          * Handles mouse press events (such as left-clicking an item on the layer).
@@ -177,7 +143,7 @@ namespace qmapcontrol
          * @param mouse_point_coord The mouse point on the map in coord.
          * @param controller_zoom The current controller zoom.
          */
-        void mousePressEvent(const QMouseEvent* mouse_event, const PointWorldCoord& mouse_point_coord, const int& controller_zoom);
+        virtual void mousePressEvent(const QMouseEvent* mouse_event, const PointWorldCoord& mouse_point_coord, const int& controller_zoom) const = 0;
 
         /*!
          * Draws each map adapter and geometry to a pixmap using the provided painter.
@@ -185,39 +151,9 @@ namespace qmapcontrol
          * @param backbuffer_rect_px Only draw map tiles/geometries that are contained in the backbuffer rect (pixels).
          * @param controller_zoom The current controller zoom.
          */
-        void draw(QPainter& painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const;
-
-        /*!
-         * Moves any geometries that represent a widget, as these are not drawn to the actually pixmap.
-         * @param offset_px The offset in pixels to remove from the coordinate pixel point.
-         * @param controller_zoom The current controller zoom.
-         */
-        void moveGeometryWidgets(const PointPx& offset_px, const int& controller_zoom) const;
-
-    private:
-        /*!
-         * Draws each map adapter to a pixmap using the provided painter.
-         * @param painter The painter that will draw to the pixmap.
-         * @param backbuffer_rect_px Only draw map tiles that are contained in the backbuffer rect (pixels).
-         * @param controller_zoom The current controller zoom.
-         */
-        void drawMapAdapters(QPainter& painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const;
-
-        /*!
-         * Draws each geometry to a pixmap using the provided painter.
-         * @param painter The painter that will draw to the pixmap.
-         * @param backbuffer_rect_coord Only draw geometries that are contained in the backbuffer rect (coords).
-         * @param controller_zoom The current controller zoom.
-         */
-        void drawGeometries(QPainter& painter, const RectWorldCoord& backbuffer_rect_coord, const int& controller_zoom) const;
+        virtual void draw(QPainter& painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const = 0;
 
     signals:
-        /*!
-         * Signal emitted when a geometry is clicked.
-         * @param geometry The clicked Geometry.
-         */
-        void geometryClicked(const Geometry* geometry);
-
         /*!
          * Signal emitted when a change has occurred that requires the layer to be redrawn.
          */
@@ -230,23 +166,9 @@ namespace qmapcontrol
         //! Disable copy assignment.
         Layer& operator=(const Layer&); /// @todo remove once MSVC supports default/delete syntax.
 
-        /// List of map adapters draw by this layer.
-        std::vector<std::shared_ptr<MapAdapter>> m_mapadapters;
-
-        /// Mutex to protect map adapters.
-        mutable QReadWriteLock m_mapadapters_mutex;
-
-        /// List of geometries draw by this layer.
-        QuadTreeContainer<std::shared_ptr<Geometry>> m_geometries;
-
-        /// Mutex to protect geometries.
-        mutable QReadWriteLock m_geometries_mutex;
-
-        /// List of geometry widgets draw by this layer.
-        std::set<std::shared_ptr<GeometryWidget>> m_geometry_widgets;
-
-        /// Mutex to protect geometry widgets.
-        mutable QReadWriteLock m_geometry_widgets_mutex;
+    private:
+        /// The layer type.
+        LayerType m_layer_type;
 
         /// Whether the layer is visible.
         bool m_visible;

@@ -4,7 +4,7 @@
 #include <QtWidgets/QHBoxLayout>
 
 // QMapControl includes.
-#include "QMapControl/Layer.h"
+#include "QMapControl/LayerMapAdapter.h"
 #include <QMapControl/MapAdapterOSM.h>
 
 /*!
@@ -22,12 +22,8 @@ GPS::GPS(QWidget* parent)
     // Create a new QMapControl.
     m_map_control = new QMapControl(QSizeF(480.0, 640.0));
 
-    // Create a custom layer with the OSM map adapter.
-    std::shared_ptr<Layer> custom_layer(std::make_shared<Layer>("Custom Layer"));
-    custom_layer->addMapAdapter(std::make_shared<MapAdapterOSM>());
-
-    // Add the custom layer to the QMapControl.
-    m_map_control->addLayer(custom_layer);
+    // Create/add a layer with the default OSM map adapter.
+    m_map_control->addLayer(std::make_shared<LayerMapAdapter>("Custom Layer", std::make_shared<MapAdapterOSM>()));
 
     // Connect the GPS Neo signal/slot and start it.
     QObject::connect(&m_gps_neo, &GPS_Neo::new_position, this, &GPS::updatePosition);
