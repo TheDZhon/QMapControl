@@ -25,9 +25,6 @@
 
 #pragma once
 
-// Qt includes.
-#include <QtCore/QPointF>
-
 // STD includes.
 #include <memory>
 #include <set>
@@ -86,7 +83,7 @@ namespace qmapcontrol
                 for(const auto& point : m_points)
                 {
                     // Is the point contained by the query range.
-                    if(range_coord.rawRect().contains(point.first))
+                    if(range_coord.rawRect().contains(point.first.rawPoint()))
                     {
                         // Add to the return points.
                         return_points.insert(point.second);
@@ -111,13 +108,13 @@ namespace qmapcontrol
          * @param object The object to insert.
          * @return whether the object was inserted into this quad tree container.
          */
-        bool insert(const QPointF& point_coord, const T& object)
+        bool insert(const PointWorldCoord& point_coord, const T& object)
         {
             // Keep track of our success.
             bool success(false);
 
             // Does this boundary contain the point?
-            if(m_boundary_coord.rawRect().contains(point_coord))
+            if(m_boundary_coord.rawRect().contains(point_coord.rawPoint()))
             {
                 // Have we reached our capacity?
                 if(m_points.size() < m_capacity)
@@ -178,10 +175,10 @@ namespace qmapcontrol
          * @param point_coord The objects's point in coordinates.
          * @param object The object to remove.
          */
-        void erase(const QPointF& point_coord, const T& object)
+        void erase(const PointWorldCoord& point_coord, const T& object)
         {
             // Does this boundary contain the point?
-            if(m_boundary_coord.rawRect().contains(point_coord))
+            if(m_boundary_coord.rawRect().contains(point_coord.rawPoint()))
             {
                 // Check whether any of our points are contained in the range.
                 auto itr_point = m_points.begin();
@@ -243,19 +240,19 @@ namespace qmapcontrol
             const QSizeF half_size = m_boundary_coord.rawRect().size() / 2.0;
 
             // Construct the north east child.
-            const RectWorldCoord north_east(RectWorldCoord::fromQRectF(QRectF(m_boundary_coord.rawRect().left() + half_size.width(), m_boundary_coord.rawRect().top(), half_size.width(), half_size.height())));
+            const RectWorldCoord north_east(PointWorldCoord(m_boundary_coord.rawRect().left() + half_size.width(), m_boundary_coord.rawRect().top()), half_size);
             m_child_north_east.reset(new QuadTreeContainer<T>(m_capacity, north_east));
 
             // Construct the north west child.
-            const RectWorldCoord north_west(RectWorldCoord::fromQRectF(QRectF(m_boundary_coord.rawRect().left(), m_boundary_coord.rawRect().top(), half_size.width(), half_size.height())));
+            const RectWorldCoord north_west(PointWorldCoord(m_boundary_coord.rawRect().left(), m_boundary_coord.rawRect().top()), half_size);
             m_child_north_west.reset(new QuadTreeContainer<T>(m_capacity, north_west));
 
             // Construct the south east child.
-            const RectWorldCoord south_east(RectWorldCoord::fromQRectF(QRectF(m_boundary_coord.rawRect().left() + half_size.width(), m_boundary_coord.rawRect().top() + half_size.height(), half_size.width(), half_size.height())));
+            const RectWorldCoord south_east(PointWorldCoord(m_boundary_coord.rawRect().left() + half_size.width(), m_boundary_coord.rawRect().top() + half_size.height()), half_size);
             m_child_south_east.reset(new QuadTreeContainer<T>(m_capacity, south_east));
 
             // Construct the south west child.
-            const RectWorldCoord south_west(RectWorldCoord::fromQRectF(QRectF(m_boundary_coord.rawRect().left(), m_boundary_coord.rawRect().top() + half_size.height(), half_size.width(), half_size.height())));
+            const RectWorldCoord south_west(PointWorldCoord(m_boundary_coord.rawRect().left(), m_boundary_coord.rawRect().top() + half_size.height()), half_size);
             m_child_south_west.reset(new QuadTreeContainer<T>(m_capacity, south_west));
         }
 
@@ -267,7 +264,7 @@ namespace qmapcontrol
         const RectWorldCoord m_boundary_coord;
 
         /// Points in this quad tree node.
-        std::vector<std::pair<QPointF, T>> m_points;
+        std::vector<std::pair<PointWorldCoord, T>> m_points;
 
         /// Child: north east quad tree node.
         std::unique_ptr<QuadTreeContainer> m_child_north_east;

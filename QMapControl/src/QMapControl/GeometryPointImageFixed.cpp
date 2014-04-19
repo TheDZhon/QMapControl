@@ -64,7 +64,7 @@ namespace qmapcontrol
                 const RectWorldPx image_rect_px(projection::get().toPointWorldPx(coord(), controller_zoom), projection::get().toPointWorldPx(m_bottom_right_coord, controller_zoom));
 
                 // Draw the pixmap.
-                painter.drawPixmap(image_rect_px.rawRect(), getPixmap(), QRectF());
+                painter.drawPixmap(image_rect_px.rawRect().toRect(), getPixmap());
             }
         }
     }

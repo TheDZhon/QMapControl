@@ -208,7 +208,7 @@ namespace qmapcontrol
                     QWriteLocker locker(&m_geometries_mutex);
 
                     // Add the geometry.
-                    m_geometries.insert(std::static_pointer_cast<GeometryPoint>(geometry)->coord().rawPoint(), geometry);
+                    m_geometries.insert(std::static_pointer_cast<GeometryPoint>(geometry)->coord(), geometry);
 
                     // Finished.
                     break;
@@ -238,7 +238,7 @@ namespace qmapcontrol
                     for(const auto point : std::static_pointer_cast<GeometryLineString>(geometry)->points())
                     {
                         // Add the geometry.
-                        m_geometries.insert(point.rawPoint(), geometry);
+                        m_geometries.insert(point, geometry);
                     }
 
                     // Finished.
@@ -255,7 +255,7 @@ namespace qmapcontrol
                     for(const auto point : std::static_pointer_cast<GeometryPolygon>(geometry)->points())
                     {
                         // Add the geometry.
-                        m_geometries.insert(point.rawPoint(), geometry);
+                        m_geometries.insert(point, geometry);
                     }
 
                     // Finished.
@@ -298,7 +298,7 @@ namespace qmapcontrol
                     QObject::disconnect(geometry.get(), 0, this, 0);
 
                     // Remove the geometry from the list.
-                    m_geometries.erase(std::static_pointer_cast<GeometryPoint>(geometry)->coord().rawPoint(), geometry);
+                    m_geometries.erase(std::static_pointer_cast<GeometryPoint>(geometry)->coord(), geometry);
                 }
 
                 // Is it a GeometryPointWidget.
@@ -336,7 +336,7 @@ namespace qmapcontrol
                     for(const auto point : std::static_pointer_cast<GeometryLineString>(geometry)->points())
                     {
                         // Remove the geometry.
-                        m_geometries.erase(point.rawPoint(), geometry);
+                        m_geometries.erase(point, geometry);
                     }
 
                     // Finished.
@@ -356,7 +356,7 @@ namespace qmapcontrol
                     for(const auto point : std::static_pointer_cast<GeometryPolygon>(geometry)->points())
                     {
                         // Remove the geometry.
-                        m_geometries.erase(point.rawPoint(), geometry);
+                        m_geometries.erase(point, geometry);
                     }
 
                     // Finished.
@@ -482,11 +482,11 @@ namespace qmapcontrol
                         // Check the tile is valid.
                         if(map_adapter->isTileValid(i, j, controller_zoom))
                         {
-                            // Calculate the tile rect.
-                            const QRectF tile_rect_px(QPointF(i * tile_size_px.width(), j * tile_size_px.height()), tile_size_px);
+                            // Calculate the top left point.
+                            const PointWorldPx top_left_px(i * tile_size_px.width(), j * tile_size_px.height());
 
                             // Draw the tile.
-                            painter.drawPixmap(tile_rect_px.topLeft(), ImageManager::get().getImage(map_adapter->tileQuery(i, j, controller_zoom)));
+                            painter.drawPixmap(top_left_px.rawPoint(), ImageManager::get().getImage(map_adapter->tileQuery(i, j, controller_zoom)));
                         }
                     }
                 }

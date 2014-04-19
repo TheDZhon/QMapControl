@@ -38,32 +38,27 @@
 namespace qmapcontrol
 {
 
-    class QMAPCONTROL_EXPORT PointCoord
+    class QMAPCONTROL_EXPORT PointWorldCoord
     {
     public:
-        PointCoord(const qreal& longitude, const qreal& latitude) : m_raw_point(longitude, latitude) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
+        PointWorldCoord(const qreal& longitude, const qreal& latitude) : m_raw_point(longitude, latitude) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
         inline QPointF rawPoint() const { return m_raw_point; }
         inline qreal longitude() const { return m_raw_point.x(); }
         inline qreal latitude() const { return m_raw_point.y(); }
         inline void setLongitude(const qreal& longitude) { m_raw_point.setX(longitude); }
         inline void setLatitude(const qreal& latitude) { m_raw_point.setY(latitude); }
 
-        inline bool operator==(const PointCoord& p) { return m_raw_point == p.rawPoint(); }
-        inline bool operator!=(const PointCoord& p)  { return m_raw_point != p.rawPoint(); }
+        inline bool operator==(const PointWorldCoord& p) { return m_raw_point == p.rawPoint(); }
+        inline bool operator!=(const PointWorldCoord& p)  { return m_raw_point != p.rawPoint(); }
     protected:
         QPointF m_raw_point;
-    };
-
-    class QMAPCONTROL_EXPORT PointWorldCoord : public PointCoord
-    {
-    public:
-        PointWorldCoord(const qreal& longitude, const qreal& latitude) : PointCoord(longitude, latitude) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
     };
 
     class QMAPCONTROL_EXPORT RectWorldCoord
     {
     public:
         RectWorldCoord(const PointWorldCoord& top_left, const PointWorldCoord& bottom_right) : m_raw_rect(top_left.rawPoint(), bottom_right.rawPoint()) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
+        RectWorldCoord(const PointWorldCoord& top_left, const QSizeF& size) : m_raw_rect(top_left.rawPoint(), size) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
         inline QRectF rawRect() const { return m_raw_rect; }
         inline PointWorldCoord topLeftCoord() const { return PointWorldCoord(m_raw_rect.x(), m_raw_rect.y()); }
         inline PointWorldCoord bottomRightCoord() const { return PointWorldCoord(m_raw_rect.x() + m_raw_rect.width(), m_raw_rect.y() + m_raw_rect.height()); }
@@ -122,7 +117,8 @@ namespace qmapcontrol
     {
     public:
         RectPx() : m_raw_rect() { }
-        RectPx(const PointWorldPx& top_left, const PointWorldPx& bottom_right) : m_raw_rect(top_left.rawPoint(), bottom_right.rawPoint()) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
+        RectPx(const PointPx& top_left, const PointPx& bottom_right) : m_raw_rect(top_left.rawPoint(), bottom_right.rawPoint()) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
+        RectPx(const PointPx& top_left, const QSizeF& size) : m_raw_rect(top_left.rawPoint(), size) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
         inline QRectF rawRect() const { return m_raw_rect; }
         inline qreal leftPx() const { return m_raw_rect.left(); }
         inline qreal topPx() const { return m_raw_rect.top(); }
@@ -139,5 +135,14 @@ namespace qmapcontrol
     public:
         RectWorldPx() : RectPx() { }
         RectWorldPx(const PointWorldPx& top_left, const PointWorldPx& bottom_right) : RectPx(top_left, bottom_right) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
+        RectWorldPx(const PointWorldPx& top_left, const QSizeF& size) : RectPx(top_left, size) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
+    };
+
+    class QMAPCONTROL_EXPORT RectViewportPx : public RectPx
+    {
+    public:
+        RectViewportPx() : RectPx() { }
+        RectViewportPx(const PointViewportPx& top_left, const PointViewportPx& bottom_right) : RectPx(top_left, bottom_right) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
+        RectViewportPx(const PointViewportPx& top_left, const QSizeF& size) : RectPx(top_left, size) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
     };
 }

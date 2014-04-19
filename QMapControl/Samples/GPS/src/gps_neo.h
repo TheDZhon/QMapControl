@@ -2,7 +2,6 @@
 
 // Qt includes.
 #include <QtCore/QObject>
-#include <QtCore/QPointF>
 
 // QMapControl includes.
 #include <QMapControl/Point.h>

@@ -30,7 +30,6 @@
 #include <QtCore/QList>
 #include <QtCore/QObject>
 #include <QtCore/QReadWriteLock>
-#include <QtCore/QRectF>
 #include <QtCore/QTimer>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QPaintEvent>
@@ -244,7 +243,7 @@ namespace qmapcontrol
          * Fetches the visible viewport rect in world coordinates.
          * @return the visible viewport rect in world coordinates.
          */
-        QRectF getViewportRect() const;
+        RectWorldCoord getViewportRect() const;
 
         /*!
          * Check whether all coordinates are visible in the current viewport.
@@ -263,7 +262,7 @@ namespace qmapcontrol
          * @param top_left_coord The top-left coordinate of the limited viewport rect.
          * @param bottom_right_coord The bottom-right coordinate of the limited viewport rect.
          */
-        void setLimitedViewportRect(const QPointF& top_left_coord, const QPointF& bottom_right_coord);
+        void setLimitedViewportRect(const PointWorldCoord& top_left_coord, const PointWorldCoord& bottom_right_coord);
 
         // Map management.
         /*!
@@ -651,8 +650,8 @@ namespace qmapcontrol
         /// The viewport (visible-part of each layer) top-left offset for the center point in pixels.
         PointViewportPx m_viewport_center_px;
 
-        /// The viewing bounding box coord (set to QRectF(0.0, 0.0, 0.0, 0.0) to disable.
-        QRectF m_limited_viewport_rect_coord;
+        /// The viewing bounding box coord (set to RectWorldCoord(0.0, 0.0, 0.0, 0.0) to disable.
+        RectWorldCoord m_limited_viewport_rect_coord;
 
         /// The current map focus point in coordinates.
         PointWorldCoord m_map_focus_coord;

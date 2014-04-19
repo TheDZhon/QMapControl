@@ -44,6 +44,7 @@ namespace qmapcontrol
 {
     QMapControl::QMapControl(QWidget * parent, Qt::WindowFlags window_flags)
         : m_viewport_center_px(0.0, 0.0),
+          m_limited_viewport_rect_coord(PointWorldCoord(0.0, 0.0), PointWorldCoord(0.0, 0.0)),
           m_map_focus_coord(0.0, 0.0),
           m_animated_map_focus_point(0.0, 0.0),
           m_mouse_position_pressed_px(0.0, 0.0),
@@ -63,7 +64,7 @@ namespace qmapcontrol
           m_layer_mouse_events_enabled(true),
           m_viewport_size_px(size_px),
           m_viewport_center_px(size_px.width() / 2.0, size_px.height() / 2.0),
-          m_limited_viewport_rect_coord(0.0, 0.0, 0.0, 0.0),
+          m_limited_viewport_rect_coord(PointWorldCoord(0.0, 0.0), PointWorldCoord(0.0, 0.0)),
           m_map_focus_coord(0.0, 0.0),
           m_animated_map_focus_point(0.0, 0.0),
           m_animated_steps(0),
@@ -307,18 +308,18 @@ namespace qmapcontrol
         bool return_visible(false);
 
         // Check the geometry and viewport are valid.
-        if(geometry != nullptr && getViewportRect().isValid())
+        if(geometry != nullptr && getViewportRect().rawRect().isValid())
         {
             // Do we want a partial visibile check?
             if(partial)
             {
                 // Check whether the geometry bounding box is partially contained by the viewport rect.
-                return_visible = getViewportRect().intersects(geometry->boundingBox(m_current_zoom).rawRect());
+                return_visible = getViewportRect().rawRect().intersects(geometry->boundingBox(m_current_zoom).rawRect());
             }
             else
             {
                 // Check whether the geometry bounding box is totally contained by the viewport rect.
-                return_visible = getViewportRect().contains(geometry->boundingBox(m_current_zoom).rawRect());
+                return_visible = getViewportRect().rawRect().contains(geometry->boundingBox(m_current_zoom).rawRect());
             }
         }
 
@@ -371,10 +372,10 @@ namespace qmapcontrol
         updateControls();
     }
 
-    QRectF QMapControl::getViewportRect() const
+    RectWorldCoord QMapControl::getViewportRect() const
     {
         // Return the viewport rect converted into the coordinates system.
-        return QRectF(projection::get().toPointWorldCoord(mapFocusPointWorldPx() - m_viewport_center_px, m_current_zoom).rawPoint(), projection::get().toPointWorldCoord(mapFocusPointWorldPx() + m_viewport_center_px, m_current_zoom).rawPoint());
+        return RectWorldCoord(projection::get().toPointWorldCoord(mapFocusPointWorldPx() - m_viewport_center_px, m_current_zoom), projection::get().toPointWorldCoord(mapFocusPointWorldPx() + m_viewport_center_px, m_current_zoom));
     }
 
     bool QMapControl::viewportContainsAll(const std::vector<PointWorldCoord>& points_coord) const
@@ -383,13 +384,13 @@ namespace qmapcontrol
         bool return_contains_all(true);
 
         // Get the current viewport rect.
-        const QRectF viewport_rect_coord = getViewportRect();
+        const RectWorldCoord viewport_rect_coord(getViewportRect());
 
         // Loop through each coordinate and check it is contained by the viewport rect, stop if we find one outside the rect.
         for(size_t i = 0; return_contains_all == true && i < points_coord.size(); i++)
         {
             // Is the point within the rect.
-            return_contains_all = viewport_rect_coord.contains(points_coord.at(i).rawPoint());
+            return_contains_all = viewport_rect_coord.rawRect().contains(points_coord.at(i).rawPoint());
         }
 
         // Return the result.
@@ -399,13 +400,13 @@ namespace qmapcontrol
     void QMapControl::resetLimitedViewportRect()
     {
         // Reset limited viewport rect to 0 (ie: disable it).
-        m_limited_viewport_rect_coord = QRectF(0.0, 0.0, 0.0, 0.0);
+        m_limited_viewport_rect_coord = RectWorldCoord(PointWorldCoord(0.0, 0.0), PointWorldCoord(0.0, 0.0));
     }
 
-    void QMapControl::setLimitedViewportRect(const QPointF& top_left_coord, const QPointF& bottom_right_coord)
+    void QMapControl::setLimitedViewportRect(const PointWorldCoord& top_left_coord, const PointWorldCoord& bottom_right_coord)
     {
         // Set the limited viewport rect.
-        m_limited_viewport_rect_coord = QRectF(top_left_coord, bottom_right_coord);
+        m_limited_viewport_rect_coord = RectWorldCoord(top_left_coord, bottom_right_coord);
     }
 
     // Map management.
@@ -726,7 +727,7 @@ namespace qmapcontrol
 
 //            // Construct area to check.
 //            // Default to rect.
-//            std::unique_ptr<QGraphicsItem> area_px(new QGraphicsRectItem(QRectF(top_left_px.rawPoint(), bottom_right_px.rawPoint())));
+//            std::unique_ptr<QGraphicsItem> area_px(new QGraphicsRectItem(RectWorldPx(top_left_px, bottom_right_px).rawPoint()));
 //            if(mouse_mode == QMapControl::MouseButtonMode::SelectLine)
 //            {
 //                // Line check.
@@ -742,7 +743,7 @@ namespace qmapcontrol
 //            else if(mouse_mode == QMapControl::MouseButtonMode::SelectEllipse)
 //            {
 //                // Ellipse check.
-//                area_px.reset(new QGraphicsEllipseItem(QRectF(top_left_px.rawPoint(), bottom_right_px.rawPoint())));
+//                area_px.reset(new QGraphicsEllipseItem(RectWorldPx(top_left_px, bottom_right_px).rawPoint()));
 //            }
 
             // Collection of selected geometries.
@@ -962,7 +963,7 @@ namespace qmapcontrol
                 new_primary_screen_scaled.fill(Qt::transparent);
                 QPainter painter(&new_primary_screen_scaled);
                 painter.scale(2, 2);
-                painter.drawPixmap(QPointF(0.0, 0.0), getPrimaryScreen());
+                painter.drawPixmap(PointWorldPx(0.0, 0.0).rawPoint(), getPrimaryScreen());
 
                 // Store the new scaled primary screen.
                 m_primary_screen_scaled = new_primary_screen_scaled;
@@ -1000,7 +1001,7 @@ namespace qmapcontrol
                 new_primary_screen_scaled.fill(Qt::transparent);
                 QPainter painter(&new_primary_screen_scaled);
                 painter.scale(0.5, 0.5);
-                painter.drawPixmap(QPointF(m_viewport_size_px.width(), m_viewport_size_px.height()), m_primary_screen);
+                painter.drawPixmap(PointWorldPx(m_viewport_size_px.width(), m_viewport_size_px.height()).rawPoint(), m_primary_screen);
 
                 // Store the new scaled primary screen.
                 m_primary_screen_scaled = new_primary_screen_scaled;
@@ -1138,7 +1139,7 @@ namespace qmapcontrol
         const PointWorldCoord new_map_focus_coord(projection::get().toPointWorldCoord(mapFocusPointWorldPx() + delta_px, m_current_zoom));
 
         // If no limited viewport is set, or if the new map focus point coord is within the limited viewport...
-        if(m_limited_viewport_rect_coord.isNull() || (m_limited_viewport_rect_coord.isValid() && m_limited_viewport_rect_coord.contains(new_map_focus_coord.rawPoint())))
+        if(m_limited_viewport_rect_coord.rawRect().isNull() || (m_limited_viewport_rect_coord.rawRect().isValid() && m_limited_viewport_rect_coord.rawRect().contains(new_map_focus_coord.rawPoint())))
         {
             // Update map focus point with delta.
             setMapFocusPoint(new_map_focus_coord);
@@ -1221,8 +1222,8 @@ namespace qmapcontrol
         // Draw the current primary screen to the widget.
         drawPrimaryScreen(&painter);
 
-        // Draw a box around the edge of the viewport.
-        painter.drawRect(QRectF(0.0, 0.0, m_viewport_size_px.width(), m_viewport_size_px.height()));
+        // Draw a box around the edge of the viewport (useful for debugging).
+        painter.drawRect(RectViewportPx(PointViewportPx(0.0, 0.0), PointViewportPx(m_viewport_size_px.width(), m_viewport_size_px.height())).rawRect());
 
         // Should we draw the scalebar?
         if(m_scalebar_enabled)
@@ -1260,9 +1261,9 @@ namespace qmapcontrol
 
                 // Draw the scalebar line.
                 painter.setPen(Qt::black);
-                const QPointF scale_line_start(10.0, m_viewport_size_px.height() - 20.0);
-                const QPointF scale_line_end(scalebar_line_length_px, m_viewport_size_px.height() - 20.0);
-                painter.drawLine(scale_line_start, scale_line_end);
+                const PointViewportPx scale_line_start(10.0, m_viewport_size_px.height() - 20.0);
+                const PointViewportPx scale_line_end(scalebar_line_length_px, m_viewport_size_px.height() - 20.0);
+                painter.drawLine(scale_line_start.rawPoint(), scale_line_end.rawPoint());
                 painter.drawLine(10.0, m_viewport_size_px.height() - 15.0, 10.0, m_viewport_size_px.height() - 25.0);
                 painter.drawLine(scalebar_line_length_px, m_viewport_size_px.height() - 15.0, scalebar_line_length_px, m_viewport_size_px.height() - 25.0);
 
@@ -1277,7 +1278,7 @@ namespace qmapcontrol
                 }
 
                 // Draw the scalebar text.
-                painter.drawText(QPointF(scalebar_line_length_px + 10.0, m_viewport_size_px.height() - 15.0), scalebar_text);
+                painter.drawText(PointViewportPx(scalebar_line_length_px + 10.0, m_viewport_size_px.height() - 15.0).rawPoint(), scalebar_text);
             }
         }
 
@@ -1341,7 +1342,7 @@ namespace qmapcontrol
             if(mouse_mode == QMapControl::MouseButtonMode::DrawBox || mouse_mode == QMapControl::MouseButtonMode::PanBox || mouse_mode == QMapControl::MouseButtonMode::SelectBox)
             {
                 // Draw rect.
-                painter.drawRect(QRectF(start_point_px.rawPoint(), end_point_px.rawPoint()));
+                painter.drawRect(RectViewportPx(start_point_px, end_point_px).rawRect());
             }
             // Is the mouse mode set to draw/pan/select a line.
             else if(mouse_mode == QMapControl::MouseButtonMode::DrawLine || mouse_mode == QMapControl::MouseButtonMode::PanLine || mouse_mode == QMapControl::MouseButtonMode::SelectLine)
@@ -1361,7 +1362,7 @@ namespace qmapcontrol
             else if(mouse_mode == QMapControl::MouseButtonMode::DrawEllipse || mouse_mode == QMapControl::MouseButtonMode::PanEllipse || mouse_mode == QMapControl::MouseButtonMode::SelectEllipse)
             {
                 // Draw ellipse from start to current mouse point.
-                painter.drawEllipse(QRectF(start_point_px.rawPoint(), end_point_px.rawPoint()));
+                painter.drawEllipse(RectViewportPx(start_point_px, end_point_px).rawRect());
             }
 
             // Restore the painter's state.
@@ -1390,10 +1391,10 @@ namespace qmapcontrol
         bool return_redraw_required(false);
 
         // Calculate required viewport rect.
-        const QRectF required_viewport_rect_px(toPointWorldPx(PointViewportPx(0.0, 0.0)).rawPoint(), toPointWorldPx(PointViewportPx(m_viewport_size_px.width(), m_viewport_size_px.height())).rawPoint());
+        const RectWorldPx required_viewport_rect_px(toPointWorldPx(PointViewportPx(0.0, 0.0)), toPointWorldPx(PointViewportPx(m_viewport_size_px.width(), m_viewport_size_px.height())));
 
         // Does the primary screen's backbuffer rect contain the requried viewport rect?
-        if(m_primary_screen_backbuffer_rect_px.rawRect().contains(required_viewport_rect_px) == false)
+        if(m_primary_screen_backbuffer_rect_px.rawRect().contains(required_viewport_rect_px.rawRect()) == false)
         {
             // Backbuffer rect does not contain the required viewport rect, therefore we need to redraw the backbuffer.
             return_redraw_required = true;

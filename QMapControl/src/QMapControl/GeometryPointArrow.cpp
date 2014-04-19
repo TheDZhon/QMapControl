@@ -71,17 +71,17 @@ namespace qmapcontrol
         painter.setBrush(QBrush(getPen().color()));
 
         // Rotate the painter, so that the arrow drawn is point in the right direction.
-        QPointF center_px(pixmap.width() / 2.0, pixmap.height() / 2.0);
-        painter.translate(center_px);
+        PointPx center_px(pixmap.width() / 2.0, pixmap.height() / 2.0);
+        painter.translate(center_px.rawPoint());
         painter.rotate(m_heading);
-        painter.translate(-center_px);
+        painter.translate(-center_px.rawPoint());
 
         // Add points to create arrow shape.
         QPolygonF arrow;
-        arrow << QPointF((pixmap.width() / 2.0), 0.0);
-        arrow << QPointF(pixmap.width(), pixmap.height());
-        arrow << QPointF((pixmap.width() / 2.0), (pixmap.height() / 2.0));
-        arrow << QPointF(0.0, pixmap.height());
+        arrow << PointPx((pixmap.width() / 2.0), 0.0).rawPoint();
+        arrow << PointPx(pixmap.width(), pixmap.height()).rawPoint();
+        arrow << PointPx((pixmap.width() / 2.0), (pixmap.height() / 2.0)).rawPoint();
+        arrow << PointPx(0.0, pixmap.height()).rawPoint();
 
         // Draw the arrow.
         painter.drawPolygon(arrow);

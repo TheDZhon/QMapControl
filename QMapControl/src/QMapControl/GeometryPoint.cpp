@@ -269,7 +269,7 @@ namespace qmapcontrol
                     const RectWorldPx pixmap_rect_px(projection::get().toPointWorldPx(pixmap_rect_coord.topLeftCoord(), controller_zoom), projection::get().toPointWorldPx(pixmap_rect_coord.bottomRightCoord(), controller_zoom));
 
                     // Draw the pixmap.
-                    painter.drawPixmap(pixmap_rect_px.rawRect(), getPixmap(), QRectF());
+                    painter.drawPixmap(pixmap_rect_px.rawRect().toRect(), getPixmap());
 
                     // Do we have a meta-data value and should we display it at this zoom?
                     if(controller_zoom >= m_metadata_displayed_zoom_minimum && getMetadata(m_metadata_displayed_key).isNull() == false)
@@ -277,7 +277,7 @@ namespace qmapcontrol
                         /// @todo calculate correct alignment for metadata displayed offset.
 
                         // Draw the text next to the point with an offset.
-                        painter.drawText(pixmap_rect_px.rawRect().topRight() + QPointF(m_metadata_displayed_alignment_offset_px, -m_metadata_displayed_alignment_offset_px), getMetadata(m_metadata_displayed_key).toString());
+                        painter.drawText(pixmap_rect_px.rawRect().topRight() + PointPx(m_metadata_displayed_alignment_offset_px, -m_metadata_displayed_alignment_offset_px).rawPoint(), getMetadata(m_metadata_displayed_key).toString());
                     }
                 }
             }
