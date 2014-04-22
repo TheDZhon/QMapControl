@@ -34,19 +34,18 @@
 
 // Local includes.
 #include "qmapcontrol_global.h"
+#include "ESRIShapefile.h"
 #include "Layer.h"
-#include "MapAdapter.h"
 
 namespace qmapcontrol
 {
     //! Layer class
     /*!
-     * Layer that can display a MapAdapter.
+     * Layer that can display a ESRI Shapefile.
      *
-     * @author Kai Winter <kaiwinter@gmx.de>
      * @author Chris Stylianou <chris5287@gmail.com>
      */
-    class QMAPCONTROL_EXPORT LayerMapAdapter : public Layer
+    class QMAPCONTROL_EXPORT LayerESRIShapefile : public Layer
     {
         Q_OBJECT
     public:
@@ -54,33 +53,40 @@ namespace qmapcontrol
         /*!
          * This is used to construct a layer.
          * @param name The name of the layer.
-         * @param mapadapter The Map Adapter of the layer.
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          * @param parent QObject parent ownership.
          */
-        LayerMapAdapter(const std::string& name, const std::shared_ptr<MapAdapter>& mapadapter = nullptr, const int& zoom_minimum = 0, const int& zoom_maximum = 17, QObject* parent = 0);
+        LayerESRIShapefile(const std::string& name, const int& zoom_minimum = 0, const int& zoom_maximum = 17, QObject* parent = 0);
 
         //! Disable copy constructor.
-        ///LayerMapAdapter(const LayerMapAdapter&) = delete; @todo re-add once MSVC supports default/delete syntax.
+        ///LayerESRIShapefile(const LayerESRIShapefile&) = delete; @todo re-add once MSVC supports default/delete syntax.
 
         //! Disable copy assignment.
-        ///LayerMapAdapter& operator=(const LayerMapAdapter&) = delete; @todo re-add once MSVC supports default/delete syntax.
+        ///LayerESRIShapefile& operator=(const LayerESRIShapefile&) = delete; @todo re-add once MSVC supports default/delete syntax.
 
         //! Destructor.
-        virtual ~LayerMapAdapter() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
+        virtual ~LayerESRIShapefile() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
 
         /*!
-         * Returns the Map Adapter from this Layer
-         * @return the map adapter that are on this Layer.
+         * Adds an ESRI Shapefile object to this Layer.
+         * @param esri_shapefile The ESRI Shapefile to add.
+         * @param disable_redraw Whether to disable the redraw call after the ESRI Shapefile is added.
          */
-        const std::shared_ptr<MapAdapter> getMapAdapter() const;
+        void addESRIShapefile(const std::shared_ptr<ESRIShapefile>& esri_shapefile, const bool& disable_redraw = false);
 
         /*!
-         * Sets the Map Adapter for this layer.
-         * @param mapadapter The Map Adapter to set.
+         * Removes an ESRI Shapefile object from this Layer.
+         * @param esri_shapefile The ESRI Shapefile to remove.
+         * @param disable_redraw Whether to disable the redraw call after the ESRI Shapefile is removed.
          */
-        void setMapAdapter(const std::shared_ptr<MapAdapter>& mapadapter);
+        void removeESRIShapefile(const std::shared_ptr<ESRIShapefile>& esri_shapefile, const bool& disable_redraw = false);
+
+        /*!
+         * Removes all ESRI Shapefile objects from this Layer.
+         * @param disable_redraw Whether to disable the redraw call after all ESRI Shapefiles are removed.
+         */
+        void clearESRIShapefiles(const bool& disable_redraw = false);
 
         /*!
          * Handles mouse press events (such as left-clicking an item on the layer).
@@ -99,10 +105,10 @@ namespace qmapcontrol
         void draw(QPainter& painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const final;
 
     private:
-        /// The map adapter drawn by this layer.
-        std::shared_ptr<MapAdapter> m_mapadapter;
+        /// List of ESRI Shapefiles draw by this layer.
+        std::vector<std::shared_ptr<ESRIShapefile>> m_esri_shapefiles;
 
-        /// Mutex to protect map adapter.
-        mutable QReadWriteLock m_mapadapter_mutex;
+        /// Mutex to protect ESRI Shapefiles.
+        mutable QReadWriteLock m_esri_shapefiles_mutex;
     };
 }

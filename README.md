@@ -16,6 +16,14 @@ Features:
 ### External Dependencies
 - Qt 5 (http://qt-project.org)
   - Tested with Qt 5.2.1.
+
+### Optional External Dependencies
+- GDAL (http://www.gdal.org)
+  - Supports: ESRI Shapefile
+  - To enable this feature, define `QMC_GDAL`
+    - You can specify the include path for GDAL with the environment variable `QMC_GDAL_INC`
+    - You can specify the library path for GDAL with the environment variable `QMC_GDAL_LIB`
+  - Tested with GDAL 1.10.1
   
 ### Internal Dependencies
 - QProgressIndicator (https://github.com/mojocorp/QProgressIndicator)

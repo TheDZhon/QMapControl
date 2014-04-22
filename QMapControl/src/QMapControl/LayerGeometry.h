@@ -143,13 +143,13 @@ namespace qmapcontrol
         void geometryClicked(const Geometry* geometry) const;
 
     private:
-        /// List of geometries draw by this layer.
+        /// List of geometries drawn by this layer.
         QuadTreeContainer<std::shared_ptr<Geometry>> m_geometries;
 
         /// Mutex to protect geometries.
         mutable QReadWriteLock m_geometries_mutex;
 
-        /// List of geometry widgets draw by this layer.
+        /// List of geometry widgets drawn by this layer.
         std::set<std::shared_ptr<GeometryWidget>> m_geometry_widgets;
 
         /// Mutex to protect geometry widgets.
