@@ -146,7 +146,7 @@ namespace qmapcontrol
 
     public:
         /*!
-         * The bounding box in world coordinates.
+         * Fetches the bounding box (world coordinates).
          * @param controller_zoom The current controller zoom.
          * @return the bounding box.
          */
@@ -154,16 +154,16 @@ namespace qmapcontrol
 
         /*!
          * Checks if the geometry touches (intersects) with another geometry.
-         * @param geometry_coord The geometry to check against.
+         * @param geometry The geometry to check against.
          * @param controller_zoom The current controller zoom.
          * @return whether the geometries touch (intersects).
          */
-        bool touches(const Geometry* geometry_coord, const int& controller_zoom) const final;
+        bool touches(const Geometry* geometry, const int& controller_zoom) const final;
 
         /*!
          * Draws the geometry to a pixmap using the provided painter.
          * @param painter The painter that will draw to the pixmap.
-         * @param backbuffer_rect_coord Only draw geometries that are contained in the backbuffer rect (coord).
+         * @param backbuffer_rect_coord Only draw geometries that are contained in the backbuffer rect (world coordinates).
          * @param controller_zoom The current controller zoom.
          */
         void draw(QPainter& painter, const RectWorldCoord& backbuffer_rect_coord, const int& controller_zoom) final;

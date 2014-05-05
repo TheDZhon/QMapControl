@@ -77,7 +77,7 @@ namespace qmapcontrol
         return RectWorldCoord::fromQRectF(polygon_line.boundingRect());
     }
 
-    bool GeometryLineString::touches(const Geometry* geometry_coord, const int& controller_zoom) const
+    bool GeometryLineString::touches(const Geometry* geometry, const int& controller_zoom) const
     {
         /// @todo change to world coordinates.
 

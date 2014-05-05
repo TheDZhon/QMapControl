@@ -211,16 +211,16 @@ namespace qmapcontrol
         return RectWorldCoord(projection::get().toPointWorldCoord(top_left_point_px, controller_zoom), projection::get().toPointWorldCoord(bottom_right_point_px, controller_zoom));
     }
 
-    bool GeometryPoint::touches(const Geometry* geometry_coord, const int& controller_zoom) const
+    bool GeometryPoint::touches(const Geometry* geometry, const int& controller_zoom) const
     {
         // Default return success.
         bool return_touches(false);
 
         // Check we are visible and the geometry to compare against is valid.
-        if(isVisible(controller_zoom) && geometry_coord != nullptr)
+        if(isVisible(controller_zoom) && geometry != nullptr)
         {
             // Switch to the correct geometry type.
-            switch(geometry_coord->getGeometryType())
+            switch(geometry->getGeometryType())
             {
                 case GeometryType::GeometryLineString:
                 {
@@ -233,7 +233,7 @@ namespace qmapcontrol
                 case GeometryType::GeometryWidget:
                 {
                     // Check if the bounding boxes intersect.
-                    if(geometry_coord->boundingBox(controller_zoom).rawRect().intersects(boundingBox(controller_zoom).rawRect()))
+                    if(geometry->boundingBox(controller_zoom).rawRect().intersects(boundingBox(controller_zoom).rawRect()))
                     {
                         // Set that we have touched.
                         return_touches = true;
@@ -245,7 +245,7 @@ namespace qmapcontrol
                 case GeometryType::GeometryPolygon:
                 {
                     // Check if the poylgon intersects with our bounding box.
-                    if(static_cast<const GeometryPolygon*>(geometry_coord)->toQPolygonF().intersected(boundingBox(controller_zoom).rawRect()).empty() == false)
+                    if(static_cast<const GeometryPolygon*>(geometry)->toQPolygonF().intersected(boundingBox(controller_zoom).rawRect()).empty() == false)
                     {
                         // Set that we have touched.
                         return_touches = true;
