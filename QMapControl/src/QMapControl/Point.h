@@ -124,6 +124,7 @@ namespace qmapcontrol
         inline qreal topPx() const { return m_raw_rect.top(); }
         inline qreal rightPx() const { return m_raw_rect.right(); }
         inline qreal bottomPx() const { return m_raw_rect.bottom(); }
+        inline PointWorldPx centerPx() const { return PointWorldPx(m_raw_rect.center().x(), m_raw_rect.center().y()); }
         inline PointWorldPx topLeftPx() const { return PointWorldPx(leftPx(), topPx()); }
         inline PointWorldPx bottomRightPx() const { return PointWorldPx(rightPx(), bottomPx()); }
     protected:

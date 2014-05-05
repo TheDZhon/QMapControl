@@ -160,6 +160,21 @@ namespace qmapcontrol
         m_alignment_type = alignment_type;
     }
 
+    qreal GeometryPoint::getRotation() const
+    {
+        // Return the rotation.
+        return m_rotation;
+    }
+
+    void GeometryPoint::setRotation(const qreal& rotation)
+    {
+        // Set the rotation.
+        m_rotation = rotation;
+
+        // Emit that we need to redraw to display this change.
+        emit requestRedraw();
+    }
+
     void GeometryPoint::setBaseZoom(const int& zoom)
     {
         // Set the base zoom level.
@@ -268,8 +283,16 @@ namespace qmapcontrol
                     // Calculate the pixmap rect to draw within.
                     const RectWorldPx pixmap_rect_px(projection::get().toPointWorldPx(pixmap_rect_coord.topLeftCoord(), controller_zoom), projection::get().toPointWorldPx(pixmap_rect_coord.bottomRightCoord(), controller_zoom));
 
+                    // Translate to center point with required rotation.
+                    painter.translate(pixmap_rect_px.centerPx().rawPoint());
+                    painter.rotate(m_rotation);
+
                     // Draw the pixmap.
-                    painter.drawPixmap(pixmap_rect_px.rawRect().toRect(), getPixmap());
+                    painter.drawPixmap(-pixmap_rect_px.rawRect().width() / 2.0, -pixmap_rect_px.rawRect().height() / 2.0, getPixmap());
+
+                    // Un-translate.
+                    painter.rotate(-m_rotation);
+                    painter.translate(-pixmap_rect_px.centerPx().rawPoint());
 
                     // Do we have a meta-data value and should we display it at this zoom?
                     if(controller_zoom >= m_metadata_displayed_zoom_minimum && getMetadata(m_metadata_displayed_key).isNull() == false)

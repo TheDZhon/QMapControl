@@ -155,9 +155,9 @@ void Multidemo::setupMaps()
 
 
     // Create a GeometryArrow with a heading set.
-    std::shared_ptr<GeometryPointArrow> arrow_point(std::make_shared<GeometryPointArrow>(PointWorldCoord(-20.0, 20.0), 0, 15));
+    std::shared_ptr<GeometryPointArrow> arrow_point(std::make_shared<GeometryPointArrow>(PointWorldCoord(-20.0, 20.0), 15));
     arrow_point->setPen(QPen(Qt::red));
-    arrow_point->setHeading(92.4);
+    arrow_point->setRotation(92.4);
     layer_geometries->addGeometry(arrow_point);
 
 

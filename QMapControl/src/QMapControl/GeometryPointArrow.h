@@ -51,7 +51,7 @@ namespace qmapcontrol
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPointArrow(const PointWorldCoord& point_coord, const qreal& heading, const int& size_px, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPointArrow(const PointWorldCoord& point_coord, const int& size_px, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Disable copy constructor.
         ///GeometryPointArrow(const GeometryPointArrow&) = delete; @todo re-add once MSVC supports default/delete syntax.
@@ -61,18 +61,6 @@ namespace qmapcontrol
 
         //! Destructor.
         virtual ~GeometryPointArrow() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
-
-        /*!
-         * Fetches the arrow heading.
-         * @return the arrow heading.
-         */
-        qreal getHeading() const;
-
-        /*!
-         * Set the arrow heading.
-         * @param heading The arrow heading.
-         */
-        void setHeading(const qreal& heading);
 
     protected:
         /*!
@@ -86,9 +74,5 @@ namespace qmapcontrol
 
         //! Disable copy assignment.
         GeometryPointArrow& operator=(const GeometryPointArrow&); /// @todo remove once MSVC supports default/delete syntax.
-
-    private:
-        /// The arrow heading.
-        qreal m_heading;
     };
 }

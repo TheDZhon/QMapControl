@@ -28,25 +28,9 @@
 
 namespace qmapcontrol
 {
-    GeometryPointArrow::GeometryPointArrow(const PointWorldCoord& point_coord, const qreal& heading, const int& size_px, const int& zoom_minimum, const int& zoom_maximum)
-        : GeometryPoint(point_coord, QPixmap(size_px, size_px), zoom_minimum, zoom_maximum),
-          m_heading(heading)
+    GeometryPointArrow::GeometryPointArrow(const PointWorldCoord& point_coord, const int& size_px, const int& zoom_minimum, const int& zoom_maximum)
+        : GeometryPoint(point_coord, QPixmap(size_px, size_px), zoom_minimum, zoom_maximum)
     {
-        // Update the pixmap.
-        updatePixmap();
-    }
-
-    qreal GeometryPointArrow::getHeading() const
-    {
-        // Return the heading,
-        return m_heading;
-    }
-
-    void GeometryPointArrow::setHeading(const qreal& heading)
-    {
-        // Set the heading.
-        m_heading = heading;
-
         // Update the pixmap.
         updatePixmap();
     }
@@ -69,12 +53,6 @@ namespace qmapcontrol
         // Set the pen and brush.
         painter.setPen(getPen());
         painter.setBrush(QBrush(getPen().color()));
-
-        // Rotate the painter, so that the arrow drawn is point in the right direction.
-        PointPx center_px(pixmap.width() / 2.0, pixmap.height() / 2.0);
-        painter.translate(center_px.rawPoint());
-        painter.rotate(m_heading);
-        painter.translate(-center_px.rawPoint());
 
         // Add points to create arrow shape.
         QPolygonF arrow;

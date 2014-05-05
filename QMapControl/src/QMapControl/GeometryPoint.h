@@ -146,6 +146,19 @@ namespace qmapcontrol
         void setAlignmentType(const AlignmentType& alignment_type = AlignmentType::Middle);
 
         /*!
+         * Fetches the rotation of the point/pixmap (degrees).
+         * @return the rotation of the point/pixmap (degrees).
+         */
+        qreal getRotation() const;
+
+        /*!
+         * Set the rotation of the point/pixmap (degrees).
+         * @note Rotation will be applied to the center of the pixmap.
+         * @param rotation The rotation to set (degrees).
+         */
+        void setRotation(const qreal& rotation);
+
+        /*!
          * Use this method to set a zoom level on which the pixmap will be drawn at its real size.
          * Set to '-1' to always drawn at its real size.
          * On lower zoom levels, it will be drawn smaller.
@@ -222,6 +235,9 @@ namespace qmapcontrol
 
         /// The alignment type to use when drawing.
         AlignmentType m_alignment_type;
+
+        /// The rotation of the point/pixmap.
+        qreal m_rotation;
 
         /// The base zoom level.
         int m_base_zoom;
