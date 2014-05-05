@@ -180,7 +180,7 @@ namespace qmapcontrol
         if(isVisible(controller_zoom) && geometry != nullptr)
         {
             // Switch to the correct geometry type.
-            switch(geometry->getGeometryType())
+            switch(geometry->geometryType())
             {
                 case GeometryType::GeometryLineString:
                 {

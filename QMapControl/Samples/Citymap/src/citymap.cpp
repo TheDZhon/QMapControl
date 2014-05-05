@@ -8,6 +8,7 @@
 
 // QMapControl includes.
 #include <QMapControl/GeometryPointImage.h>
+#include <QMapControl/GeometryPointImageScaled.h>
 #include <QMapControl/GeometryWidget.h>
 #include <QMapControl/LayerMapAdapter.h>
 #include <QMapControl/MapAdapterOSM.h>
@@ -80,21 +81,18 @@ void Citymap::addSights()
     m_map_control->addLayer(m_layer_sights);
 
     // Create the "Mainzer Dom" sight and add it to the layer.
-    std::shared_ptr<GeometryPoint> dom(std::make_shared<GeometryPointImage>(PointWorldCoord(8.274167, 49.998889), ":/resources/images/180-dom.jpg"));
+    std::shared_ptr<GeometryPoint> dom(std::make_shared<GeometryPointImageScaled>(PointWorldCoord(8.274167, 49.998889), ":/resources/images/180-dom.jpg", 17));
     dom->setMetadata("name", "Mainzer Dom");
-    dom->setBaseZoom(17);
     m_layer_sights->addGeometry(dom);
 
     // Create the "St. Stephan" sight and add it to the layer.
-    std::shared_ptr<GeometryPoint> stephan(std::make_shared<GeometryPointImage>(PointWorldCoord(8.268611, 49.995556), ":/resources/images/180-stephan.jpg"));
+    std::shared_ptr<GeometryPoint> stephan(std::make_shared<GeometryPointImageScaled>(PointWorldCoord(8.268611, 49.995556), ":/resources/images/180-stephan.jpg", 17));
     stephan->setMetadata("name", "St. Stephan");
-    stephan->setBaseZoom(17);
     m_layer_sights->addGeometry(stephan);
 
     // Create the "St. Quintin" sight and add it to the layer.
-    std::shared_ptr<GeometryPoint> quitin(std::make_shared<GeometryPointImage>(PointWorldCoord(8.272222, 50.000833), ":/resources/images/180-quintin.jpg"));
+    std::shared_ptr<GeometryPoint> quitin(std::make_shared<GeometryPointImageScaled>(PointWorldCoord(8.272222, 50.000833), ":/resources/images/180-quintin.jpg", 17));
     quitin->setMetadata("name", "St. Quintin");
-    quitin->setBaseZoom(17);
     m_layer_sights->addGeometry(quitin);
 
     // Connect signal/slot to handle sights being clicked.
@@ -133,15 +131,13 @@ void Citymap::addMuseums()
     m_map_control->addLayer(m_layer_museum);
 
     // Create the "rgzm" pub and add it to the layer.
-    std::shared_ptr<GeometryPoint> rgzm(std::make_shared<GeometryPointImage>(PointWorldCoord(8.269722, 50.006111), ":/resources/images/180-rgzm.jpg"));
+    std::shared_ptr<GeometryPoint> rgzm(std::make_shared<GeometryPointImageScaled>(PointWorldCoord(8.269722, 50.006111), ":/resources/images/180-rgzm.jpg", 17));
     rgzm->setMetadata("name", "rgzm");
-    rgzm->setBaseZoom(17);
     m_layer_museum->addGeometry(rgzm);
 
     // Create the "lm" pub and add it to the layer.
-    std::shared_ptr<GeometryPoint> lm(std::make_shared<GeometryPointImage>(PointWorldCoord(8.26778, 50.00385), ":/resources/images/180-lm.jpg"));
+    std::shared_ptr<GeometryPoint> lm(std::make_shared<GeometryPointImageScaled>(PointWorldCoord(8.26778, 50.00385), ":/resources/images/180-lm.jpg", 17));
     lm->setMetadata("name", "lm");
-    lm->setBaseZoom(17);
     m_layer_museum->addGeometry(lm);
 
     // Connect signal/slot to handle sights being clicked.
@@ -218,30 +214,30 @@ void Citymap::geometryClicked(const Geometry* geometry)
     {
         // Create a new info dialog.
         InfoDialog* info_dialog = new InfoDialog(this);
-        info_dialog->setWindowTitle(geometry->getMetadata("name").toString());
+        info_dialog->setWindowTitle(geometry->metadata("name").toString());
 
         // Handle the sight/musem.
-        if(geometry->getMetadata("name") == "Mainzer Dom")
+        if(geometry->metadata("name") == "Mainzer Dom")
         {
             info_dialog->setInfotext("<h1>Mainzer Dom</h1><p><img src=':/resources/images/180-dom.jpg' align='left'/>Der Hohe Dom zu Mainz ist die Bischofskirche der Diözese Mainz und steht unter dem Patrozinium des heiligen Martin von Tours. Der Ostchor ist dem Hl. Stephan geweiht. Der zu den Kaiserdomen zählende Bau ist in seiner heutigen Form eine dreischiffige romanische Säulenbasilika, die in ihren Anbauten sowohl gotische als auch barocke Elemente aufweist.</p>");
         }
-        else if(geometry->getMetadata("name") == "St. Stephan")
+        else if(geometry->metadata("name") == "St. Stephan")
         {
             info_dialog->setInfotext("<h1>St. Stephan</h1><p><img src=':/resources/images/180-stephan.jpg' align='left'/>Die katholische Pfarrkirche Sankt Stephan in Mainz wurde 990 von Erzbischof Willigis auf der höchsten Erhebung der Stadt gegründet. Auftraggeberin war höchstwahrscheinlich die Kaiserwitwe Theophanu. Willigis wollte mit ihr die Gebetsstätte des Reiches schaffen. In der Kirche war ursprünglich ein Stift untergebracht. Der Propst des Stiftes verwaltete eines der Archidiakonate (mittelalterliche Organisationseinheit, ähnlich den heutigen Dekanaten) des Erzbistums.</p>");
         }
-        else if(geometry->getMetadata("name") == "St. Quintin")
+        else if(geometry->metadata("name") == "St. Quintin")
         {
             info_dialog->setInfotext("<h1>St. Quintin</h1><p><img src=':/resources/images/180-quintin.jpg' align='left'/>Die Kirche St. Quintin in Mainz ist die Pfarrkirche der ältesten nachgewiesenen Pfarrei der Stadt.");
         }
-        else if(geometry->getMetadata("name") == "rgzm")
+        else if(geometry->metadata("name") == "rgzm")
         {
             info_dialog->setInfotext("<h1>Römisch-Germanisches Zentralmuseum</h1><p><img src=':/resources/images/180-rgzm.jpg' align='left'/>Das Römisch-Germanische Zentralmuseum (RGZM) in Mainz ist ein Forschungsinstitut für Vor- und Frühgeschichte, das von Bund und Ländern getragen wird und zur Leibniz-Gemeinschaft deutscher Forschungseinrichtungen gehört. Gegliedert in mehrere Abteilungen, arbeitet das Institut im Bereich der Alten Welt sowie seiner Kontaktzonen von der Altsteinzeit bis ins Mittelalter.");
         }
-        else if(geometry->getMetadata("name") == "lm")
+        else if(geometry->metadata("name") == "lm")
         {
             info_dialog->setInfotext("<h1>Landesmuseum Mainz</h1><p><img src=':/resources/images/180-lm.jpg' align='left'/>Das Landesmuseum Mainz ist eines der ältesten Museen in Deutschland. Eine seiner Vorgängerinstitutionen, die Städtische Gemäldesammlung, wurde bereits 1803 von Jean-Antoine Chaptal auf Veranlassung Napoléon Bonapartes durch eine Schenkung von 36 Gemälden gegründet. Das Museum, welches sich heute im ehemaligen kurfürstlichen Marstall befindet, gehört zusammen mit dem Römisch-Germanischen Zentralmuseum und dem Gutenbergmuseum zu den bedeutenden Museen in Mainz. Seine kunst- und kulturgeschichtliche Sammlung erstreckt sich von der Vorgeschichte über die römische Zeit, dem Mittelalter und Barock bis hin zur Jugendstilzeit und der Kunst des 20. Jahrhunderts.");
         }
-        if(geometry->getMetadata("name") != "")
+        if(geometry->metadata("name") != "")
         {
             info_dialog->showMaximized();
         }
@@ -257,8 +253,8 @@ void Citymap::geometryClickedPub(const Geometry* geometry)
         InfoDialog* info_dialog = new InfoDialog(this);
 
         // Display the pub info.
-        info_dialog->setWindowTitle(geometry->getMetadata("name").toString());
-        info_dialog->setInfotext("<h1>" + geometry->getMetadata("name").toString() + "</h1>");
+        info_dialog->setWindowTitle(geometry->metadata("name").toString());
+        info_dialog->setInfotext("<h1>" + geometry->metadata("name").toString() + "</h1>");
         info_dialog->showNormal();
     }
 }
@@ -381,9 +377,8 @@ void Citymap::addNote()
 void Citymap::writeNote(QMouseEvent* /*mouse_event*/, PointWorldCoord press_coordinate)
 {
     // Create a point to represent the note.
-    std::shared_ptr<GeometryPoint> point(std::make_shared<GeometryPointImage>(press_coordinate, ":/resources/images/note.png"));
+    std::shared_ptr<GeometryPointImageScaled> point(std::make_shared<GeometryPointImageScaled>(press_coordinate, ":/resources/images/note.png", 16));
     point->setAlignmentType(GeometryPoint::AlignmentType::BottomLeft);
-    point->setBaseZoom(16);
     point->setDrawMinimumPx(QSizeF(12, 10));
     point->setDrawMaximumPx(QSizeF(47, 40));
     m_layer_notes->addGeometry(point);
@@ -434,13 +429,13 @@ void Citymap::editNote(const Geometry* geometry)
     m_selected_geometry = const_cast<Geometry*>(geometry);
 
     // Did we get a GeometryPoint?
-    if(m_selected_geometry->getGeometryType() == Geometry::GeometryType::GeometryPoint)
+    if(m_selected_geometry->geometryType() == Geometry::GeometryType::GeometryPoint)
     {
         // Set that we are editing the note.
         m_mode_note_adding = true;
 
         // Set the text edit to the current note contents.
-        m_text_edit->setPlainText(m_selected_geometry->getMetadata("notes").toString());
+        m_text_edit->setPlainText(m_selected_geometry->metadata("notes").toString());
 
         // Show the text edit geometry and move to the geometry coordinates.
         m_geometry_text_edit->setCoord(static_cast<GeometryPoint*>(m_selected_geometry)->coord());
@@ -469,7 +464,7 @@ void Citymap::calculateDistanceClick(QMouseEvent* evnt, PointWorldCoord press_co
         m_coord_start = press_coordinate;
 
         // Create a start point flag.
-        std::shared_ptr<GeometryPoint> point_flag(std::make_shared<GeometryPointImage>(m_coord_start, ":/resources/images/flag.png"));
+        std::shared_ptr<GeometryPointImage> point_flag(std::make_shared<GeometryPointImage>(m_coord_start, ":/resources/images/flag.png"));
         point_flag->setAlignmentType(GeometryPoint::AlignmentType::BottomRight);
 
         // Add the starting point to the layer.
@@ -502,7 +497,7 @@ void Citymap::calculateDistanceClick(QMouseEvent* evnt, PointWorldCoord press_co
         painter.setFont(QFont("Helvetiva", 6));
         painter.drawText(pixmap->rect(), QString().setNum(distance, 'f', 3) + " km");
         painter.end();
-        std::shared_ptr<GeometryPoint> point_end(std::make_shared<GeometryPoint>(m_coord_end, *pixmap));
+        std::shared_ptr<GeometryPointImage> point_end(std::make_shared<GeometryPointImage>(m_coord_end, *pixmap));
         point_end->setAlignmentType(GeometryPoint::AlignmentType::BottomLeft);
         m_layer_notes->addGeometry(point_end);
 

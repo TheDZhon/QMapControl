@@ -73,7 +73,7 @@ namespace qmapcontrol
         if(geometry != nullptr)
         {
             // Is it a geometry widget?
-            if(geometry->getGeometryType() == Geometry::GeometryType::GeometryWidget)
+            if(geometry->geometryType() == Geometry::GeometryType::GeometryWidget)
             {
                 // Fetch a copy of the current geometry widgets.
                 const auto geometry_widgets = getGeometryWidgets();
@@ -102,7 +102,7 @@ namespace qmapcontrol
         if(geometry != nullptr)
         {
             // Handle the different geometry types.
-            switch(geometry->getGeometryType())
+            switch(geometry->geometryType())
             {
                 // Is it a GeometryPoint.
                 case Geometry::GeometryType::GeometryPoint:
@@ -185,7 +185,7 @@ namespace qmapcontrol
         if(geometry != nullptr)
         {
             // Handle the different geometry types.
-            switch(geometry->getGeometryType())
+            switch(geometry->geometryType())
             {
                 // Is it a GeometryPoint.
                 case Geometry::GeometryType::GeometryPoint:

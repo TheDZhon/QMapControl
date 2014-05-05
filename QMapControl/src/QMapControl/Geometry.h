@@ -32,8 +32,6 @@
 #include <QtGui/QPainter>
 #include <QtGui/QPen>
 
-#include <QtWidgets/QGraphicsItem>
-
 // STL includes.
 #include <map>
 #include <memory>
@@ -48,6 +46,8 @@ namespace qmapcontrol
     //! Main class for objects that should be painted in maps.
     /*!
      * Geometry is the root class of the hierarchy. Geometry is an abstract (non-instantiable) class.
+     *
+     * All geometries can emit click events, if the containing layer receives click events (the default).
      *
      * This class and the derived classes Point and LineString are leant on the Simple
      * Feature Specification of the Open Geospatial Consortium.
@@ -116,7 +116,7 @@ namespace qmapcontrol
          * Fetches the geometry type.
          * @return the geometry type.
          */
-        const GeometryType& getGeometryType() const;
+        const GeometryType& geometryType() const;
 
         /*!
          * Fetches whether the geometry is visible.
@@ -135,7 +135,7 @@ namespace qmapcontrol
          * Fetches the pen to draw the geometry with (outline).
          * @return the QPen to used for drawing.
          */
-        const QPen& getPen();
+        const QPen& pen();
 
         /*!
          * Sets the pen to draw the geometry with (outline).
@@ -153,7 +153,7 @@ namespace qmapcontrol
          * Fetches the brush to draw the geometry with (fill).
          * @return the QBrush to used for drawing.
          */
-        const QBrush& getBrush();
+        const QBrush& brush();
 
         /*!
          * Sets the brush to draw the geometry with (fill).
@@ -172,7 +172,7 @@ namespace qmapcontrol
          * @param key The meta-data key.
          * @return the meta-data value.
          */
-        QVariant& getMetadata(const std::string& key) const;
+        QVariant& metadata(const std::string& key) const;
 
         /*!
          * Set a meta-data key/value.

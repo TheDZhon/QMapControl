@@ -17,6 +17,8 @@
 #include <QMapControl/MapAdapterYahoo.h>
 #include <QMapControl/MapAdapterWMS.h>
 
+#include <QMapControl/LayerESRIShapefile.h>
+
 /*!
  * This is a bit complexer application, which lets you play around.
  * There are the following buttons configured:
@@ -155,7 +157,7 @@ void Multidemo::setupMaps()
 
 
     // Create a GeometryArrow with a heading set.
-    std::shared_ptr<GeometryPointArrow> arrow_point(std::make_shared<GeometryPointArrow>(PointWorldCoord(-20.0, 20.0), 15));
+    std::shared_ptr<GeometryPointArrow> arrow_point(std::make_shared<GeometryPointArrow>(PointWorldCoord(-20.0, 20.0), QSizeF(15.0, 15.0)));
     arrow_point->setPen(QPen(Qt::red));
     arrow_point->setRotation(92.4);
     layer_geometries->addGeometry(arrow_point);
@@ -250,6 +252,24 @@ void Multidemo::setupLayout()
 
     // Set the main layout to the QWidget.
     QWidget::setLayout(layout_main);
+
+    std::shared_ptr<LayerESRIShapefile> esri_layer(std::make_shared<LayerESRIShapefile>("ESRI"));
+    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/GSHHS_shp/l/GSHHS_l_L1.shp", "GSHHS_l_L1", 0, 2));
+    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/GSHHS_shp/l/GSHHS_l_L2.shp", "GSHHS_l_L2", 0, 2));
+    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/WDBII_shp/l/WDBII_border_l_L1.shp", "WDBII_border_l_L1", 0, 2));
+    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/WDBII_shp/l/WDBII_border_l_L2.shp", "WDBII_border_l_L2", 0, 2));
+
+    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/GSHHS_shp/i/GSHHS_i_L1.shp", "GSHHS_i_L1", 3, 9));
+    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/GSHHS_shp/i/GSHHS_i_L2.shp", "GSHHS_i_L2", 3, 9));
+    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/WDBII_shp/i/WDBII_border_i_L1.shp", "WDBII_border_i_L1", 3, 9));
+    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/WDBII_shp/i/WDBII_border_i_L2.shp", "WDBII_border_i_L2", 3, 9));
+
+    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/GSHHS_shp/h/GSHHS_h_L1.shp", "GSHHS_h_L1", 10, 17));
+    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/GSHHS_shp/h/GSHHS_h_L2.shp", "GSHHS_h_L2", 10, 17));
+    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/WDBII_shp/h/WDBII_border_h_L1.shp", "WDBII_border_h_L1", 10, 17));
+    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/WDBII_shp/h/WDBII_border_h_L2.shp", "WDBII_border_h_L2", 10, 17));
+
+    m_map_control->addLayer(esri_layer);
 }
 
 void Multidemo::resizeEvent(QResizeEvent* event)
@@ -368,10 +388,10 @@ void Multidemo::geometriesSelectedEvent(std::map<std::string, std::vector<std::s
 void Multidemo::geometryClickEvent(const Geometry* geometry)
 {
     // Is it a GeometryPoint.
-    if(geometry->getGeometryType() == Geometry::GeometryType::GeometryPoint)
+    if(geometry->geometryType() == Geometry::GeometryType::GeometryPoint)
     {
         // Display a message box with the point's details.
-        QMessageBox::information(this, geometry->getMetadata("name").toString(), geometry->getMetadata("name").toString());
+        QMessageBox::information(this, geometry->metadata("name").toString(), geometry->metadata("name").toString());
     }
 }
 
@@ -392,7 +412,7 @@ void Multidemo::main_mouseEventPressCoordinate(QMouseEvent* mouse_event, PointWo
         if(m_button_add_point->isChecked())
         {
             // Add a GeometryPointCircle with a radius of 10.0 pixels.
-            std::static_pointer_cast<LayerGeometry>(m_map_control->getLayer("Geometry Layer"))->addGeometry(std::make_shared<GeometryPointCircle>(press_coordinate, 10.0));
+            std::static_pointer_cast<LayerGeometry>(m_map_control->getLayer("Geometry Layer"))->addGeometry(std::make_shared<GeometryPointCircle>(press_coordinate, QSizeF(10.0, 10.0)));
         }
     }
 }

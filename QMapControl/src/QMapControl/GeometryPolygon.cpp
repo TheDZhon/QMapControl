@@ -72,7 +72,7 @@ namespace qmapcontrol
         if(isVisible(controller_zoom) && geometry != nullptr)
         {
             // Switch to the correct geometry type.
-            switch(geometry->getGeometryType())
+            switch(geometry->geometryType())
             {
                 case GeometryType::GeometryLineString:
                 {
@@ -139,10 +139,10 @@ namespace qmapcontrol
                 }
 
                 // Set the pen to use.
-                painter.setPen(getPen());
+                painter.setPen(pen());
 
                 // Set the brush to use.
-                painter.setBrush(getBrush());
+                painter.setBrush(brush());
 
                 // Draw the polygon line.
                 painter.drawPolygon(polygon);

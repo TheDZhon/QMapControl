@@ -40,7 +40,7 @@ namespace qmapcontrol
 
     }
 
-    const Geometry::GeometryType& Geometry::getGeometryType() const
+    const Geometry::GeometryType& Geometry::geometryType() const
     {
         // Return the geometry type.
         return m_geometry_type;
@@ -75,7 +75,7 @@ namespace qmapcontrol
         }
     }
 
-    const QPen& Geometry::getPen()
+    const QPen& Geometry::pen()
     {
         // Do we have a pen?
         if(m_pen == nullptr)
@@ -106,7 +106,7 @@ namespace qmapcontrol
         emit requestRedraw();
     }
 
-    const QBrush& Geometry::getBrush()
+    const QBrush& Geometry::brush()
     {
         // Do we have a brush?
         if(m_brush == nullptr)
@@ -137,7 +137,7 @@ namespace qmapcontrol
         emit requestRedraw();
     }
 
-    QVariant& Geometry::getMetadata(const std::string& key) const
+    QVariant& Geometry::metadata(const std::string& key) const
     {
         // Return the value for the key.
         return m_metadata[key];

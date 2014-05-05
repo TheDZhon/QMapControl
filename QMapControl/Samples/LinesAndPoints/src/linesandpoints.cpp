@@ -40,13 +40,13 @@ LinesAndPoints::LinesAndPoints(QWidget *parent)
 
     // Image points.
     points.emplace_back(std::make_shared<GeometryPointImage>(PointWorldCoord(8.259959, 50.001781), ":/resources/images/bus_stop.png"));
-    points.back()->setAlignmentType(GeometryPoint::AlignmentType::BottomLeft);
+    std::static_pointer_cast<GeometryPointImage>(points.back())->setAlignmentType(GeometryPoint::AlignmentType::BottomLeft);
     points.back()->setMetadata("name", "Mainz, Hauptbahnhof");
     points.emplace_back(std::make_shared<GeometryPointImage>(PointWorldCoord(8.263758, 49.998917), ":/resources/images/bus_stop.png"));
-    points.back()->setAlignmentType(GeometryPoint::AlignmentType::BottomLeft);
+    std::static_pointer_cast<GeometryPointImage>(points.back())->setAlignmentType(GeometryPoint::AlignmentType::BottomLeft);
     points.back()->setMetadata("name", "Mainz, Münsterplatz");
     points.emplace_back(std::make_shared<GeometryPointImage>(PointWorldCoord(8.265812, 50.001952), ":/resources/images/bus_stop.png"));
-    points.back()->setAlignmentType(GeometryPoint::AlignmentType::BottomLeft);
+    std::static_pointer_cast<GeometryPointImage>(points.back())->setAlignmentType(GeometryPoint::AlignmentType::BottomLeft);
     points.back()->setMetadata("name", "Mainz, Neubrunnenplatz");
 
     // Circle points.
@@ -60,13 +60,13 @@ LinesAndPoints::LinesAndPoints(QWidget *parent)
     // Circle points with large green borders.
     QPen point_pen(QColor(0,255,0));
     point_pen.setWidth(3);
-    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.273573, 50.016315), 15));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.273573, 50.016315), QSizeF(15.0, 15.0)));
     points.back()->setPen(point_pen);
     points.back()->setMetadata("name", "Wiesbaden-Mainz-Kastel, Eleonorenstraße");
-    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.275145, 50.016992), 15));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.275145, 50.016992), QSizeF(15.0, 15.0)));
     points.back()->setPen(point_pen);
     points.back()->setMetadata("name", "Wiesbaden-Mainz-Kastel, Johannes-Goßner-Straße");
-    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.270476, 50.021426), 15));
+    points.emplace_back(std::make_shared<GeometryPointCircle>(PointWorldCoord(8.270476, 50.021426), QSizeF(15.0, 15.0)));
     points.back()->setPen(point_pen);
     points.back()->setMetadata("name", "Wiesbaden-Mainz-Kastel, Ruthof");
 
@@ -113,9 +113,9 @@ LinesAndPoints::LinesAndPoints(QWidget *parent)
 void LinesAndPoints::geometryClickEvent(const Geometry* geometry)
 {
     // Is it a GeometryPoint.
-    if(geometry->getGeometryType() == Geometry::GeometryType::GeometryPoint)
+    if(geometry->geometryType() == Geometry::GeometryType::GeometryPoint)
     {
         // Display a message box with the point's details.
-        QMessageBox::information(this, geometry->getMetadata("name").toString(), "");
+        QMessageBox::information(this, geometry->metadata("name").toString(), "");
     }
 }

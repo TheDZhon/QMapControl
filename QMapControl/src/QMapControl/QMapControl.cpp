@@ -1496,7 +1496,7 @@ namespace qmapcontrol
     void QMapControl::geometryPositionChanged(const Geometry* geometry)
     {
         // Is it a point geometry?
-        if(geometry->getGeometryType() == Geometry::GeometryType::GeometryPoint)
+        if(geometry->geometryType() == Geometry::GeometryType::GeometryPoint)
         {
             // Calculate the delta between the current map focus and the new geometry position.
             const PointWorldPx start_px(projection::get().toPointWorldPx(m_map_focus_coord, m_current_zoom));

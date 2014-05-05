@@ -145,7 +145,7 @@ namespace qmapcontrol
                 }
 
                 // Set the pen to use.
-                painter.setPen(getPen());
+                painter.setPen(pen());
 
                 // Draw the polygon line.
                 painter.drawPolyline(polygon_line_px);
