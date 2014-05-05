@@ -1,28 +1,3 @@
-/*
-*
-* This file is part of QMapControl,
-* an open-source cross-platform map widget
-*
-* Copyright (C) 2007 - 2008 Kai Winter
-*
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU Lesser General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU Lesser General Public License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public License
-* along with QMapControl. If not, see <http://www.gnu.org/licenses/>.
-*
-* Contact e-mail: kaiwinter@gmx.de
-* Program URL   : http://qmapcontrol.sourceforge.net/
-*
-*/
-
 #include "GeometryPolygon.h"
 
 // Local includes.
@@ -43,13 +18,17 @@ namespace qmapcontrol
         return m_points;
     }
 
-    void GeometryPolygon::setPoints(const std::vector<PointWorldCoord>& points)
+    void GeometryPolygon::setPoints(const std::vector<PointWorldCoord>& points, const bool& disable_redraw)
     {
         // Set the new points.
         m_points = points;
 
-        // Emit that we need to redraw to display this change.
-        emit requestRedraw();
+        // Should we redraw?
+        if(disable_redraw == false)
+        {
+            // Emit to redraw to display this change.
+            emit requestRedraw();
+        }
     }
 
     const QPolygonF GeometryPolygon::toQPolygonF() const
@@ -84,16 +63,16 @@ namespace qmapcontrol
         return RectWorldCoord::fromQRectF(polygon.boundingRect());
     }
 
-    bool GeometryPolygon::touches(const Geometry* geometry_coord, const int& controller_zoom) const
+    bool GeometryPolygon::touches(const Geometry* geometry, const int& controller_zoom) const
     {
         // Default return success.
         bool return_touches(false);
 
         // Check we are visible and the geometry to compare against is valid.
-        if(isVisible(controller_zoom) && geometry_coord != nullptr)
+        if(isVisible(controller_zoom) && geometry != nullptr)
         {
             // Switch to the correct geometry type.
-            switch(geometry_coord->getGeometryType())
+            switch(geometry->getGeometryType())
             {
                 case GeometryType::GeometryLineString:
                 {
@@ -106,7 +85,7 @@ namespace qmapcontrol
                 case GeometryType::GeometryWidget:
                 {
                     // Check if the polygon (bounding box) intersects with our polygon.
-                    if(QPolygonF(geometry_coord->boundingBox(controller_zoom).rawRect()).intersected(toQPolygonF()).empty() == false)
+                    if(QPolygonF(geometry->boundingBox(controller_zoom).rawRect()).intersected(toQPolygonF()).empty() == false)
                     {
                         // Set that we have touched.
                         return_touches = true;
@@ -118,7 +97,7 @@ namespace qmapcontrol
                 case GeometryType::GeometryPolygon:
                 {
                     // Check if the poylgons intersect.
-                    if(static_cast<const GeometryPolygon*>(geometry_coord)->toQPolygonF().intersected(toQPolygonF()).empty() == false)
+                    if(static_cast<const GeometryPolygon*>(geometry)->toQPolygonF().intersected(toQPolygonF()).empty() == false)
                     {
                         // Set that we have touched.
                         return_touches = true;
@@ -163,7 +142,7 @@ namespace qmapcontrol
                 painter.setPen(getPen());
 
                 // Set the brush to use.
-                painter.setBrush(m_brush);
+                painter.setBrush(getBrush());
 
                 // Draw the polygon line.
                 painter.drawPolygon(polygon);

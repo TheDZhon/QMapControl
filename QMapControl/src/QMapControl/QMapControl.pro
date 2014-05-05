@@ -22,8 +22,8 @@ HEADERS +=                                      \
     GeometryPointArrow.h                        \
     GeometryPointCircle.h                       \
     GeometryPointImage.h                        \
-    GeometryPointImageFixed.h                   \
     GeometryPolygon.h                           \
+    GeometryPolygonImage.h                      \
     GeometryWidget.h                            \
     GPS_Position.h                              \
     ImageManager.h                              \
@@ -54,8 +54,8 @@ SOURCES +=                                      \
     GeometryPointArrow.cpp                      \
     GeometryPointCircle.cpp                     \
     GeometryPointImage.cpp                      \
-    GeometryPointImageFixed.cpp                 \
     GeometryPolygon.cpp                         \
+    GeometryPolygonImage.cpp                    \
     GeometryWidget.cpp                          \
     GPS_Position.cpp                            \
     ImageManager.cpp                            \

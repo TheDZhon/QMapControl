@@ -29,6 +29,9 @@
 #include <QtCore/QPointF>
 #include <QtCore/QRectF>
 
+// STL includes.
+#include <vector>
+
 // Local includes.
 #include "qmapcontrol_global.h"
 
@@ -60,8 +63,26 @@ namespace qmapcontrol
         RectWorldCoord(const PointWorldCoord& top_left, const PointWorldCoord& bottom_right) : m_raw_rect(top_left.rawPoint(), bottom_right.rawPoint()) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
         RectWorldCoord(const PointWorldCoord& top_left, const QSizeF& size) : m_raw_rect(top_left.rawPoint(), size) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
         inline QRectF rawRect() const { return m_raw_rect; }
-        inline PointWorldCoord topLeftCoord() const { return PointWorldCoord(m_raw_rect.x(), m_raw_rect.y()); }
-        inline PointWorldCoord bottomRightCoord() const { return PointWorldCoord(m_raw_rect.x() + m_raw_rect.width(), m_raw_rect.y() + m_raw_rect.height()); }
+        inline PointWorldCoord topLeftCoord() const { return PointWorldCoord(m_raw_rect.left(), m_raw_rect.top()); }
+        inline PointWorldCoord topRightCoord() const { return PointWorldCoord(m_raw_rect.right(), m_raw_rect.top()); }
+        inline PointWorldCoord bottomRightCoord() const { return PointWorldCoord(m_raw_rect.right(), m_raw_rect.bottom()); }
+        inline PointWorldCoord bottomLeftCoord() const { return PointWorldCoord(m_raw_rect.left(), m_raw_rect.bottom()); }
+
+        inline std::vector<PointWorldCoord> toStdVector()
+        {
+            // Create a vector to return the points.
+            std::vector<PointWorldCoord> return_points;
+
+            // Add the points.
+            return_points.push_back(topLeftCoord());
+            return_points.push_back(topRightCoord());
+            return_points.push_back(bottomRightCoord());
+            return_points.push_back(bottomLeftCoord());
+
+            // Return the points.
+            return return_points;
+        }
+
     public:
         static RectWorldCoord fromQRectF(const QRectF& rect) { return RectWorldCoord(rect); }
     private:
