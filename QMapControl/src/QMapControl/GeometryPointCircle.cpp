@@ -1,61 +1,37 @@
-/*
-*
-* This file is part of QMapControl,
-* an open-source cross-platform map widget
-*
-* Copyright (C) 2007 - 2008 Kai Winter
-*
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU Lesser General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU Lesser General Public License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public License
-* along with QMapControl. If not, see <http://www.gnu.org/licenses/>.
-*
-* Contact e-mail: kaiwinter@gmx.de
-* Program URL   : http://qmapcontrol.sourceforge.net/
-*
-*/
-
 #include "GeometryPointCircle.h"
 
 namespace qmapcontrol
 {
-    GeometryPointCircle::GeometryPointCircle(const PointWorldCoord& point_coord, const int& radius_px, const int& zoom_minimum, const int& zoom_maximum)
-        : GeometryPoint(point_coord, QPixmap(radius_px, radius_px), zoom_minimum, zoom_maximum)
+    GeometryPointCircle::GeometryPointCircle(const PointWorldCoord& point_coord, const QSizeF& size_px, const int& zoom_minimum, const int& zoom_maximum)
+        : GeometryPointImage(point_coord, QPixmap(size_px.toSize()), zoom_minimum, zoom_maximum)
     {
-        // Update the pixmap.
-        updatePixmap();
+        // Update the shape (to draw the initial image pixmap).
+        updateShape();
     }
 
-    void GeometryPointCircle::updatePixmap()
+    void GeometryPointCircle::updateShape()
     {
-        // Fetch the current pixmap.
-        QPixmap pixmap = getPixmap();
+        // Create a pixmap of the required size.
+        QPixmap image_pixmap(sizePx().toSize());
 
-        // Reset the pixmap.
-        pixmap.fill(Qt::transparent);
+        // Reset the image pixmap.
+        image_pixmap.fill(Qt::transparent);
 
-        // Create a painter for the pixmap.
-        QPainter painter(&pixmap);
+        // Create a painter for the image pixmap.
+        QPainter painter(&image_pixmap);
 
         // Ensure antialiasing is enabled.
         painter.setRenderHints(QPainter::Antialiasing, true);
 
-        // Set the pen.
-        painter.setPen(getPen());
+        // Set the pen and brush.
+        painter.setPen(pen());
+        painter.setBrush(brush());
 
         // Draw the ellipse.
-        const double center_px(pixmap.width() / 2.0);
-        painter.drawEllipse(PointWorldPx(center_px, center_px).rawPoint(), center_px - getPen().widthF(), center_px - getPen().widthF());
+        const double center_px(image_pixmap.width() / 2.0);
+        painter.drawEllipse(PointWorldPx(center_px, center_px).rawPoint(), center_px - pen().widthF(), center_px - pen().widthF());
 
-        // Set the new pixmap.
-        setPixmap(pixmap);
+        // Set the image pixmap.
+        setImage(image_pixmap, false);
     }
 }

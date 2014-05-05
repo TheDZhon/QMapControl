@@ -1,69 +1,43 @@
-/*
-*
-* This file is part of QMapControl,
-* an open-source cross-platform map widget
-*
-* Copyright (C) 2010 Jeffery MacEachern
-* Based on CirclePoint code by Kai Winter
-*
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU Lesser General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will `be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU Lesser General Public License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public License
-* along with QMapControl. If not, see <http://www.gnu.org/licenses/>.
-*
-* Contact e-mail: kaiwinter@gmx.de
-* Program URL   : http://qmapcontrol.sourceforge.net/
-*
-*/
-
 #include "GeometryPointArrow.h"
 
 namespace qmapcontrol
 {
-    GeometryPointArrow::GeometryPointArrow(const PointWorldCoord& point_coord, const int& size_px, const int& zoom_minimum, const int& zoom_maximum)
-        : GeometryPoint(point_coord, QPixmap(size_px, size_px), zoom_minimum, zoom_maximum)
+    GeometryPointArrow::GeometryPointArrow(const PointWorldCoord& point_coord, const QSizeF& size_px, const int& zoom_minimum, const int& zoom_maximum)
+        : GeometryPointImage(point_coord, QPixmap(size_px.toSize()), zoom_minimum, zoom_maximum)
     {
-        // Update the pixmap.
-        updatePixmap();
+        // Update the shape (to draw the initial image pixmap).
+        updateShape();
     }
 
-    void GeometryPointArrow::updatePixmap()
+    void GeometryPointArrow::updateShape()
     {
-        // Fetch the current pixmap.
-        QPixmap pixmap(getPixmap());
+        // Create a pixmap of the required size.
+        QPixmap image_pixmap(sizePx().toSize());
 
-        // Reset the pixmap.
-        pixmap.fill(Qt::transparent);
+        // Reset the image pixmap.
+        image_pixmap.fill(Qt::transparent);
 
-        // Create a painter for the pixmap.
-        QPainter painter(&pixmap);
+        // Create a painter for the image pixmap.
+        QPainter painter(&image_pixmap);
 
         // Ensure antialiasing is enabled.
         painter.setRenderHints(QPainter::Antialiasing, true);
 
         // Set the pen and brush.
-        painter.setPen(getPen());
-        painter.setBrush(QBrush(getPen().color()));
+        painter.setPen(pen());
+        painter.setBrush(brush());
 
         // Add points to create arrow shape.
         QPolygonF arrow;
-        arrow << PointPx((pixmap.width() / 2.0), 0.0).rawPoint();
-        arrow << PointPx(pixmap.width(), pixmap.height()).rawPoint();
-        arrow << PointPx((pixmap.width() / 2.0), (pixmap.height() / 2.0)).rawPoint();
-        arrow << PointPx(0.0, pixmap.height()).rawPoint();
+        arrow << PointPx((image_pixmap.width() / 2.0), 0.0).rawPoint();
+        arrow << PointPx(image_pixmap.width(), image_pixmap.height()).rawPoint();
+        arrow << PointPx((image_pixmap.width() / 2.0), (image_pixmap.height() / 2.0)).rawPoint();
+        arrow << PointPx(0.0, image_pixmap.height()).rawPoint();
 
         // Draw the arrow.
         painter.drawPolygon(arrow);
 
-        // Set the new pixmap.
-        setPixmap(pixmap);
+        // Set the image pixmap.
+        setImage(image_pixmap, false);
     }
 }

@@ -28,18 +28,18 @@
 
 // Local includes.
 #include "qmapcontrol_global.h"
-#include "GeometryPointShape.h"
+#include "GeometryPointShapeScaled.h"
 
 namespace qmapcontrol
 {
-    //! Draws an image at a specific point onto the map.
+    //! Draws a scaled image at a specific point onto the map.
     /*!
-     * This class draws an image at a specific point onto the map.
+     * This class draws a scaled image at a specific point onto the map.
      *
      * @author Kai Winter <kaiwinter@gmx.de>
      * @author Chris Stylianou <chris5287@gmail.com>
      */
-    class QMAPCONTROL_EXPORT GeometryPointImage : public GeometryPointShape
+    class QMAPCONTROL_EXPORT GeometryPointImageScaled : public GeometryPointShapeScaled
     {
     public:
         //! Constructor.
@@ -47,46 +47,49 @@ namespace qmapcontrol
          * This constructor creates a point which will display an image pixmap.
          * @param point_coord The point to draw the image at (world coordinates).
          * @param image The image to draw.
+         * @param base_size_px The size of the shape (pixels).
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPointImage(const PointWorldCoord& point_coord, const std::shared_ptr<QPixmap>& image, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPointImageScaled(const PointWorldCoord& point_coord, const std::shared_ptr<QPixmap>& image, const int& base_zoom, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Constructor.
         /*!
          * This constructor creates a point which will display an image pixmap.
          * @param point_coord The point to draw the image at (world coordinates).
          * @param image The image to draw.
+         * @param base_size_px The size of the shape (pixels).
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPointImage(const PointWorldCoord& point_coord, const QPixmap& image, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPointImageScaled(const PointWorldCoord& point_coord, const QPixmap& image, const int& base_zoom, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Constructor.
         /*!
          * This constructor creates a point which will display an image pixmap from the file.
          * @param point_coord The point to draw the image at (world coordinates).
          * @param filename The image file to draw.
+         * @param base_size_px The size of the shape (pixels).
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryPointImage(const PointWorldCoord& point_coord, const std::string& filename, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        GeometryPointImageScaled(const PointWorldCoord& point_coord, const std::string& filename, const int& base_zoom, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Disable copy constructor.
-        ///GeometryPointImage(const GeometryPointImage&) = delete; @todo re-add once MSVC supports default/delete syntax.
+        ///GeometryPointImageScaled(const GeometryPointImageScaled&) = delete; @todo re-add once MSVC supports default/delete syntax.
 
         //! Disable copy assignment.
-        ///GeometryPointImage& operator=(const GeometryPointImage&) = delete; @todo re-add once MSVC supports default/delete syntax.
+        ///GeometryPointImageScaled& operator=(const GeometryPointImageScaled&) = delete; @todo re-add once MSVC supports default/delete syntax.
 
         //! Destructor.
-        virtual ~GeometryPointImage() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
+        virtual ~GeometryPointImageScaled() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
 
     private:
         //! Disable copy constructor.
-        GeometryPointImage(const GeometryPointImage&); /// @todo remove once MSVC supports default/delete syntax.
+        GeometryPointImageScaled(const GeometryPointImageScaled&); /// @todo remove once MSVC supports default/delete syntax.
 
         //! Disable copy assignment.
-        GeometryPointImage& operator=(const GeometryPointImage&); /// @todo remove once MSVC supports default/delete syntax.
+        GeometryPointImageScaled& operator=(const GeometryPointImageScaled&); /// @todo remove once MSVC supports default/delete syntax.
 
     public:
         /*!

@@ -19,9 +19,12 @@ HEADERS +=                                      \
     Geometry.h                                  \
     GeometryLineString.h                        \
     GeometryPoint.h                             \
+    GeometryPointShape.h                        \
+    GeometryPointShapeScaled.h                  \
     GeometryPointArrow.h                        \
     GeometryPointCircle.h                       \
     GeometryPointImage.h                        \
+    GeometryPointImageScaled.h                  \
     GeometryPolygon.h                           \
     GeometryPolygonImage.h                      \
     GeometryWidget.h                            \
@@ -51,9 +54,12 @@ SOURCES +=                                      \
     Geometry.cpp                                \
     GeometryLineString.cpp                      \
     GeometryPoint.cpp                           \
+    GeometryPointShape.cpp                      \
+    GeometryPointShapeScaled.cpp                \
     GeometryPointArrow.cpp                      \
     GeometryPointCircle.cpp                     \
     GeometryPointImage.cpp                      \
+    GeometryPointImageScaled.cpp                \
     GeometryPolygon.cpp                         \
     GeometryPolygonImage.cpp                    \
     GeometryWidget.cpp                          \
