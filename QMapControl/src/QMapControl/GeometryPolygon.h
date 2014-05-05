@@ -45,7 +45,7 @@ namespace qmapcontrol
     public:
         //! Constructor.
         /*!
-         * The constructor that takes a list of points that form the polygon.
+         * This constructor takes a list of points, which form a polygon, to be displayed.
          * @param points The list of points (world coordinates).
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.

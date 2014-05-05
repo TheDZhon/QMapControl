@@ -45,7 +45,7 @@ namespace qmapcontrol
     public:
         //! Constructor.
         /*!
-         * This constructor creates a polygon that will display an image file within its bounding box.
+         * This constructor creates a polygon with an image file to be displayed.
          * @param top_left_coord The top-left point of the polygon (world coordinates).
          * @param bottom_right_coord The bottom-right point of the polygon (world coordinates).
          * @param filename The image file to draw.
@@ -56,7 +56,7 @@ namespace qmapcontrol
 
         //! Constructor.
         /*!
-         * This constructor creates a polygon that will display an image within its bounding box.
+         * This constructor creates a polygon with an image to be displayed.
          * @param top_left_coord The top-left point of the polygon (world coordinates).
          * @param bottom_right_coord The bottom-right point of the polygon (world coordinates).
          * @param image The image pixmap to draw.
