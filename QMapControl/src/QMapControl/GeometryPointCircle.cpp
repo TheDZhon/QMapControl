@@ -45,9 +45,8 @@ namespace qmapcontrol
         // Create a painter for the pixmap.
         QPainter painter(&pixmap);
 
-//#if !defined Q_WS_MAEMO_5 //FIXME Maemo has a bug - it will antialias our point out of existence
-        painter.setRenderHints(QPainter::Antialiasing|QPainter::HighQualityAntialiasing);
-//#endif
+        // Ensure antialiasing is enabled.
+        painter.setRenderHints(QPainter::Antialiasing, true);
 
         // Set the pen.
         painter.setPen(getPen());

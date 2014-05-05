@@ -150,21 +150,23 @@ void QProgressIndicator::paintEvent(QPaintEvent* /*event*/)
     // Check if we should alawys display, or we are currently animating.
     if(m_always_visible || isAnimated())
     {
-        // Calculate the smallest dimension of the QWidget.
-        const int width = qMin(this->width(), this->height());
-
         // Create a painter for this QWidget.
         QPainter painter(this);
-        painter.setRenderHint(QPainter::Antialiasing);
+
+        // Ensure antialiasing is enabled.
+        painter.setRenderHint(QPainter::Antialiasing, true);
+
+        // Calculate the smallest dimension of the QWidget.
+        const int width = qMin(this->width(), this->height());
 
         // Calculate the inner and outer radius'.
         const int radius_outer = (width - 1.0) * 0.5;
         const int radius_inner = (width - 1.0) * 0.5 * 0.38;
 
         // Calculate the capsule dimensions.
-        int capsule_height = radius_outer - radius_inner;
-        int capsule_width  = (width > 32 ) ? capsule_height * 0.23 : capsule_height * 0.35;
-        int capsule_radius = capsule_width / 2.0;
+        const int capsule_height = radius_outer - radius_inner;
+        const int capsule_width  = (width > 32 ) ? capsule_height * 0.23 : capsule_height * 0.35;
+        const int capsule_radius = capsule_width / 2.0;
 
         // Loop and create the progress capsule indicators.
         for(int i = 0; i < 12; ++i)

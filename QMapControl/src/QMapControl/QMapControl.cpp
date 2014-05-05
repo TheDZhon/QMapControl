@@ -1221,6 +1221,9 @@ namespace qmapcontrol
         // Create a painter for this QWidget to draw on.
         QPainter painter(this);
 
+        // Ensure antialiasing is enabled (primitives and pixmaps).
+        painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform, true);
+
         // Apply style sheet options to painter.
         QStyleOption style_options;
         style_options.initFrom(this);
