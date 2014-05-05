@@ -17,8 +17,6 @@
 #include <QMapControl/MapAdapterYahoo.h>
 #include <QMapControl/MapAdapterWMS.h>
 
-#include <QMapControl/LayerESRIShapefile.h>
-
 /*!
  * This is a bit complexer application, which lets you play around.
  * There are the following buttons configured:
@@ -252,24 +250,6 @@ void Multidemo::setupLayout()
 
     // Set the main layout to the QWidget.
     QWidget::setLayout(layout_main);
-
-    std::shared_ptr<LayerESRIShapefile> esri_layer(std::make_shared<LayerESRIShapefile>("ESRI"));
-    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/GSHHS_shp/l/GSHHS_l_L1.shp", "GSHHS_l_L1", 0, 2));
-    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/GSHHS_shp/l/GSHHS_l_L2.shp", "GSHHS_l_L2", 0, 2));
-    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/WDBII_shp/l/WDBII_border_l_L1.shp", "WDBII_border_l_L1", 0, 2));
-    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/WDBII_shp/l/WDBII_border_l_L2.shp", "WDBII_border_l_L2", 0, 2));
-
-    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/GSHHS_shp/i/GSHHS_i_L1.shp", "GSHHS_i_L1", 3, 9));
-    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/GSHHS_shp/i/GSHHS_i_L2.shp", "GSHHS_i_L2", 3, 9));
-    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/WDBII_shp/i/WDBII_border_i_L1.shp", "WDBII_border_i_L1", 3, 9));
-    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/WDBII_shp/i/WDBII_border_i_L2.shp", "WDBII_border_i_L2", 3, 9));
-
-    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/GSHHS_shp/h/GSHHS_h_L1.shp", "GSHHS_h_L1", 10, 17));
-    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/GSHHS_shp/h/GSHHS_h_L2.shp", "GSHHS_h_L2", 10, 17));
-    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/WDBII_shp/h/WDBII_border_h_L1.shp", "WDBII_border_h_L1", 10, 17));
-    esri_layer->addESRIShapefile(std::make_shared<ESRIShapefile>("/Users/chris/Downloads/gshhg-shp-2.2.2/WDBII_shp/h/WDBII_border_h_L2.shp", "WDBII_border_h_L2", 10, 17));
-
-    m_map_control->addLayer(esri_layer);
 }
 
 void Multidemo::resizeEvent(QResizeEvent* event)
