@@ -22,6 +22,17 @@ macx {
 # Include paths.
 INCLUDEPATH += ../../src
 
+# Include GDAL-required files.
+contains(DEFINES, QMC_GDAL) {
+    message(Building with GDAL support...)
+
+    # Add GDAL include path.
+    INCLUDEPATH += $$(QMC_GDAL_INC)
+
+    # Add GDAL library path and library.
+    LIBS += -L$$(QMC_GDAL_LIB) -lgdal
+}
+
 # Target install directory.
 DESTDIR = bin
 

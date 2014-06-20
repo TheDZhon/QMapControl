@@ -31,6 +31,9 @@
 #include <QtGui/QPainter>
 #include <QtGui/QPen>
 
+// GDAL includes.
+#include <gdal/ogrsf_frmts.h>
+
 // STL includes.
 #include <memory>
 #include <string>
@@ -60,6 +63,9 @@ namespace qmapcontrol
          * @param zoom_maximum The maximum zoom level to show this ESRI Shapefile at.
          */
         ESRIShapefile(const std::string& file_path, const std::string& layer_name, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+
+        //! Destructor.
+        ~ESRIShapefile();
 
         /*!
          * Fetches the pen to draw the polygon with (outline).
@@ -130,8 +136,8 @@ namespace qmapcontrol
         void requestRedraw() const;
 
     private:
-        /// The file path of the ESRI Shapefile.
-        std::string m_file_path;
+        /// The OGR data set of the ESRI Shapefile.
+        OGRDataSource* m_ogr_data_set;
 
         /// The layer name.
         std::string m_layer_name;

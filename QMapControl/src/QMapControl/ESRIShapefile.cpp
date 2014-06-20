@@ -25,20 +25,29 @@
 
 #include "ESRIShapefile.h"
 
-// GDAL includes.
-#include <gdal/gdal.h>
-#include <gdal/ogrsf_frmts.h>
-
 // Local includes.
 #include "Projection.h"
 
 namespace qmapcontrol
 {
     ESRIShapefile::ESRIShapefile(const std::string& file_path, const std::string& layer_name, const int& zoom_minimum, const int& zoom_maximum)
-        : m_file_path(file_path), m_layer_name(layer_name), m_zoom_minimum(zoom_minimum), m_zoom_maximum(zoom_maximum)
+        : m_layer_name(layer_name), m_zoom_minimum(zoom_minimum), m_zoom_maximum(zoom_maximum)
     {
-        // Register all OGR drivers.
+        // Register OGR drivers.
         OGRRegisterAll();
+
+        // Open the file.
+        m_ogr_data_set = OGRSFDriverRegistrar::Open(file_path.c_str(), FALSE);
+    }
+
+    ESRIShapefile::~ESRIShapefile()
+    {
+        // Do we have a dataset open?
+        if(m_ogr_data_set != nullptr)
+        {
+            // Close the data set.
+            OGRDataSource::DestroyDataSource(m_ogr_data_set);
+        }
     }
 
     const QPen& ESRIShapefile::getPenPolygon() const
@@ -146,25 +155,20 @@ namespace qmapcontrol
             // Calculate the world coordinates.
             const RectWorldCoord backbuffer_rect_coord(projection::get().toPointWorldCoord(backbuffer_rect_px.topLeftPx(), controller_zoom), projection::get().toPointWorldCoord(backbuffer_rect_px.bottomRightPx(), controller_zoom));
 
-            // Intialise data set.
-            const auto ogr_data_set(OGRSFDriverRegistrar::Open(m_file_path.c_str()));
-            if(ogr_data_set == nullptr)
-            {
-                // Invalid file path!
-
-                // Ensure the data set is destroyed.
-                OGRDataSource::DestroyDataSource(ogr_data_set);
-            }
-            else
+            // Do we have a data set open?
+            if(m_ogr_data_set != nullptr)
             {
                 // Get layer.
-                const auto ogr_layer(ogr_data_set->GetLayerByName(m_layer_name.c_str()));
+                const auto ogr_layer(m_ogr_data_set->GetLayerByName(m_layer_name.c_str()));
                 if(ogr_layer == nullptr)
                 {
                     // Invalid layer name!
                 }
                 else
                 {
+                    // Reset reading.
+                    ogr_layer->ResetReading();
+
                     // Set the Spatial Filter.
                     ogr_layer->SetSpatialFilterRect(backbuffer_rect_coord.rawRect().left(), backbuffer_rect_coord.rawRect().top(), backbuffer_rect_coord.rawRect().right(), backbuffer_rect_coord.rawRect().bottom());
 
@@ -303,6 +307,9 @@ namespace qmapcontrol
                             // Draw the polygon line.
                             painter.drawPolyline(polygon_line_px);
                         }
+
+                        // Destroy the feature.
+                        OGRFeature::DestroyFeature(ogr_feature);
                     }
                 }
             }
