@@ -8,7 +8,8 @@ namespace qmapcontrol
     GeometryPointShape::GeometryPointShape(const qreal& longitude, const qreal& latitude, const QSizeF& size_px, const int& zoom_minimum, const int& zoom_maximum)
         : GeometryPoint(PointWorldCoord(longitude, latitude), zoom_minimum, zoom_maximum),
           m_size_px(size_px),
-          m_alignment_type(AlignmentType::Middle)
+          m_alignment_type(AlignmentType::Middle),
+          m_rotation(0.0)
     {
 
     }
@@ -16,7 +17,8 @@ namespace qmapcontrol
     GeometryPointShape::GeometryPointShape(const PointWorldCoord& point_coord, const QSizeF& size_px, const int& zoom_minimum, const int& zoom_maximum)
         : GeometryPoint(point_coord, zoom_minimum, zoom_maximum),
           m_size_px(size_px),
-          m_alignment_type(AlignmentType::Middle)
+          m_alignment_type(AlignmentType::Middle),
+          m_rotation(0.0)
     {
 
     }
