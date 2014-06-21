@@ -714,7 +714,7 @@ namespace qmapcontrol
             const PointWorldCoord bottom_right_coord(projection::get().toPointWorldCoord(bottom_right_px, m_current_zoom));
 
             // Construct geometry to compare against (default is polygon/rect).
-            std::unique_ptr<Geometry> geometry_to_compare_coord(new GeometryPolygon({top_left_coord, bottom_right_coord}));
+            std::unique_ptr<Geometry> geometry_to_compare_coord(new GeometryPolygon(RectWorldCoord(top_left_coord, bottom_right_coord).toStdVector()));
             if(mouse_mode == QMapControl::MouseButtonMode::SelectLine)
             {
                 // Set the line with a 'fuzzy-factor' around it using the pen.
@@ -724,7 +724,7 @@ namespace qmapcontrol
                 line_pen.setWidthF(fuzzy_factor_px);
 
                 // Create line string geometry.
-                geometry_to_compare_coord.reset(new GeometryLineString({top_left_coord, bottom_right_coord}));
+                geometry_to_compare_coord.reset(new GeometryLineString(std::vector<PointWorldCoord>{top_left_coord, bottom_right_coord}));
                 geometry_to_compare_coord->setPen(line_pen);
             }
             else if(mouse_mode == QMapControl::MouseButtonMode::SelectEllipse)
