@@ -103,7 +103,7 @@ namespace qmapcontrol
          * @param parent QObject parent ownership.
          * @param window_flags QWidget window flags.
          */
-        QMapControl(QWidget * parent = 0, Qt::WindowFlags window_flags = 0);
+        QMapControl(QWidget* parent = 0, Qt::WindowFlags window_flags = 0);
 
         //! QMapControl constructor.
         /*!

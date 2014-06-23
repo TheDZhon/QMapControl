@@ -43,19 +43,10 @@
 
 namespace qmapcontrol
 {
-    QMapControl::QMapControl(QWidget * parent, Qt::WindowFlags window_flags)
-        : m_viewport_center_px(0.0, 0.0),
-          m_limited_viewport_rect_coord(PointWorldCoord(0.0, 0.0), PointWorldCoord(0.0, 0.0)),
-          m_map_focus_coord(0.0, 0.0),
-          m_animated_map_focus_point(0.0, 0.0),
-          m_mouse_position_pressed_px(0.0, 0.0),
-          m_mouse_position_current_px(0.0, 0.0),
-          m_primary_screen_map_focus_point_px(0.0, 0.0),
-          m_primary_screen_backbuffer_rect_px(PointWorldPx(0.0, 0.0), PointWorldPx(0.0, 0.0)),
-          m_primary_screen_scaled_offset(0.0, 0.0)
+    QMapControl::QMapControl(QWidget* parent, Qt::WindowFlags window_flags)
+        : QMapControl(parent->size(), parent, window_flags)
     {
-        /// @TODO understand how QtDesigner uses this so that the correct size can be passed to the constructor.
-        QMapControl(parent->size(), parent, window_flags);
+        // Nothing else to do.
     }
 
     QMapControl::QMapControl(const QSizeF& size_px, QWidget* parent, Qt::WindowFlags window_flags)
