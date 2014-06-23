@@ -103,15 +103,23 @@ contains(DEFINES, QMC_GDAL) {
     LIBS += -L$$(QMC_GDAL_LIB) -lgdal
 }
 
+# Capture whether this is a release/debug build.
+CONFIG(debug, debug|release) {
+    TARGET_TYPE = debug
+}
+CONFIG(release, debug|release) {
+    TARGET_TYPE = release
+}
+
 # Install details.
 # Has a prefix been specified?
 !isEmpty(prefix) {
     # Change prefix to PREFIX.
-    PREFIX = $${prefix}
+    PREFIX = $${prefix}/$$TARGET_TYPE
 }
 isEmpty(PREFIX) {
     # Default to parent directory.
-    PREFIX = ../../../
+    PREFIX = ../../../$$TARGET_TYPE
 }
 # Install headers to $${PREFIX}/include/QMapControl
 headers.path = $${PREFIX}/include/QMapControl

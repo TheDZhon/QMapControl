@@ -40,15 +40,23 @@ DESTDIR = bin
 target_libs.commands = -$(INSTALL_FILE) $$system_path(../../src/QMapControl/lib/*) $$system_path(bin/.)
 QMAKE_EXTRA_TARGETS += target_libs
 
+# Capture whether this is a release/debug build.
+CONFIG(debug, debug|release) {
+    TARGET_TYPE = debug
+}
+CONFIG(release, debug|release) {
+    TARGET_TYPE = release
+}
+
 # Install details.
 # Has a prefix been specified?
 !isEmpty(prefix) {
     # Change prefix to PREFIX.
-    PREFIX = $${prefix}
+    PREFIX = $${prefix}/$$TARGET_TYPE
 }
 isEmpty(PREFIX) {
     # Default to parent directory.
-    PREFIX = ../../../
+    PREFIX = ../../../$$TARGET_TYPE
 }
 # Install target to $${PREFIX}/bin.
 target.path = $${PREFIX}/bin
