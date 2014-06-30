@@ -1,8 +1,15 @@
 # Include common configurations.
 include(../../QMapControl.pri)
 
-# Target name.
-TARGET = qmapcontrol
+# Capture whether this is a release/debug build.
+CONFIG(debug, debug|release) {
+    # Target name.
+    TARGET = qmapcontrold
+}
+CONFIG(release, debug|release) {
+    # Target name.
+    TARGET = qmapcontrol
+}
 
 # Target version.
 VERSION = 1.0.0
@@ -99,8 +106,11 @@ contains(DEFINES, QMC_GDAL) {
     # Add GDAL include path.
     INCLUDEPATH += $$(QMC_GDAL_INC)
 
-    # Add GDAL library path and library.
-    LIBS += -L$$(QMC_GDAL_LIB) -lgdal
+    # Add GDAL library path and library (windows).
+    win32:LIBS += -L$$(QMC_GDAL_LIB) -lgdal_i
+
+    # Add GDAL library path and library (unix).
+    unix:LIBS += -L$$(QMC_GDAL_LIB) -lgdal
 }
 
 # Capture whether this is a release/debug build.

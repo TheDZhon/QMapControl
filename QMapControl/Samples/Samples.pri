@@ -3,14 +3,28 @@ include(../QMapControl.pri)
 
 # Windows specific options.
 win32 {
-    # Add QMapControl library.
-    LIBS += -L../../src/QMapControl/lib -lqmapcontrol1
+    # Capture whether this is a release/debug build.
+    CONFIG(debug, debug|release) {
+        # Add QMapControl library.
+        LIBS += -L../../src/QMapControl/lib -lqmapcontrold1
+    }
+    CONFIG(release, debug|release) {
+        # Add QMapControl library.
+        LIBS += -L../../src/QMapControl/lib -lqmapcontrol1
+    }
 }
 
 # Unix specific options.
 unix {
-    # Add QMapControl library.
-    LIBS += -L../../src/QMapControl/lib -lqmapcontrol
+    # Capture whether this is a release/debug build.
+    CONFIG(debug, debug|release) {
+        # Add QMapControl library.
+        LIBS += -L../../src/QMapControl/lib -lqmapcontrold
+    }
+    CONFIG(release, debug|release) {
+        # Add QMapControl library.
+        LIBS += -L../../src/QMapControl/lib -lqmapcontrol
+    }
 }
 
 # OSX specific options.
@@ -29,8 +43,11 @@ contains(DEFINES, QMC_GDAL) {
     # Add GDAL include path.
     INCLUDEPATH += $$(QMC_GDAL_INC)
 
-    # Add GDAL library path and library.
-    LIBS += -L$$(QMC_GDAL_LIB) -lgdal
+    # Add GDAL library path and library (windows).
+    win32:LIBS += -L$$(QMC_GDAL_LIB) -lgdal_i
+
+    # Add GDAL library path and library (unix).
+    unix:LIBS += -L$$(QMC_GDAL_LIB) -lgdal
 }
 
 # Target install directory.
