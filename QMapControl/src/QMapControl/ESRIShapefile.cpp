@@ -158,29 +158,61 @@ namespace qmapcontrol
             // Do we have a data set open?
             if(m_ogr_data_set != nullptr)
             {
-                // Get layer.
-                const auto ogr_layer(m_ogr_data_set->GetLayerByName(m_layer_name.c_str()));
-                if(ogr_layer == nullptr)
+                // Do we have a layer name set?
+                if(m_layer_name.empty() == false)
                 {
-                    // Invalid layer name!
+                    // Get layer.
+                    const auto ogr_layer(m_ogr_data_set->GetLayerByName(m_layer_name.c_str()));
+                    if(ogr_layer == nullptr)
+                    {
+                        // Invalid layer name!
+                    }
+                    else
+                    {
+                        // Reset reading.
+                        ogr_layer->ResetReading();
+
+                        // Set the Spatial Filter.
+                        ogr_layer->SetSpatialFilterRect(backbuffer_rect_coord.rawRect().left(), backbuffer_rect_coord.rawRect().top(), backbuffer_rect_coord.rawRect().right(), backbuffer_rect_coord.rawRect().bottom());
+
+                        // Loop through features.
+                        OGRFeature* ogr_feature;
+                        while((ogr_feature = ogr_layer->GetNextFeature()) != nullptr)
+                        {
+                            // Draw the feature.
+                            drawFeature(ogr_feature, painter, controller_zoom);
+
+                            // Destroy the feature.
+                            OGRFeature::DestroyFeature(ogr_feature);
+                        }
+                    }
                 }
                 else
                 {
-                    // Reset reading.
-                    ogr_layer->ResetReading();
-
-                    // Set the Spatial Filter.
-                    ogr_layer->SetSpatialFilterRect(backbuffer_rect_coord.rawRect().left(), backbuffer_rect_coord.rawRect().top(), backbuffer_rect_coord.rawRect().right(), backbuffer_rect_coord.rawRect().bottom());
-
-                    // Loop through features.
-                    OGRFeature* ogr_feature;
-                    while((ogr_feature = ogr_layer->GetNextFeature()) != nullptr)
+                    // Loop through and draw each layer.
+                    for(int i = 0; i < m_ogr_data_set->GetLayerCount(); ++i)
                     {
-                        // Draw the feature.
-                        drawFeature(ogr_feature, painter, controller_zoom);
+                        // Get layer.
+                        const auto ogr_layer(m_ogr_data_set->GetLayer(i));
+                        if(ogr_layer != nullptr)
+                        {
+                            // Reset reading.
+                            ogr_layer->ResetReading();
 
-                        // Destroy the feature.
-                        OGRFeature::DestroyFeature(ogr_feature);
+                            // Set the Spatial Filter.
+                            ogr_layer->SetSpatialFilterRect(backbuffer_rect_coord.rawRect().left(), backbuffer_rect_coord.rawRect().top(), backbuffer_rect_coord.rawRect().right(), backbuffer_rect_coord.rawRect().bottom());
+
+                            // Loop through features.
+                            OGRFeature* ogr_feature;
+                            while((ogr_feature = ogr_layer->GetNextFeature()) != nullptr)
+                            {
+                                // Draw the feature.
+                                drawFeature(ogr_feature, painter, controller_zoom);
+
+                                // Destroy the feature.
+                                OGRFeature::DestroyFeature(ogr_feature);
+                            }
+                        }
                     }
                 }
             }
