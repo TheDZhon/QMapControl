@@ -176,143 +176,143 @@ namespace qmapcontrol
                     OGRFeature* ogr_feature;
                     while((ogr_feature = ogr_layer->GetNextFeature()) != nullptr)
                     {
-                //        // Fetch labels.
-                //        const auto field_name = ogr_feature->GetFieldAsString("NAME");
-                //        const auto field_area = ogr_feature->GetFieldAsInteger("AREA");
-                //        const auto field_longitude = ogr_feature->GetFieldAsDouble("LON");
-                //        const auto field_latitude = ogr_feature->GetFieldAsDouble("LAT");
-
-                        // Fetch geometries.
-                        const auto ogr_geometry(ogr_feature->GetGeometryRef());
-                        if(ogr_geometry == nullptr)
-                        {
-                            // No geometry to fetch!
-                        }
-                        // Is it a polygon.
-                        else if(wkbFlatten(ogr_geometry->getGeometryType()) == wkbPolygon)
-                        {
-                            // Cast to a polygon.
-                            const auto ogr_polygon(static_cast<OGRPolygon*>(ogr_geometry));
-
-                            // Fetch the exterior ring.
-                            const auto ogr_exterior_ring(ogr_polygon->getExteriorRing());
-                            if(ogr_exterior_ring == nullptr)
-                            {
-                                // No exterior ring!
-                            }
-                            else
-                            {
-                                // Prepare storage for point.
-                                OGRPoint ogr_point;
-
-                                // Create a polygon of the points.
-                                QPolygonF polygon_px;
-
-                                // Loop through the points.
-                                for(int i = 0; i < ogr_exterior_ring->getNumPoints(); ++i)
-                                {
-                                    // Fetch the point.
-                                    ogr_exterior_ring->getPoint(i, &ogr_point);
-
-                                    // Add the point to be drawn.
-                                    polygon_px.append(projection::get().toPointWorldPx(PointWorldCoord(ogr_point.getX(), ogr_point.getY()), controller_zoom).rawPoint());
-                                }
-
-                                // Set the pen to use.
-                                painter.setPen(getPenPolygon());
-
-                                // Set the brush to use.
-                                painter.setBrush(getBrushPolygon());
-
-                                // Draw the polygon line.
-                                painter.drawPolygon(polygon_px);
-                            }
-                        }
-                        else if(wkbFlatten(ogr_geometry->getGeometryType()) == wkbMultiPolygon)
-                        {
-                            // Cast to a multi polygon.
-                            const auto ogr_multi_polygon(static_cast<OGRMultiPolygon*>(ogr_geometry));
-                            if(ogr_multi_polygon == nullptr)
-                            {
-                                // No multi polygons!
-                            }
-                            else
-                            {
-                                // Loop through each polygon.
-                                for(int i = 0; i < ogr_multi_polygon->getNumGeometries(); ++i)
-                                {
-                                    // Cast to a polygon.
-                                    const auto ogr_polygon(static_cast<OGRPolygon*>(ogr_multi_polygon->getGeometryRef(i)));
-
-                                    // Fetch the exterior ring.
-                                    const auto ogr_exterior_ring(ogr_polygon->getExteriorRing());
-                                    if(ogr_exterior_ring == nullptr)
-                                    {
-                                        // No exterior ring!
-                                    }
-                                    else
-                                    {
-                                        // Prepare storage for point.
-                                        OGRPoint ogr_point;
-
-                                        // Create a polygon of the points.
-                                        QPolygonF polygon_px;
-
-                                        // Loop through the points.
-                                        for(int i = 0; i < ogr_exterior_ring->getNumPoints(); ++i)
-                                        {
-                                            // Fetch the point.
-                                            ogr_exterior_ring->getPoint(i, &ogr_point);
-
-                                            // Add the point to be drawn.
-                                            polygon_px.append(projection::get().toPointWorldPx(PointWorldCoord(ogr_point.getX(), ogr_point.getY()), controller_zoom).rawPoint());
-                                        }
-
-                                        // Set the pen to use.
-                                        painter.setPen(getPenPolygon());
-
-                                        // Set the brush to use.
-                                        painter.setBrush(getBrushPolygon());
-
-                                        // Draw the polygon line.
-                                        painter.drawPolygon(polygon_px);
-                                    }
-                                }
-                            }
-                        }
-                        else if(wkbFlatten(ogr_geometry->getGeometryType()) == wkbLineString) // wkbLineString
-                        {
-                            // Cast to a line string.
-                            const auto ogr_line_string(static_cast<OGRLineString*>(ogr_geometry));
-
-                            // Prepare storage for point.
-                            OGRPoint ogr_point;
-
-                            // Create a polygon of the points.
-                            QPolygonF polygon_line_px;
-
-                            // Loop through the points.
-                            for(int i = 0; i < ogr_line_string->getNumPoints(); ++i)
-                            {
-                                // Fetch the point.
-                                ogr_line_string->getPoint(i, &ogr_point);
-
-                                // Add the point to be drawn.
-                                polygon_line_px.append(projection::get().toPointWorldPx(PointWorldCoord(ogr_point.getX(), ogr_point.getY()), controller_zoom).rawPoint());
-                            }
-
-                            // Set the pen to use.
-                            painter.setPen(getPenLineString());
-
-                            // Draw the polygon line.
-                            painter.drawPolyline(polygon_line_px);
-                        }
+                        // Draw the feature.
+                        drawFeature(ogr_feature, painter, controller_zoom);
 
                         // Destroy the feature.
                         OGRFeature::DestroyFeature(ogr_feature);
                     }
                 }
             }
+        }
+    }
+
+    void ESRIShapefile::drawFeature(OGRFeature* ogr_feature, QPainter& painter, const int& controller_zoom) const
+    {
+        // Fetch geometries.
+        const auto ogr_geometry(ogr_feature->GetGeometryRef());
+        if(ogr_geometry == nullptr)
+        {
+            // No geometry to fetch!
+        }
+        // Is it a polygon.
+        else if(wkbFlatten(ogr_geometry->getGeometryType()) == wkbPolygon)
+        {
+            // Cast to a polygon.
+            const auto ogr_polygon(static_cast<OGRPolygon*>(ogr_geometry));
+
+            // Fetch the exterior ring.
+            const auto ogr_exterior_ring(ogr_polygon->getExteriorRing());
+            if(ogr_exterior_ring == nullptr)
+            {
+                // No exterior ring!
+            }
+            else
+            {
+                // Prepare storage for point.
+                OGRPoint ogr_point;
+
+                // Create a polygon of the points.
+                QPolygonF polygon_px;
+
+                // Loop through the points.
+                for(int i = 0; i < ogr_exterior_ring->getNumPoints(); ++i)
+                {
+                    // Fetch the point.
+                    ogr_exterior_ring->getPoint(i, &ogr_point);
+
+                    // Add the point to be drawn.
+                    polygon_px.append(projection::get().toPointWorldPx(PointWorldCoord(ogr_point.getX(), ogr_point.getY()), controller_zoom).rawPoint());
+                }
+
+                // Set the pen to use.
+                painter.setPen(getPenPolygon());
+
+                // Set the brush to use.
+                painter.setBrush(getBrushPolygon());
+
+                // Draw the polygon line.
+                painter.drawPolygon(polygon_px);
+            }
+        }
+        else if(wkbFlatten(ogr_geometry->getGeometryType()) == wkbMultiPolygon)
+        {
+            // Cast to a multi polygon.
+            const auto ogr_multi_polygon(static_cast<OGRMultiPolygon*>(ogr_geometry));
+            if(ogr_multi_polygon == nullptr)
+            {
+                // No multi polygons!
+            }
+            else
+            {
+                // Loop through each polygon.
+                for(int i = 0; i < ogr_multi_polygon->getNumGeometries(); ++i)
+                {
+                    // Cast to a polygon.
+                    const auto ogr_polygon(static_cast<OGRPolygon*>(ogr_multi_polygon->getGeometryRef(i)));
+
+                    // Fetch the exterior ring.
+                    const auto ogr_exterior_ring(ogr_polygon->getExteriorRing());
+                    if(ogr_exterior_ring == nullptr)
+                    {
+                        // No exterior ring!
+                    }
+                    else
+                    {
+                        // Prepare storage for point.
+                        OGRPoint ogr_point;
+
+                        // Create a polygon of the points.
+                        QPolygonF polygon_px;
+
+                        // Loop through the points.
+                        for(int i = 0; i < ogr_exterior_ring->getNumPoints(); ++i)
+                        {
+                            // Fetch the point.
+                            ogr_exterior_ring->getPoint(i, &ogr_point);
+
+                            // Add the point to be drawn.
+                            polygon_px.append(projection::get().toPointWorldPx(PointWorldCoord(ogr_point.getX(), ogr_point.getY()), controller_zoom).rawPoint());
+                        }
+
+                        // Set the pen to use.
+                        painter.setPen(getPenPolygon());
+
+                        // Set the brush to use.
+                        painter.setBrush(getBrushPolygon());
+
+                        // Draw the polygon line.
+                        painter.drawPolygon(polygon_px);
+                    }
+                }
+            }
+        }
+        else if(wkbFlatten(ogr_geometry->getGeometryType()) == wkbLineString) // wkbLineString
+        {
+            // Cast to a line string.
+            const auto ogr_line_string(static_cast<OGRLineString*>(ogr_geometry));
+
+            // Prepare storage for point.
+            OGRPoint ogr_point;
+
+            // Create a polygon of the points.
+            QPolygonF polygon_line_px;
+
+            // Loop through the points.
+            for(int i = 0; i < ogr_line_string->getNumPoints(); ++i)
+            {
+                // Fetch the point.
+                ogr_line_string->getPoint(i, &ogr_point);
+
+                // Add the point to be drawn.
+                polygon_line_px.append(projection::get().toPointWorldPx(PointWorldCoord(ogr_point.getX(), ogr_point.getY()), controller_zoom).rawPoint());
+            }
+
+            // Set the pen to use.
+            painter.setPen(getPenLineString());
+
+            // Draw the polygon line.
+            painter.drawPolyline(polygon_line_px);
         }
     }
 }

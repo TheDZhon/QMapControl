@@ -65,7 +65,7 @@ namespace qmapcontrol
         ESRIShapefile(const std::string& file_path, const std::string& layer_name, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Destructor.
-        ~ESRIShapefile();
+        virtual ~ESRIShapefile();
 
         /*!
          * Fetches the pen to draw the polygon with (outline).
@@ -128,6 +128,16 @@ namespace qmapcontrol
          * @param controller_zoom The current controller zoom.
          */
         void draw(QPainter& painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const;
+
+    protected:
+
+        /*!
+         * Draws ESRI Shapefile feature to a pixmap using the provided painter.
+         * @param ogr_feature The feature to draw.
+         * @param painter The painter that will draw to the pixmap.
+         * @param controller_zoom The current controller zoom.
+         */
+        virtual void drawFeature(OGRFeature* ogr_feature, QPainter& painter, const int& controller_zoom) const;
 
     signals:
         /*!
