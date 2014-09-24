@@ -120,6 +120,12 @@ namespace qmapcontrol
         bool isVisible(const int& controller_zoom) const;
 
         /*!
+         * \brief Whether the layer is currently visible, independently from the zoom factor
+         * \return whether the layer is visible.
+         */
+        bool isVisible() const;
+
+        /*!
          * Set the visibility of the layer.
          * @param visible Whether the layer should be visible.
          */

@@ -90,6 +90,11 @@ namespace qmapcontrol
         return visibility;
     }
 
+    bool Layer::isVisible() const
+    {
+        return m_visible;
+    }
+
     void Layer::setVisible(const bool& visible)
     {
         // Set the visibility.
