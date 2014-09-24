@@ -188,6 +188,11 @@ namespace qmapcontrol
         return getImage(url);
     }
 
+    void ImageManager::setLoadingPixmap(const QPixmap &pixmap)
+    {
+        m_pixmap_loading = pixmap;
+    }
+
     void ImageManager::imageDownloaded(const QUrl& url, const QPixmap& pixmap)
     {
         qDebug() << "ImageManager::imageDownloaded '" << url << "'";

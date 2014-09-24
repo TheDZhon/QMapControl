@@ -132,6 +132,12 @@ namespace qmapcontrol
          */
         QPixmap prefetchImage(const QUrl& url);
 
+        /*!
+         * \brief setLoadingPixmap sets the pixmap displayed when a tile is not yet loaded
+         * \param pixmap the pixmap to display
+         */
+        void setLoadingPixmap (const QPixmap &pixmap);
+
     signals:
         /*!
          * Signal emitted to schedule an image resource to be downloaded.
