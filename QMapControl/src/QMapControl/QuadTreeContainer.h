@@ -29,6 +29,7 @@
 #include <memory>
 #include <set>
 #include <vector>
+#include <stdexcept>
 
 // Local includes.
 #include "qmapcontrol_global.h"
