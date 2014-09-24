@@ -185,7 +185,7 @@ namespace qmapcontrol
     }
 
     // Layer management.
-    const std::vector<std::shared_ptr<Layer> > QMapControl::getLayers() const
+    const std::vector<std::shared_ptr<Layer> > &QMapControl::getLayers() const
     {
         // Gain a read lock to protect the layers container.
         QReadLocker locker(&m_layers_mutex);

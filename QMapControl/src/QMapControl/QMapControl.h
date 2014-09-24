@@ -187,7 +187,7 @@ namespace qmapcontrol
          * Fetch the layers (Use this instead of the member variable for thread-safety).
          * @return a list of all layers.
          */
-        const std::vector<std::shared_ptr<Layer>> getLayers() const;
+        const std::vector<std::shared_ptr<Layer> > &getLayers() const;
 
         /*!
          * Fetch the layer with the given name.
