@@ -112,14 +112,13 @@ namespace qmapcontrol
          */
         void setImage(const QPixmap& new_image, const bool& update_shape = true);
 
-    public:
+    protected:
         /*!
-         * Draws the geometry to a pixmap using the provided painter.
-         * @param painter The painter that will draw to the pixmap.
-         * @param backbuffer_rect_coord Only draw geometries that are contained in the backbuffer rect (world coordinates).
-         * @param controller_zoom The current controller zoom.
+         * \brief drawShape Draws the shape in a transformed painter according to zoom/translate/rotate status
+         * \param painter
+         * \param rect The rect in pixel coordinates
          */
-        void draw(QPainter& painter, const RectWorldCoord& backbuffer_rect_coord, const int& controller_zoom) final;
+        virtual void drawShape(QPainter &painter, const RectWorldPx &rect);
 
     private:
         /// The image pixmap to draw.

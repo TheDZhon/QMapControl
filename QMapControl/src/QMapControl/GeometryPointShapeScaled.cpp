@@ -89,6 +89,45 @@ namespace qmapcontrol
         return RectWorldCoord(projection::get().toPointWorldCoord(top_left_point_px, controller_zoom), projection::get().toPointWorldCoord(bottom_right_point_px, controller_zoom));
     }
 
+    void GeometryPointShapeScaled::draw(QPainter &painter, const RectWorldCoord &backbuffer_rect_coord, const int &controller_zoom)
+    {
+        // Check the geometry is visible.
+        if(isVisible(controller_zoom))
+        {
+            // Check if the bounding boxes intersect.
+            const RectWorldCoord pixmap_rect_coord(boundingBox(controller_zoom));
+            if(backbuffer_rect_coord.rawRect().intersects(pixmap_rect_coord.rawRect()))
+            {
+                // Calculate the pixmap rect to draw within.
+                const RectWorldPx pixmap_rect_px(projection::get().toPointWorldPx(pixmap_rect_coord.topLeftCoord(), controller_zoom), projection::get().toPointWorldPx(pixmap_rect_coord.bottomRightCoord(), controller_zoom));
+
+
+                qreal scale = pow(2.0, controller_zoom - baseZoom());
+
+                // Translate to center point with required rotation.
+                painter.translate(pixmap_rect_px.centerPx().rawPoint());
+                painter.rotate(rotation());
+                painter.scale(scale, scale);
+
+                drawShape(painter, pixmap_rect_px);
+
+                // Un-translate.
+                painter.scale(1.0/scale, 1.0/scale);
+                painter.rotate(-rotation());
+                painter.translate(-pixmap_rect_px.centerPx().rawPoint());
+
+                // Do we have a meta-data value and should we display it at this zoom?
+                if(controller_zoom >= m_metadata_displayed_zoom_minimum && metadata(m_metadata_displayed_key).isNull() == false)
+                {
+                    /// @todo calculate correct alignment for metadata displayed offset.
+
+                    // Draw the text next to the point with an offset.
+                    painter.drawText(pixmap_rect_px.rawRect().topRight() + PointPx(m_metadata_displayed_alignment_offset_px, -m_metadata_displayed_alignment_offset_px).rawPoint(), metadata(m_metadata_displayed_key).toString());
+                }
+            }
+        }
+    }
+
     const QSizeF GeometryPointShapeScaled::calculateGeometrySizePx(const int& controller_zoom) const
     {
         // Get the object size (default to base size).

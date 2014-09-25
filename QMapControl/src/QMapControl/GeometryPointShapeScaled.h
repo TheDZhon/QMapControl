@@ -135,6 +135,14 @@ namespace qmapcontrol
          */
         RectWorldCoord boundingBox(const int& controller_zoom) const final;
 
+        /*!
+         * Draws the geometry to a pixmap using the provided painter.
+         * @param painter The painter that will draw to the pixmap.
+         * @param backbuffer_rect_coord Only draw geometries that are contained in the backbuffer rect (world coordinates).
+         * @param controller_zoom The current controller zoom.
+         */
+        void draw(QPainter& painter, const RectWorldCoord& backbuffer_rect_coord, const int& controller_zoom);
+
     private:
         /*!
          * Calculates the shape size in pixels for the given controller zoom.
@@ -142,6 +150,15 @@ namespace qmapcontrol
          * @return the shape size in pixels.
          */
         const QSizeF calculateGeometrySizePx(const int& controller_zoom) const;
+
+    protected:
+        /*!
+         * \brief drawShape Draws the shape in a transformed painter according to zoom/translate/rotate status
+         * A derived class must implement this method
+         * \param painter
+         * \param rect The rect in pixel coordinates
+         */
+        virtual void drawShape(QPainter &painter, const RectWorldPx &rect) = 0;
 
     private:
         /// The base zoom level.
