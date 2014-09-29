@@ -119,7 +119,9 @@ namespace qmapcontrol
                 success = true;
 
                 // Log success.
+#ifdef QMAP_DEBUG
                 qDebug() << "Downloading image '" << url << "'";
+#endif
             }
         }
 
@@ -180,8 +182,10 @@ namespace qmapcontrol
         // Did the reply return no errors...
         if(reply->error() != QNetworkReply::NoError)
         {
+#ifdef QMAP_DEBUG
             // Log error.
             qDebug() << "Failed to download '" << reply->url() << "' with error '" << reply->errorString() << "'";
+#endif
         }
         else
         {
@@ -193,8 +197,10 @@ namespace qmapcontrol
                 continue_processing_image = m_downloading_image.contains(reply);
                 if(continue_processing_image)
                 {
+#ifdef QMAP_DEBUG
                     // Log success.
                     qDebug() << "Downloaded image '" << m_downloading_image[reply] << "'";
+#endif
 
                     // Remove it from the downloading image queue.
                     m_downloading_image.remove(reply);
