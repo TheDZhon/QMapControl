@@ -419,6 +419,8 @@ namespace qmapcontrol
         // Set the map focus point.
         m_map_focus_coord = point_coord;
 
+        emit mapFocusPointChanged(m_map_focus_coord);
+
         // Request the primary screen to be redrawn.
         redrawPrimaryScreen();
     }

@@ -620,6 +620,10 @@ namespace qmapcontrol
          */
         void updatedBackBuffer(QPixmap backbuffer_pixmap, RectWorldPx backbuffer_rect_px, PointWorldPx backbuffer_map_focus_px);
 
+        /**
+         * Signal emitted when the map foucus has changed
+         * */
+        void mapFocusPointChanged(PointWorldCoord);
     private:
         //! Disable copy constructor.
         QMapControl(const QMapControl&); /// @todo remove once MSVC supports default/delete syntax.
