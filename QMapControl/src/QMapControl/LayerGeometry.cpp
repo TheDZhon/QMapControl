@@ -101,6 +101,7 @@ namespace qmapcontrol
         // Check the geometry is valid.
         if(geometry != nullptr)
         {
+            geometry->mLayer = this;
             // Handle the different geometry types.
             switch(geometry->geometryType())
             {

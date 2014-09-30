@@ -43,6 +43,8 @@
 
 namespace qmapcontrol
 {
+    class LayerGeometry;
+
     //! Main class for objects that should be painted in maps.
     /*!
      * Geometry is the root class of the hierarchy. Geometry is an abstract (non-instantiable) class.
@@ -58,6 +60,8 @@ namespace qmapcontrol
      */
     class QMAPCONTROL_EXPORT Geometry : public QObject
     {
+        friend class LayerGeometry;
+
         Q_OBJECT
     public:
         //! Geometry types.
@@ -199,6 +203,7 @@ namespace qmapcontrol
          */
         PointWorldPx calculateTopLeftPoint(const PointWorldPx& point_px, const AlignmentType& alignment_type, const QSizeF& geometry_size_px) const;
 
+        LayerGeometry *layer() const { return mLayer; }
     public:
         /*!
          * Fetches the bounding box (world coordinates).
@@ -271,6 +276,8 @@ namespace qmapcontrol
         mutable std::map<std::string, QVariant> m_metadata;
 
     protected:
+        LayerGeometry *mLayer;
+
         /// The meta-data's key for the value to display.
         std::string m_metadata_displayed_key;
 
