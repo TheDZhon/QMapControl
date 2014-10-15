@@ -64,6 +64,8 @@ namespace qmapcontrol
 
         Q_OBJECT
     public:
+        class AncillaryData {};
+
         //! Geometry types.
         enum class GeometryType
         {
@@ -205,8 +207,8 @@ namespace qmapcontrol
 
         LayerGeometry *layer() const { return mLayer; }
 
-        void *ancillaryData() const { return mAncillaryData; }
-        void setAncillaryData(void *ptr) {
+        AncillaryData *ancillaryData() const { return mAncillaryData; }
+        void setAncillaryData(AncillaryData *ptr) {
             mAncillaryData = ptr;
         }
 
@@ -296,6 +298,6 @@ namespace qmapcontrol
         /// The offset that the meta-data value is displayed from in pixels.
         double m_metadata_displayed_alignment_offset_px;
 
-        void *mAncillaryData;
+        AncillaryData *mAncillaryData;
     };
 }
