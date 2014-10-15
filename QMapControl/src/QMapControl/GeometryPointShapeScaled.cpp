@@ -11,6 +11,7 @@ namespace qmapcontrol
     GeometryPointShapeScaled::GeometryPointShapeScaled(const qreal& longitude, const qreal& latitude, const QSizeF& base_size_px, const int& base_zoom, const int& zoom_minimum, const int& zoom_maximum)
         : GeometryPointShape(PointWorldCoord(longitude, latitude), base_size_px, zoom_minimum, zoom_maximum),
           m_base_zoom(base_zoom),
+          m_nonlinear_zoom(1.0),
           m_draw_minimum_px(-1.0, -1.0),
           m_draw_maximum_px(-1.0, -1.0)
     {
@@ -20,6 +21,7 @@ namespace qmapcontrol
     GeometryPointShapeScaled::GeometryPointShapeScaled(const PointWorldCoord& point_coord, const QSizeF& base_size_px, const int& base_zoom, const int& zoom_minimum, const int& zoom_maximum)
         : GeometryPointShape(point_coord, base_size_px, zoom_minimum, zoom_maximum),
           m_base_zoom(base_zoom),
+          m_nonlinear_zoom(1.0),
           m_draw_minimum_px(-1.0, -1.0),
           m_draw_maximum_px(-1.0, -1.0)
     {
@@ -39,6 +41,16 @@ namespace qmapcontrol
 
         // Update the shape.
         updateShape();
+    }
+
+    void GeometryPointShapeScaled::setNonlinearZoomFactor(double factor)
+    {
+        m_nonlinear_zoom = factor;
+    }
+
+    double GeometryPointShapeScaled::getNonlinearZoomFactor() const
+    {
+        return m_nonlinear_zoom;
     }
 
     const QSizeF& GeometryPointShapeScaled::drawMinimumPx() const
@@ -102,7 +114,7 @@ namespace qmapcontrol
                 const RectWorldPx pixmap_rect_px(projection::get().toPointWorldPx(pixmap_rect_coord.topLeftCoord(), controller_zoom), projection::get().toPointWorldPx(pixmap_rect_coord.bottomRightCoord(), controller_zoom));
 
 
-                qreal scale = pow(2.0, controller_zoom - baseZoom());
+                qreal scale = pow(2.0, m_nonlinear_zoom * (controller_zoom - baseZoom()));
 
                 // Translate to center point with required rotation.
                 painter.translate(pixmap_rect_px.centerPx().rawPoint());

@@ -102,6 +102,23 @@ namespace qmapcontrol
         void setBaseZoom(const int& base_zoom = -1);
 
         /*!
+         * \brief setNonlinearZoomFactor Sets a nonlinear zoom factor for the shape
+         *
+         * Normally, and by default, this factor is set to 1.0, so zooming in one steps doubles the size of the shape.
+         * User can control this, for example, to prevent zooming out to make shape disappear too fast.
+         * Use factor < 1.0 to rescale slower than zoom, > 1.0 to rescale faster.
+         * \param factor
+         */
+        void setNonlinearZoomFactor (double factor);
+
+        /*!
+         * \brief getNonlinearZoomFactor Returns the current nonlinear zoom factor of the shape.
+         * \seealso setNonlinearZoomFactor
+         * \return
+         */
+        double getNonlinearZoomFactor () const;
+
+        /*!
          * Fetches the draw minimum size (pixels).
          * @return the draw minimum size (pixels).
          */
@@ -163,6 +180,9 @@ namespace qmapcontrol
     private:
         /// The base zoom level.
         int m_base_zoom;
+
+        /// A nonlinear zoom factor to control shape scaling across zoom factors
+        double m_nonlinear_zoom;
 
         /// The minimum size a shape can be drawn in pixels.
         QSizeF m_draw_minimum_px;
