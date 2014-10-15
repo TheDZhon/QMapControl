@@ -35,7 +35,8 @@ namespace qmapcontrol
           m_metadata_displayed_key(""),
           m_metadata_displayed_zoom_minimum(10),
           m_metadata_displayed_alignment_type(AlignmentType::TopRight),
-          m_metadata_displayed_alignment_offset_px(5.0)
+          m_metadata_displayed_alignment_offset_px(5.0),
+          mAncillaryData(0)
     {
 
     }

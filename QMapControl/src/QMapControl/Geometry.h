@@ -204,6 +204,12 @@ namespace qmapcontrol
         PointWorldPx calculateTopLeftPoint(const PointWorldPx& point_px, const AlignmentType& alignment_type, const QSizeF& geometry_size_px) const;
 
         LayerGeometry *layer() const { return mLayer; }
+
+        void *ancillaryData() const { return mAncillaryData; }
+        void setAncillaryData(void *ptr) {
+            mAncillaryData = ptr;
+        }
+
     public:
         /*!
          * Fetches the bounding box (world coordinates).
@@ -289,5 +295,7 @@ namespace qmapcontrol
 
         /// The offset that the meta-data value is displayed from in pixels.
         double m_metadata_displayed_alignment_offset_px;
+
+        void *mAncillaryData;
     };
 }
