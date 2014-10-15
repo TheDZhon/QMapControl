@@ -41,6 +41,8 @@
 #include "LayerGeometry.h"
 #include "Projection.h"
 
+#include <QDebug>
+
 namespace qmapcontrol
 {
     QMapControl::QMapControl(QWidget* parent, Qt::WindowFlags window_flags)
@@ -606,8 +608,13 @@ namespace qmapcontrol
             // Loop through each layer and pass the mouse event on.
             for(const auto& layer : getLayers())
             {
+                bool handled;
                 // Send the mouse press event to the layer.
-                layer->mousePressEvent(mouse_event, toPointWorldCoord(m_mouse_position_current_px), m_current_zoom);
+                handled = layer->mousePressEvent(mouse_event, toPointWorldCoord(m_mouse_position_current_px), m_current_zoom);
+
+                if (handled) {
+                    break;
+                }
             }
         }
 

@@ -284,7 +284,7 @@ namespace qmapcontrol
         m_geometry_widgets.clear();
     }
 
-    void LayerGeometry::mousePressEvent(const QMouseEvent* mouse_event, const PointWorldCoord& mouse_point_coord, const int& controller_zoom) const
+    bool LayerGeometry::mousePressEvent(const QMouseEvent* mouse_event, const PointWorldCoord& mouse_point_coord, const int& controller_zoom) const
     {
         // Are mouse events enabled, is the layer visible and is it a mouse press event?
         if(isMouseEventsEnabled() && isVisible(controller_zoom) && mouse_event->type() == QEvent::MouseButtonPress)
@@ -315,10 +315,13 @@ namespace qmapcontrol
                     {
                         // Emit that the geometry has been clicked.
                         emit geometryClicked(geometry.get());
+                        return true;
                     }
                 }
             }
         }
+
+        return false;
     }
 
     void LayerGeometry::draw(QPainter& painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const

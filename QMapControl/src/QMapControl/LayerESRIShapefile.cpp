@@ -114,9 +114,10 @@ namespace qmapcontrol
         }
     }
 
-    void LayerESRIShapefile::mousePressEvent(const QMouseEvent* /*mouse_event*/, const PointWorldCoord& /*mouse_point_coord*/, const int& /*controller_zoom*/) const
+    bool LayerESRIShapefile::mousePressEvent(const QMouseEvent* /*mouse_event*/, const PointWorldCoord& /*mouse_point_coord*/, const int& /*controller_zoom*/) const
     {
-        // Do nothing.
+        // Do Nothing...
+        return false;
     }
 
     void LayerESRIShapefile::draw(QPainter& painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const
