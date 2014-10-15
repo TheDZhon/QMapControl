@@ -606,15 +606,16 @@ namespace qmapcontrol
         if(m_layer_mouse_events_enabled)
         {
             // Loop through each layer and pass the mouse event on.
-            for(const auto& layer : getLayers())
-            {
+            std::vector<std::shared_ptr<Layer> >::const_reverse_iterator rit = getLayers().rbegin();
+            while (rit != getLayers().rend()) {
                 bool handled;
                 // Send the mouse press event to the layer.
-                handled = layer->mousePressEvent(mouse_event, toPointWorldCoord(m_mouse_position_current_px), m_current_zoom);
+                handled = (*rit)->mousePressEvent(mouse_event, toPointWorldCoord(m_mouse_position_current_px), m_current_zoom);
 
                 if (handled) {
                     break;
                 }
+                ++rit;
             }
         }
 
