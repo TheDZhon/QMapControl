@@ -168,6 +168,8 @@ namespace qmapcontrol
                 }
             }
 
+            geometry->onAddedToLayer(this);
+
             // Should we redraw?
             if(disable_redraw == false)
             {
@@ -264,6 +266,8 @@ namespace qmapcontrol
                     break;
                 }
             }
+
+            geometry->onRemovedFromLayer();
 
             // Should we redraw?
             if(disable_redraw == false)

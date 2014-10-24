@@ -212,6 +212,19 @@ namespace qmapcontrol
             mAncillaryData = ptr;
         }
 
+        /* "Callback" functions */
+
+        /// @brief Callback function when a geometry is added in a LayerGeometry.
+        ///
+        /// Classes can use this callback function to record a layer pointer, for example
+        /// @arg layer pointer to a layer "owning" the geometry.
+        void onAddedToLayer(LayerGeometry *layer) { Q_UNUSED(layer); }
+
+        /// @brief Callback function when a geometry is removed from the owning LayerGeometry.
+        ///
+        /// Classes can use this callback function to record a layer pointer, for example
+        void onRemovedFromLayer() {}
+
     public:
         /*!
          * Fetches the bounding box (world coordinates).
