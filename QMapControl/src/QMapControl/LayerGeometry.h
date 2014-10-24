@@ -135,6 +135,9 @@ namespace qmapcontrol
          */
         void moveGeometryWidgets(const PointPx& offset_px, const int& controller_zoom) const;
 
+        qreal getFuzzyFactorPx() const;
+        void setFuzzyFactorPx(const qreal &value);
+
     signals:
         /*!
          * Signal emitted when a geometry is clicked.
@@ -154,5 +157,7 @@ namespace qmapcontrol
 
         /// Mutex to protect geometry widgets.
         mutable QReadWriteLock m_geometry_widgets_mutex;
+
+        qreal mFuzzyFactorPx;
     };
 }
