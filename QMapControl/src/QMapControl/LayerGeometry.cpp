@@ -236,7 +236,7 @@ namespace qmapcontrol
                     QObject::disconnect(geometry.get(), 0, this, 0);
 
                     // Loop through each GeometryLineString point and remove it to the container.
-                    for(const auto point : std::static_pointer_cast<GeometryLineString>(geometry)->points())
+                    for(const auto point : std::static_pointer_cast<GeometryLineString>(geometry)->quadtree_points())
                     {
                         // Remove the geometry.
                         m_geometries.erase(point, geometry);
