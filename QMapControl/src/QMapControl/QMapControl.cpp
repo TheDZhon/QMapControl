@@ -1473,12 +1473,17 @@ namespace qmapcontrol
             // Translate to the backbuffer top/left point.
             painter_back_buffer.translate(-backbuffer_rect_px.topLeftPx().rawPoint());
 
+            // Gain a read lock to protect the layers container.
+            QReadLocker read_locker(&m_layers_mutex);
+
             // Loop through each layer and draw it to the backbuffer.
-            for(const auto& layer : getLayers())
+            for(std::shared_ptr<Layer> layer : m_layers)
             {
                 // Draw the layer to the backbuffer.
                 layer->draw(painter_back_buffer, backbuffer_rect_px, m_current_zoom);
             }
+
+            read_locker.unlock();
 
             // Undo the backbuffer top/left point translation.
             painter_back_buffer.translate(backbuffer_rect_px.topLeftPx().rawPoint());
