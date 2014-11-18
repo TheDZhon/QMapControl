@@ -104,6 +104,10 @@ namespace qmapcontrol
          */
         void draw(QPainter& painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const final;
 
+
+        int getShapefileCount() const { return m_esri_shapefiles.size(); }
+        std::shared_ptr<ESRIShapefile> getShapefile(int idx) const;
+
     private:
         /// List of ESRI Shapefiles draw by this layer.
         std::vector<std::shared_ptr<ESRIShapefile>> m_esri_shapefiles;

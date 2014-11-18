@@ -142,4 +142,10 @@ namespace qmapcontrol
             }
         }
     }
+
+    std::shared_ptr<ESRIShapefile> LayerESRIShapefile::getShapefile(int idx) const
+    {
+        QReadLocker lock(&m_esri_shapefiles_mutex);
+        return m_esri_shapefiles[idx];
+    }
 }
