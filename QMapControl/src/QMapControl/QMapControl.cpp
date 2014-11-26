@@ -463,7 +463,7 @@ namespace qmapcontrol
     void QMapControl::setMapFocusPointAnimated(const PointWorldCoord& coordinate, const int& steps, const std::chrono::milliseconds& step_interval)
     {
         // Is animation already taking place?
-        if(m_animated_mutex.try_lock())
+        if(m_animated_mutex.tryLock())
         {
             // Set the new map focus point to scroll to.
             m_animated_map_focus_point = coordinate;
@@ -1442,10 +1442,10 @@ namespace qmapcontrol
     void QMapControl::redrawBackbuffer()
     {
         // Get access to the backbuffer's queue mutex.
-        if(m_backbuffer_queued_mutex.try_lock())
+        if(m_backbuffer_queued_mutex.tryLock())
         {
             // Get access to the backbuffer mutex.
-            std::lock_guard<std::mutex> locker(m_backbuffer_mutex);
+            QMutexLocker locker(&m_backbuffer_mutex);
 
             // Release the backbuffer queue mutex, so someone else can wait while we redraw.
             m_backbuffer_queued_mutex.unlock();

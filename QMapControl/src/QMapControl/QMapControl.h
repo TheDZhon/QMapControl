@@ -38,10 +38,10 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
+#include <QMutex>
 
 // STL includes.
 #include <chrono>
-#include <mutex>
 
 // Local includes.
 #include "qmapcontrol_global.h"
@@ -662,7 +662,7 @@ namespace qmapcontrol
         PointWorldCoord m_map_focus_coord;
 
         /// Mutex to protect the animation loop.
-        std::mutex m_animated_mutex;
+        QMutex m_animated_mutex;
 
         /// Animation map focus point target.
         PointWorldCoord m_animated_map_focus_point;
@@ -737,10 +737,10 @@ namespace qmapcontrol
         QPushButton m_zoom_control_button_out;
 
         /// Mutex to protect the backbuffer during the redraw process.
-        std::mutex m_backbuffer_mutex;
+        QMutex m_backbuffer_mutex;
 
         /// Mutex to only allow only one other thread to wait for the redraw process.
-        std::mutex m_backbuffer_queued_mutex;
+        QMutex m_backbuffer_queued_mutex;
 
         /// Progress indicator to alert user to redrawing progress.
         QProgressIndicator m_progress_indicator;
