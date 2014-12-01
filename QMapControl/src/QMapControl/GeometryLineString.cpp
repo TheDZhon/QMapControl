@@ -34,7 +34,12 @@ namespace qmapcontrol
         : Geometry(Geometry::GeometryType::GeometryLineString, zoom_minimum, zoom_maximum),
           m_points(points)
     {
+    }
 
+    GeometryLineString::GeometryLineString(int zoom_min, int zoom_max)
+        : Geometry(Geometry::GeometryType::GeometryLineString, zoom_min, zoom_max),
+          m_points()
+    {
     }
 
     std::vector<PointWorldCoord> GeometryLineString::points() const
