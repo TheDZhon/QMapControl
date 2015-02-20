@@ -12,12 +12,12 @@ TEMPLATE = app
 
 # Add header files.
 HEADERS +=                      \
-    src/LinesAndPoints.h        \
+    src/linesandpoints.h        \
 
 # Add source files.
 SOURCES +=                      \
     src/main.cpp                \
-    src/LinesAndPoints.cpp      \
+    src/linesandpoints.cpp      \
 
 # Add resource files.
 RESOURCES +=                    \
