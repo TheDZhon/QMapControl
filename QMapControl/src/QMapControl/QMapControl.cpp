@@ -1148,7 +1148,7 @@ namespace qmapcontrol
     void QMapControl::checkZoom()
     {
         // Quick check to ensure min <= max.
-        if(m_zoom_maximum > m_zoom_minimum)
+        if(m_zoom_maximum < m_zoom_minimum)
         {
             // Swap the zooms.
             std::swap(m_zoom_minimum, m_zoom_maximum);
