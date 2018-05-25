@@ -50,12 +50,16 @@ namespace qmapcontrol
         // Convert the enum to a 1-character representation.
         switch (layer_type)
         {
-            case GoogleLayerType::SATELLITE:
+            case GoogleLayerType::SATELLITE_ONLY:
                 return "s";
-            case GoogleLayerType::TERRAIN:
+            case GoogleLayerType::TERRAIN_ONLY:
                 return "t";
-            case GoogleLayerType::HYBRID:
+            case GoogleLayerType::TERRAIN:
+                return "p";
+            case GoogleLayerType::ROADS_ONLY:
                 return "h";
+            case GoogleLayerType::HYBRID:
+                return "y";
             case GoogleLayerType::RASTER:
                 return "r";
             case GoogleLayerType::MAPS:

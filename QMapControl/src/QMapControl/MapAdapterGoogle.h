@@ -45,13 +45,16 @@ namespace qmapcontrol
         /// Different Google layer types available.
         enum class GoogleLayerType
         {
-            /// Map layer.
+            /// Map layer (standard roadmap).
             MAPS,
             /// Satelite layer.
-            SATELLITE,
+            SATELLITE_ONLY,
             /// Terrain layer.
+            TERRAIN_ONLY,
             TERRAIN,
-            /// Hypnrid layer.
+            // Roads layer
+            ROADS_ONLY,
+            /// Hybrid layer.
             HYBRID,
             /// Ratser layer.
             RASTER
