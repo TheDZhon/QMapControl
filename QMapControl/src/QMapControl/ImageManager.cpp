@@ -27,6 +27,7 @@
 
 // Qt includes.
 #include <QtCore/QCryptographicHash>
+#include <QtCore/QDateTime>
 #include <QtGui/QPainter>
 
 // Local includes.
