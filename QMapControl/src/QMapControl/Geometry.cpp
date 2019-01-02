@@ -31,6 +31,7 @@ namespace qmapcontrol
         : m_geometry_type(geometry_type),
           m_zoom_minimum(zoom_minimum),
           m_zoom_maximum(zoom_maximum),
+          m_z_index(0),
           m_visible(true),
           m_metadata_displayed_key(""),
           m_metadata_displayed_zoom_minimum(10),
@@ -40,6 +41,10 @@ namespace qmapcontrol
     {
 
     }
+
+    int Geometry::zIndex() const { return m_z_index; }
+
+    void Geometry::setZIndex(int z_index) { m_z_index = z_index; }
 
     const Geometry::GeometryType& Geometry::geometryType() const
     {

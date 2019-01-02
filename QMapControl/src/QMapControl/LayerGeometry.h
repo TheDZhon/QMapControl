@@ -77,7 +77,7 @@ namespace qmapcontrol
          * @param range_coord The bounding box range to limit the geometries that are fetched in coordinates.
          * @return a list of geometries that are on this Layer within the bounding box range.
          */
-        const std::set<std::shared_ptr<Geometry>> getGeometries(const RectWorldCoord& range_coord) const;
+        const std::vector<std::shared_ptr<Geometry>>
 
         /*!
          * Returns the Geometry QWidgets from this Layer (Use this instead of the member variable for thread-safety).

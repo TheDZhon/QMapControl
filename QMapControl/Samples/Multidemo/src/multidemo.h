@@ -4,6 +4,7 @@
 #include <QtWidgets/QPushButton>
 
 // QMapControl includes.
+#include <QMapControl/GeometryLineString.h>
 #include <QMapControl/QMapControl.h>
 #include <QMapControl/GeometryPointImage.h>
 
@@ -54,6 +55,7 @@ private:
     void resizeEvent(QResizeEvent* event);
 
 private slots:
+    void positionChanged(const PointWorldCoord& point);
     /*!
      * Toggle whether to add points
      * @param enable Whether to add points.
@@ -118,6 +120,7 @@ private slots:
     void mini_mouseEventPressCoordinate(QMouseEvent* mouse_event, PointWorldCoord press_coordinate);
 
 private:
+    std::shared_ptr<GeometryLineString> m_line_string;
     /// The main map control.
     QMapControl* m_map_control;
 

@@ -119,6 +119,18 @@ namespace qmapcontrol
         virtual ~Geometry() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
 
         /*!
+         * Fetches the zindex of the geometry
+         * \return z-index of the geomety
+         */
+        int zIndex() const;
+
+        /*!
+         * Set the ZIndex of this geometry
+         * \param z_index
+         */
+        void setZIndex(int z_index);
+
+        /*!
          * Fetches the geometry type.
          * @return the geometry type.
          */
@@ -283,6 +295,9 @@ namespace qmapcontrol
 
         /// Maximum zoom level to show this geometry.
         int m_zoom_maximum;
+
+        /// z-index for rendering order
+        int m_z_index;
 
         /// Whether the geometry is visible.
         bool m_visible;

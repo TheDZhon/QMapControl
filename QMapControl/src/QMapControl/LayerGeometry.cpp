@@ -31,6 +31,7 @@
 #include "GeometryPolygon.h"
 #include "Projection.h"
 
+#include <algorithm>
 namespace qmapcontrol
 {
     LayerGeometry::LayerGeometry(const std::string& name, const int& zoom_minimum, const int& zoom_maximum, QObject* parent)
@@ -41,17 +42,22 @@ namespace qmapcontrol
 
     }
 
-    const std::set< std::shared_ptr<Geometry> > LayerGeometry::getGeometries(const RectWorldCoord& range_coord) const
+    const std::vector<std::shared_ptr<Geometry>>
     {
         // Gain a read lock to protect the geometries container.
         QReadLocker locker(&m_geometries_mutex);
 
         // The geometries container to return.
-        std::set< std::shared_ptr<Geometry> > return_geometries;
+        std::vector<std::shared_ptr<Geometry>> return_geometries;
 
         // Populate the geometries container.
         m_geometries.query(return_geometries, range_coord);
 
+        // Sort by z-index
+        std::sort(return_geometries.begin(), return_geometries.end(),
+                  [](std::shared_ptr<Geometry> a, std::shared_ptr<Geometry> b) {
+                      return a->zIndex() < b->zIndex();
+                  });
         // Return the list of geometries.
         return return_geometries;
     }

@@ -75,7 +75,7 @@ namespace qmapcontrol
          * @param return_points The objects that are within the specified range are added to this.
          * @param range_coord The bounding box range.
          */
-        void query(std::set<T>& return_points, const RectWorldCoord& range_coord) const
+        void query(std::vector<T>& return_points, const RectWorldCoord& range_coord) const
         {
             // Does the range intersect with our boundary.
             if(range_coord.rawRect().intersects(m_boundary_coord.rawRect()))
@@ -87,7 +87,7 @@ namespace qmapcontrol
                     if(range_coord.rawRect().contains(point.first.rawPoint()))
                     {
                         // Add to the return points.
-                        return_points.insert(point.second);
+                        return_points.push_back(point.second);
                     }
                 }
 
