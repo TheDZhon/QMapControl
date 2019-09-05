@@ -42,7 +42,7 @@ namespace qmapcontrol
 
     }
 
-    const std::vector<std::shared_ptr<Geometry>>
+    const std::vector<std::shared_ptr<Geometry>> LayerGeometry::getGeometries(const RectWorldCoord& range_coord) const
     {
         // Gain a read lock to protect the geometries container.
         QReadLocker locker(&m_geometries_mutex);
@@ -62,7 +62,7 @@ namespace qmapcontrol
         return return_geometries;
     }
 
-    const std::set< std::shared_ptr<GeometryWidget> > LayerGeometry::getGeometryWidgets() const
+    const std::set<std::shared_ptr<GeometryWidget>> LayerGeometry::getGeometryWidgets() const
     {
         // Gain a read lock to protect the geometry widgets container.
         QReadLocker locker(&m_geometry_widgets_mutex);
@@ -242,7 +242,7 @@ namespace qmapcontrol
                     QObject::disconnect(geometry.get(), 0, this, 0);
 
                     // Loop through each GeometryLineString point and remove it to the container.
-                    for(const auto point : std::static_pointer_cast<GeometryLineString>(geometry)->quadtree_points())
+                    for(const auto point : std::static_pointer_cast<GeometryLineString>(geometry)->points())
                     {
                         // Remove the geometry.
                         m_geometries.erase(point, geometry);
