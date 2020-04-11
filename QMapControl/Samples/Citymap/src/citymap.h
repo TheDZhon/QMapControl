@@ -71,6 +71,8 @@ private:
      */
     void createMenus();
 
+    void resizeEvent(QResizeEvent * resize_event);
+
 private slots:
     /*!
      * Slot called when a geometry is clicked.
@@ -187,6 +189,12 @@ private:
 
     /// Menu action to toggle OSM maps.
     QAction* m_action_osm;
+
+    /// Menu action to toggle OpenTopoMap.
+    QAction* m_action_otm;
+
+    /// Menu action to toggle Bing Maps.
+    QAction* m_action_bing;
 
     /// Menu action to toggle Yahoo maps.
     QAction* m_action_yahoo_map;

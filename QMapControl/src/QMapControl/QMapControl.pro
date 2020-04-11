@@ -42,7 +42,9 @@ HEADERS +=                                      \
     LayerMapAdapter.h                           \
     MapAdapter.h                                \
     MapAdapterGoogle.h                          \
+    MapAdapterBing.h                            \
     MapAdapterOSM.h                             \
+    MapAdapterOTM.h                             \
     MapAdapterTile.h                            \
     MapAdapterWMS.h                             \
     MapAdapterYahoo.h                           \
@@ -77,7 +79,9 @@ SOURCES +=                                      \
     LayerMapAdapter.cpp                         \
     MapAdapter.cpp                              \
     MapAdapterGoogle.cpp                        \
+    MapAdapterBing.cpp                          \
     MapAdapterOSM.cpp                           \
+    MapAdapterOTM.cpp                           \
     MapAdapterTile.cpp                          \
     MapAdapterWMS.cpp                           \
     MapAdapterYahoo.cpp                         \

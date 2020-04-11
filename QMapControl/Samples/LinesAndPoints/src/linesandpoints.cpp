@@ -119,3 +119,9 @@ void LinesAndPoints::geometryClickEvent(const Geometry* geometry)
         QMessageBox::information(this, geometry->metadata("name").toString(), "");
     }
 }
+
+void LinesAndPoints::resizeEvent(QResizeEvent * resize_event)
+{
+    // Set the new viewport size.
+    m_map_control->setViewportSize(resize_event->size());
+}
