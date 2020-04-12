@@ -39,6 +39,7 @@ public slots:
      * @param geometry The clicked Geometry.
      */
     void geometryClickEvent(const Geometry* geometry);
+    void resizeEvent(QResizeEvent* resize_event);
 
 private:
     /// The main map control.

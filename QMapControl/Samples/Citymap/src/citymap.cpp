@@ -14,6 +14,8 @@
 #include <QMapControl/MapAdapterOSM.h>
 #include <QMapControl/MapAdapterYahoo.h>
 #include <QMapControl/MapAdapterGoogle.h>
+#include <QMapControl/MapAdapterOTM.h>
+#include <QMapControl/MapAdapterBing.h>
 
 /*!
  * This demo application shows more features of the QMapControl.
@@ -312,12 +314,16 @@ void Citymap::createActions()
     QActionGroup* map_provider_group = new QActionGroup(this);
     m_action_google_map = new QAction(tr("Google: Map"), map_provider_group);
     m_action_osm = new QAction(tr("OpenStreetMap"), map_provider_group);
+    m_action_otm = new QAction(tr("OpenTopoMap"), map_provider_group);
+    m_action_bing = new QAction(tr("Bing maps"), map_provider_group);
     m_action_yahoo_map = new QAction(tr("Yahoo: Map"), map_provider_group);
     m_action_yahoo_satellite = new QAction(tr("Yahoo: Satellite"), map_provider_group);
 
     // Ensure the map provider actions are checkable.
     m_action_google_map->setCheckable(true);
     m_action_osm->setCheckable(true);
+    m_action_otm->setCheckable(true);
+    m_action_bing->setCheckable(true);
     m_action_yahoo_map->setCheckable(true);
     m_action_yahoo_satellite->setCheckable(true);
 
@@ -359,6 +365,8 @@ void Citymap::createMenus()
     QMenu* menu_map = menuBar()->addMenu(tr("Map Provider"));
     menu_map->addAction(m_action_google_map);
     menu_map->addAction(m_action_osm);
+    menu_map->addAction(m_action_otm);
+    menu_map->addAction(m_action_bing);
     menu_map->addAction(m_action_yahoo_map);
     menu_map->addAction(m_action_yahoo_satellite);
     menu_map->addSeparator();
@@ -535,6 +543,18 @@ void Citymap::mapProviderSelected(QAction* action)
         // Set the map adapter to OSM.
         map_layer->setMapAdapter(std::make_shared<MapAdapterOSM>());
     }
+    // Set the map to OTM.
+    else if(action == m_action_otm)
+    {
+        // Set the map adapter to OSM.
+        map_layer->setMapAdapter(std::make_shared<MapAdapterOTM>());
+    }
+    // Set the map to OTM.
+    else if(action == m_action_bing)
+    {
+        // Set the map adapter to OSM.
+        map_layer->setMapAdapter(std::make_shared<MapAdapterBing>());
+    }
     // Set the map to Yahoo 'map'.
     else if(action == m_action_yahoo_map)
     {
@@ -553,4 +573,10 @@ void Citymap::mapProviderSelected(QAction* action)
 
     // Add the replacement map layer.
     m_map_control->addLayer(map_layer, 0);
+}
+
+void Citymap::resizeEvent(QResizeEvent * resize_event)
+{
+    // Set the new viewport size.
+    m_map_control->setViewportSize(resize_event->size());
 }
