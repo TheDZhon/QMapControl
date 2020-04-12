@@ -62,7 +62,9 @@ namespace qmapcontrol
          * @param zoom_minimum The minimum zoom level to show this ESRI Shapefile at.
          * @param zoom_maximum The maximum zoom level to show this ESRI Shapefile at.
          */
-        ESRIShapefile(const std::string& file_path, const std::string& layer_name, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        explicit ESRIShapefile(const std::string& file_path, const std::string& layer_name, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+
+        explicit ESRIShapefile(OGRDataSource *datasource, const std::string& layer_name, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
 
         //! Destructor.
         virtual ~ESRIShapefile();

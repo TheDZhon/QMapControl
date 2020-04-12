@@ -41,6 +41,8 @@
 #include "LayerGeometry.h"
 #include "Projection.h"
 
+#include <QDebug>
+
 namespace qmapcontrol
 {
     QMapControl::QMapControl(QWidget* parent, Qt::WindowFlags window_flags)
@@ -185,7 +187,7 @@ namespace qmapcontrol
     }
 
     // Layer management.
-    const std::vector<std::shared_ptr<Layer> > QMapControl::getLayers() const
+    const std::vector<std::shared_ptr<Layer> > &QMapControl::getLayers() const
     {
         // Gain a read lock to protect the layers container.
         QReadLocker locker(&m_layers_mutex);
@@ -419,6 +421,8 @@ namespace qmapcontrol
         // Set the map focus point.
         m_map_focus_coord = point_coord;
 
+        emit mapFocusPointChanged(m_map_focus_coord);
+
         // Request the primary screen to be redrawn.
         redrawPrimaryScreen();
     }
@@ -459,7 +463,7 @@ namespace qmapcontrol
     void QMapControl::setMapFocusPointAnimated(const PointWorldCoord& coordinate, const int& steps, const std::chrono::milliseconds& step_interval)
     {
         // Is animation already taking place?
-        if(m_animated_mutex.try_lock())
+        if(m_animated_mutex.tryLock())
         {
             // Set the new map focus point to scroll to.
             m_animated_map_focus_point = coordinate;
@@ -602,10 +606,16 @@ namespace qmapcontrol
         if(m_layer_mouse_events_enabled)
         {
             // Loop through each layer and pass the mouse event on.
-            for(const auto& layer : getLayers())
-            {
+            std::vector<std::shared_ptr<Layer> >::const_reverse_iterator rit = getLayers().rbegin();
+            while (rit != getLayers().rend()) {
+                bool handled;
                 // Send the mouse press event to the layer.
-                layer->mousePressEvent(mouse_event, toPointWorldCoord(m_mouse_position_current_px), m_current_zoom);
+                handled = (*rit)->mousePressEvent(mouse_event, toPointWorldCoord(m_mouse_position_current_px), m_current_zoom);
+
+                if (handled) {
+                    break;
+                }
+                ++rit;
             }
         }
 
@@ -1432,10 +1442,10 @@ namespace qmapcontrol
     void QMapControl::redrawBackbuffer()
     {
         // Get access to the backbuffer's queue mutex.
-        if(m_backbuffer_queued_mutex.try_lock())
+        if(m_backbuffer_queued_mutex.tryLock())
         {
             // Get access to the backbuffer mutex.
-            std::lock_guard<std::mutex> locker(m_backbuffer_mutex);
+            QMutexLocker locker(&m_backbuffer_mutex);
 
             // Release the backbuffer queue mutex, so someone else can wait while we redraw.
             m_backbuffer_queued_mutex.unlock();
@@ -1463,12 +1473,17 @@ namespace qmapcontrol
             // Translate to the backbuffer top/left point.
             painter_back_buffer.translate(-backbuffer_rect_px.topLeftPx().rawPoint());
 
+            // Gain a read lock to protect the layers container.
+            QReadLocker read_locker(&m_layers_mutex);
+
             // Loop through each layer and draw it to the backbuffer.
-            for(const auto& layer : getLayers())
+            for(std::shared_ptr<Layer> layer : m_layers)
             {
                 // Draw the layer to the backbuffer.
                 layer->draw(painter_back_buffer, backbuffer_rect_px, m_current_zoom);
             }
+
+            read_locker.unlock();
 
             // Undo the backbuffer top/left point translation.
             painter_back_buffer.translate(backbuffer_rect_px.topLeftPx().rawPoint());

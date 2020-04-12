@@ -31,14 +31,20 @@ namespace qmapcontrol
         : m_geometry_type(geometry_type),
           m_zoom_minimum(zoom_minimum),
           m_zoom_maximum(zoom_maximum),
+          m_z_index(0),
           m_visible(true),
           m_metadata_displayed_key(""),
           m_metadata_displayed_zoom_minimum(10),
           m_metadata_displayed_alignment_type(AlignmentType::TopRight),
-          m_metadata_displayed_alignment_offset_px(5.0)
+          m_metadata_displayed_alignment_offset_px(5.0),
+          mAncillaryData(0)
     {
 
     }
+
+    int Geometry::zIndex() const { return m_z_index; }
+
+    void Geometry::setZIndex(int z_index) { m_z_index = z_index; }
 
     const Geometry::GeometryType& Geometry::geometryType() const
     {

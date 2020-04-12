@@ -43,6 +43,8 @@
 
 namespace qmapcontrol
 {
+    class LayerGeometry;
+
     //! Main class for objects that should be painted in maps.
     /*!
      * Geometry is the root class of the hierarchy. Geometry is an abstract (non-instantiable) class.
@@ -58,8 +60,12 @@ namespace qmapcontrol
      */
     class QMAPCONTROL_EXPORT Geometry : public QObject
     {
+        friend class LayerGeometry;
+
         Q_OBJECT
     public:
+        class AncillaryData {};
+
         //! Geometry types.
         enum class GeometryType
         {
@@ -111,6 +117,18 @@ namespace qmapcontrol
 
         //! Destructor.
         virtual ~Geometry() { } /// = default; @todo re-add once MSVC supports default/delete syntax.
+
+        /*!
+         * Fetches the zindex of the geometry
+         * \return z-index of the geomety
+         */
+        int zIndex() const;
+
+        /*!
+         * Set the ZIndex of this geometry
+         * \param z_index
+         */
+        void setZIndex(int z_index);
 
         /*!
          * Fetches the geometry type.
@@ -199,6 +217,26 @@ namespace qmapcontrol
          */
         PointWorldPx calculateTopLeftPoint(const PointWorldPx& point_px, const AlignmentType& alignment_type, const QSizeF& geometry_size_px) const;
 
+        LayerGeometry *layer() const { return mLayer; }
+
+        AncillaryData *ancillaryData() const { return mAncillaryData; }
+        void setAncillaryData(AncillaryData *ptr) {
+            mAncillaryData = ptr;
+        }
+
+        /* "Callback" functions */
+
+        /// @brief Callback function when a geometry is added in a LayerGeometry.
+        ///
+        /// Classes can use this callback function to record a layer pointer, for example
+        /// @arg layer pointer to a layer "owning" the geometry.
+        void onAddedToLayer(LayerGeometry *layer) { Q_UNUSED(layer); }
+
+        /// @brief Callback function when a geometry is removed from the owning LayerGeometry.
+        ///
+        /// Classes can use this callback function to record a layer pointer, for example
+        void onRemovedFromLayer() {}
+
     public:
         /*!
          * Fetches the bounding box (world coordinates).
@@ -258,6 +296,9 @@ namespace qmapcontrol
         /// Maximum zoom level to show this geometry.
         int m_zoom_maximum;
 
+        /// z-index for rendering order
+        int m_z_index;
+
         /// Whether the geometry is visible.
         bool m_visible;
 
@@ -271,6 +312,8 @@ namespace qmapcontrol
         mutable std::map<std::string, QVariant> m_metadata;
 
     protected:
+        LayerGeometry *mLayer;
+
         /// The meta-data's key for the value to display.
         std::string m_metadata_displayed_key;
 
@@ -282,5 +325,7 @@ namespace qmapcontrol
 
         /// The offset that the meta-data value is displayed from in pixels.
         double m_metadata_displayed_alignment_offset_px;
+
+        AncillaryData *mAncillaryData;
     };
 }

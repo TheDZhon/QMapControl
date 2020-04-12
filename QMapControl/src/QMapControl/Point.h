@@ -44,6 +44,7 @@ namespace qmapcontrol
     class QMAPCONTROL_EXPORT PointWorldCoord
     {
     public:
+        PointWorldCoord() : m_raw_point() {}
         PointWorldCoord(const qreal& longitude, const qreal& latitude) : m_raw_point(longitude, latitude) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
         inline QPointF rawPoint() const { return m_raw_point; }
         inline qreal longitude() const { return m_raw_point.x(); }
@@ -167,4 +168,5 @@ namespace qmapcontrol
         RectViewportPx(const PointViewportPx& top_left, const PointViewportPx& bottom_right) : RectPx(top_left, bottom_right) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
         RectViewportPx(const PointViewportPx& top_left, const QSizeF& size) : RectPx(top_left, size) { } /// = default; @todo re-add once MSVC supports default/delete syntax.
     };
+
 }

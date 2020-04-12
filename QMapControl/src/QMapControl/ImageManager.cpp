@@ -26,7 +26,9 @@
 #include "ImageManager.h"
 
 // Qt includes.
+#include <QDateTime>
 #include <QtCore/QCryptographicHash>
+#include <QtCore/QDateTime>
 #include <QtGui/QPainter>
 
 // Local includes.
@@ -187,9 +189,16 @@ namespace qmapcontrol
         return getImage(url);
     }
 
+    void ImageManager::setLoadingPixmap(const QPixmap &pixmap)
+    {
+        m_pixmap_loading = pixmap;
+    }
+
     void ImageManager::imageDownloaded(const QUrl& url, const QPixmap& pixmap)
     {
+#ifdef QMAP_DEBUG
         qDebug() << "ImageManager::imageDownloaded '" << url << "'";
+#endif
 
         // Add it to the pixmap cache.
         m_pixmap_cache[md5hex(url)] = pixmap;
@@ -267,7 +276,9 @@ namespace qmapcontrol
                 m_persistent_cache_directory.remove(file.fileName());
 
                 // Log removing the file.
+#ifdef QMAP_DEBUG
                 qDebug() << "Removing '" << file.fileName() << "' from persistent cache for url '" << url << "'";
+#endif
             }
             else
             {

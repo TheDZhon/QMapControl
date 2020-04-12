@@ -28,6 +28,8 @@
 // Local includes.
 #include "Projection.h"
 
+#include <QDebug>
+
 namespace qmapcontrol
 {
     ESRIShapefile::ESRIShapefile(const std::string& file_path, const std::string& layer_name, const int& zoom_minimum, const int& zoom_maximum)
@@ -38,6 +40,11 @@ namespace qmapcontrol
 
         // Open the file.
         m_ogr_data_set = OGRSFDriverRegistrar::Open(file_path.c_str(), FALSE);
+    }
+
+    ESRIShapefile::ESRIShapefile(OGRDataSource *datasource, const std::string &layer_name, const int &zoom_minimum, const int &zoom_maximum)
+        : m_ogr_data_set(datasource), m_layer_name(layer_name), m_zoom_minimum(zoom_minimum), m_zoom_maximum(zoom_maximum)
+    {
     }
 
     ESRIShapefile::~ESRIShapefile()
@@ -241,6 +248,8 @@ namespace qmapcontrol
             }
             else
             {
+                QPainterPath path;
+
                 // Prepare storage for point.
                 OGRPoint ogr_point;
 
@@ -257,6 +266,21 @@ namespace qmapcontrol
                     polygon_px.append(projection::get().toPointWorldPx(PointWorldCoord(ogr_point.getX(), ogr_point.getY()), controller_zoom).rawPoint());
                 }
 
+                path.addPolygon(polygon_px);
+
+                QPainterPath inp;
+                for (int i = 0; i < ogr_polygon->getNumInteriorRings(); ++i) {
+                    auto inn = ogr_polygon->getInteriorRing(i);
+                    QPolygonF pf;
+                    for (int j = 0; j < inn->getNumPoints(); ++j) {
+                        inn->getPoint(j, &ogr_point);
+                        pf.append(projection::get().toPointWorldPx(PointWorldCoord(ogr_point.getX(), ogr_point.getY()), controller_zoom).rawPoint());
+                    }
+                    inp.addPolygon(pf);
+                }
+
+                path = path.subtracted(inp);
+
                 // Set the pen to use.
                 painter.setPen(getPenPolygon());
 
@@ -264,11 +288,12 @@ namespace qmapcontrol
                 painter.setBrush(getBrushPolygon());
 
                 // Draw the polygon line.
-                painter.drawPolygon(polygon_px);
+                painter.drawPath(path);
             }
         }
         else if(wkbFlatten(ogr_geometry->getGeometryType()) == wkbMultiPolygon)
         {
+            qDebug() << "MultiPoly";
             // Cast to a multi polygon.
             const auto ogr_multi_polygon(static_cast<OGRMultiPolygon*>(ogr_geometry));
             if(ogr_multi_polygon == nullptr)
@@ -277,6 +302,8 @@ namespace qmapcontrol
             }
             else
             {
+                QPainterPath path;
+
                 // Loop through each polygon.
                 for(int i = 0; i < ogr_multi_polygon->getNumGeometries(); ++i)
                 {
@@ -307,16 +334,33 @@ namespace qmapcontrol
                             polygon_px.append(projection::get().toPointWorldPx(PointWorldCoord(ogr_point.getX(), ogr_point.getY()), controller_zoom).rawPoint());
                         }
 
-                        // Set the pen to use.
-                        painter.setPen(getPenPolygon());
+                        path.addPolygon(polygon_px);
 
-                        // Set the brush to use.
-                        painter.setBrush(getBrushPolygon());
+                        QPainterPath inp;
+                        for (int i = 0; i < ogr_polygon->getNumInteriorRings(); ++i) {
+                            auto inn = ogr_polygon->getInteriorRing(i);
+                            QPolygonF pf;
+                            for (int j = 0; j < inn->getNumPoints(); ++j) {
+                                inn->getPoint(j, &ogr_point);
+                                pf.append(projection::get().toPointWorldPx(PointWorldCoord(ogr_point.getX(), ogr_point.getY()), controller_zoom).rawPoint());
+                            }
+                            inp.addPolygon(pf);
+                        }
 
-                        // Draw the polygon line.
-                        painter.drawPolygon(polygon_px);
+                        path = path.subtracted(inp);
+
                     }
                 }
+
+                // Set the pen to use.
+                painter.setPen(getPenPolygon());
+
+                // Set the brush to use.
+                painter.setBrush(getBrushPolygon());
+
+                // Draw the polygon line.
+                painter.drawPath(path);
+
             }
         }
         else if(wkbFlatten(ogr_geometry->getGeometryType()) == wkbLineString) // wkbLineString

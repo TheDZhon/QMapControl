@@ -38,9 +38,19 @@ namespace qmapcontrol
         }
     }
 
-    MapAdapterGoogle::MapAdapterGoogle(const MapAdapterGoogle::GoogleLayerType& layer_type, QObject* parent)
-        ///: MapAdapterTile("http://mt1.google.com/vt/v=ap.106&hl=en&x=%x&y=%y&zoom=%zoom&lyrs=" + layerTypeToString(layer_type), { projection::EPSG::SphericalMercator }, 17, 0, 0, false, parent) @todo re-add once MSVC supports initializer lists.
-        : MapAdapterTile("http://mt1.google.com/vt/v=ap.106&hl=en&x=%x&y=%y&zoom=%zoom&lyrs=" + layerTypeToString(layer_type), supportedProjections(), 17, 0, 0, false, parent) /// @todo remove once MSVC supports initializer lists.
+    MapAdapterGoogle::MapAdapterGoogle(const MapAdapterGoogle::GoogleLayerType& layer_type,
+                                       QObject* parent)
+        ///: MapAdapterTile("http://mt1.google.com/vt/v=ap.106&hl=en&x=%x&y=%y&zoom=%zoom&lyrs=" +
+        ///layerTypeToString(layer_type), { projection::EPSG::SphericalMercator }, 17, 0, 0, false,
+        ///parent) @todo re-add once MSVC supports initializer lists.
+        : MapAdapterTile("http://mt.google.com/vt/v=ap.106&hl=en&x=%x&y=%y&zoom=%zoom&lyrs="
+                             + layerTypeToString(layer_type),
+                         supportedProjections(),
+                         17,
+                         0,
+                         0,
+                         false,
+                         parent) /// @todo remove once MSVC supports initializer lists.
     {
 
     }
@@ -50,12 +60,16 @@ namespace qmapcontrol
         // Convert the enum to a 1-character representation.
         switch (layer_type)
         {
-            case GoogleLayerType::SATELLITE:
+            case GoogleLayerType::SATELLITE_ONLY:
                 return "s";
-            case GoogleLayerType::TERRAIN:
+            case GoogleLayerType::TERRAIN_ONLY:
                 return "t";
-            case GoogleLayerType::HYBRID:
+            case GoogleLayerType::TERRAIN:
+                return "p";
+            case GoogleLayerType::ROADS_ONLY:
                 return "h";
+            case GoogleLayerType::HYBRID:
+                return "y";
             case GoogleLayerType::RASTER:
                 return "r";
             case GoogleLayerType::MAPS:

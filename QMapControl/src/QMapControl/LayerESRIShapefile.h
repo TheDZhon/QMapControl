@@ -94,7 +94,7 @@ namespace qmapcontrol
          * @param mouse_point_coord The mouse point on the map in coord.
          * @param controller_zoom The current controller zoom.
          */
-        void mousePressEvent(const QMouseEvent* mouse_event, const PointWorldCoord& mouse_point_coord, const int& controller_zoom) const final;
+        bool mousePressEvent(const QMouseEvent* mouse_event, const PointWorldCoord& mouse_point_coord, const int& controller_zoom) const final;
 
         /*!
          * Draws each map adapter and geometry to a pixmap using the provided painter.
@@ -103,6 +103,10 @@ namespace qmapcontrol
          * @param controller_zoom The current controller zoom.
          */
         void draw(QPainter& painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const final;
+
+
+        int getShapefileCount() const { return m_esri_shapefiles.size(); }
+        std::shared_ptr<ESRIShapefile> getShapefile(int idx) const;
 
     private:
         /// List of ESRI Shapefiles draw by this layer.

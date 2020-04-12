@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "multidemo.h"
 
 // Qt includes.
@@ -40,6 +42,7 @@ Multidemo::Multidemo(QWidget* parent)
     // Create the GPS Modul and connect the appropriate signal/slot to update the associated GeometryPointImage position.
     m_gps_modul = new GPS_Modul();
     QObject::connect(m_gps_modul, &GPS_Modul::positionChanged, m_gps_point.get(), &GeometryPointImage::setCoord);
+    QObject::connect(m_gps_modul, &GPS_Modul::positionChanged, this, &Multidemo::positionChanged);
 }
 
 void Multidemo::setupMaps()
@@ -139,12 +142,14 @@ void Multidemo::setupMaps()
         // Also add the point to the custom layer.
         layer_geometries->addGeometry(point);
     }
-    std::shared_ptr<GeometryLineString> line_string(std::make_shared<GeometryLineString>(raw_points));
-    line_string->setPen(pen);
-    line_string->setMetadata("name", "Busline 54");
+
+    m_line_string = std::make_shared<GeometryLineString>(std::vector<PointWorldCoord>());
+    m_line_string->setPen(pen);
+    m_line_string->setMetadata("name", "Busline 54");
+    //    m_line_string->setPoints(raw_points);
 
     // Add the GeoemtryLineString to the Geometry layer.
-    layer_geometries->addGeometry(line_string);
+    layer_geometries->addGeometry(m_line_string);
 
 
     // Create a GPS GeometryPoint that can dynamically move, and add it to the geometry layer.
@@ -256,6 +261,13 @@ void Multidemo::resizeEvent(QResizeEvent* event)
 {
     // Set the new viewport size.
     m_map_control->setViewportSize(event->size());
+}
+
+void Multidemo::positionChanged(const PointWorldCoord& point)
+{
+    std::cout << "Position updated (" << point.latitude() << "," << point.longitude() << ")"
+              << std::endl;
+    m_line_string->addPoint(point);
 }
 
 void Multidemo::toggleAddPoint(bool enable)

@@ -102,6 +102,23 @@ namespace qmapcontrol
         void setBaseZoom(const int& base_zoom = -1);
 
         /*!
+         * \brief setNonlinearZoomFactor Sets a nonlinear zoom factor for the shape
+         *
+         * Normally, and by default, this factor is set to 1.0, so zooming in one steps doubles the size of the shape.
+         * User can control this, for example, to prevent zooming out to make shape disappear too fast.
+         * Use factor < 1.0 to rescale slower than zoom, > 1.0 to rescale faster.
+         * \param factor
+         */
+        void setNonlinearZoomFactor (double factor);
+
+        /*!
+         * \brief getNonlinearZoomFactor Returns the current nonlinear zoom factor of the shape.
+         * \seealso setNonlinearZoomFactor
+         * \return
+         */
+        double getNonlinearZoomFactor () const;
+
+        /*!
          * Fetches the draw minimum size (pixels).
          * @return the draw minimum size (pixels).
          */
@@ -135,6 +152,14 @@ namespace qmapcontrol
          */
         RectWorldCoord boundingBox(const int& controller_zoom) const final;
 
+        /*!
+         * Draws the geometry to a pixmap using the provided painter.
+         * @param painter The painter that will draw to the pixmap.
+         * @param backbuffer_rect_coord Only draw geometries that are contained in the backbuffer rect (world coordinates).
+         * @param controller_zoom The current controller zoom.
+         */
+        void draw(QPainter& painter, const RectWorldCoord& backbuffer_rect_coord, const int& controller_zoom);
+
     private:
         /*!
          * Calculates the shape size in pixels for the given controller zoom.
@@ -143,9 +168,21 @@ namespace qmapcontrol
          */
         const QSizeF calculateGeometrySizePx(const int& controller_zoom) const;
 
+    protected:
+        /*!
+         * \brief drawShape Draws the shape in a transformed painter according to zoom/translate/rotate status
+         * A derived class must implement this method
+         * \param painter
+         * \param rect The rect in pixel coordinates
+         */
+        virtual void drawShape(QPainter &painter, const RectWorldPx &rect) = 0;
+
     private:
         /// The base zoom level.
         int m_base_zoom;
+
+        /// A nonlinear zoom factor to control shape scaling across zoom factors
+        double m_nonlinear_zoom;
 
         /// The minimum size a shape can be drawn in pixels.
         QSizeF m_draw_minimum_px;

@@ -53,7 +53,9 @@ namespace qmapcontrol
          * @param zoom_minimum The minimum zoom level to show this geometry at.
          * @param zoom_maximum The maximum zoom level to show this geometry at.
          */
-        GeometryLineString(const std::vector<PointWorldCoord>& points, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        explicit GeometryLineString(const std::vector<PointWorldCoord>& points, const int& zoom_minimum = 0, const int& zoom_maximum = 17);
+        explicit GeometryLineString(int zoom_min = 0, int zoom_max = 17);
+
 
         //! Disable copy constructor.
         ///GeometryLineString(const GeometryLineString&) = delete; @todo re-add once MSVC supports default/delete syntax.
@@ -104,7 +106,7 @@ namespace qmapcontrol
          * @param backbuffer_rect_coord Only draw geometries that are contained in the backbuffer rect (world coordinates).
          * @param controller_zoom The current controller zoom.
          */
-        void draw(QPainter& painter, const RectWorldCoord& backbuffer_rect_coord, const int& controller_zoom) final;
+        void draw(QPainter& painter, const RectWorldCoord& backbuffer_rect_coord, const int& controller_zoom);
 
     private:
         //! Disable copy constructor.

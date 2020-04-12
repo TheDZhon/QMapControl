@@ -77,7 +77,7 @@ namespace qmapcontrol
          * @param range_coord The bounding box range to limit the geometries that are fetched in coordinates.
          * @return a list of geometries that are on this Layer within the bounding box range.
          */
-        const std::set<std::shared_ptr<Geometry>> getGeometries(const RectWorldCoord& range_coord) const;
+        const std::vector<std::shared_ptr<Geometry>> getGeometries(const RectWorldCoord& range_coord) const;
 
         /*!
          * Returns the Geometry QWidgets from this Layer (Use this instead of the member variable for thread-safety).
@@ -118,7 +118,7 @@ namespace qmapcontrol
          * @param mouse_point_coord The mouse point on the map in coord.
          * @param controller_zoom The current controller zoom.
          */
-        void mousePressEvent(const QMouseEvent* mouse_event, const PointWorldCoord& mouse_point_coord, const int& controller_zoom) const final;
+        bool mousePressEvent(const QMouseEvent* mouse_event, const PointWorldCoord& mouse_point_coord, const int& controller_zoom) const final;
 
         /*!
          * Draws each map adapter and geometry to a pixmap using the provided painter.
@@ -134,6 +134,9 @@ namespace qmapcontrol
          * @param controller_zoom The current controller zoom.
          */
         void moveGeometryWidgets(const PointPx& offset_px, const int& controller_zoom) const;
+
+        qreal getFuzzyFactorPx() const;
+        void setFuzzyFactorPx(const qreal &value);
 
     signals:
         /*!
@@ -154,5 +157,7 @@ namespace qmapcontrol
 
         /// Mutex to protect geometry widgets.
         mutable QReadWriteLock m_geometry_widgets_mutex;
+
+        qreal mFuzzyFactorPx;
     };
 }

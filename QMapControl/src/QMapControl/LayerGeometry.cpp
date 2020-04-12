@@ -31,31 +31,38 @@
 #include "GeometryPolygon.h"
 #include "Projection.h"
 
+#include <algorithm>
 namespace qmapcontrol
 {
     LayerGeometry::LayerGeometry(const std::string& name, const int& zoom_minimum, const int& zoom_maximum, QObject* parent)
         : Layer(LayerType::LayerGeometry, name, zoom_minimum, zoom_maximum, parent),
-          m_geometries(50, RectWorldCoord(PointWorldCoord(-180.0, 90.0), PointWorldCoord(180.0, -90.0)))
+          m_geometries(50, RectWorldCoord(PointWorldCoord(-180.0, 90.0), PointWorldCoord(180.0, -90.0))),
+          mFuzzyFactorPx(5.0)
     {
 
     }
 
-    const std::set< std::shared_ptr<Geometry> > LayerGeometry::getGeometries(const RectWorldCoord& range_coord) const
+    const std::vector<std::shared_ptr<Geometry>> LayerGeometry::getGeometries(const RectWorldCoord& range_coord) const
     {
         // Gain a read lock to protect the geometries container.
         QReadLocker locker(&m_geometries_mutex);
 
         // The geometries container to return.
-        std::set< std::shared_ptr<Geometry> > return_geometries;
+        std::vector<std::shared_ptr<Geometry>> return_geometries;
 
         // Populate the geometries container.
         m_geometries.query(return_geometries, range_coord);
 
+        // Sort by z-index
+        std::sort(return_geometries.begin(), return_geometries.end(),
+                  [](std::shared_ptr<Geometry> a, std::shared_ptr<Geometry> b) {
+                      return a->zIndex() < b->zIndex();
+                  });
         // Return the list of geometries.
         return return_geometries;
     }
 
-    const std::set< std::shared_ptr<GeometryWidget> > LayerGeometry::getGeometryWidgets() const
+    const std::set<std::shared_ptr<GeometryWidget>> LayerGeometry::getGeometryWidgets() const
     {
         // Gain a read lock to protect the geometry widgets container.
         QReadLocker locker(&m_geometry_widgets_mutex);
@@ -101,6 +108,7 @@ namespace qmapcontrol
         // Check the geometry is valid.
         if(geometry != nullptr)
         {
+            geometry->mLayer = this;
             // Handle the different geometry types.
             switch(geometry->geometryType())
             {
@@ -165,6 +173,8 @@ namespace qmapcontrol
                     break;
                 }
             }
+
+            geometry->onAddedToLayer(this);
 
             // Should we redraw?
             if(disable_redraw == false)
@@ -263,6 +273,8 @@ namespace qmapcontrol
                 }
             }
 
+            geometry->onRemovedFromLayer();
+
             // Should we redraw?
             if(disable_redraw == false)
             {
@@ -283,7 +295,7 @@ namespace qmapcontrol
         m_geometry_widgets.clear();
     }
 
-    void LayerGeometry::mousePressEvent(const QMouseEvent* mouse_event, const PointWorldCoord& mouse_point_coord, const int& controller_zoom) const
+    bool LayerGeometry::mousePressEvent(const QMouseEvent* mouse_event, const PointWorldCoord& mouse_point_coord, const int& controller_zoom) const
     {
         // Are mouse events enabled, is the layer visible and is it a mouse press event?
         if(isMouseEventsEnabled() && isVisible(controller_zoom) && mouse_event->type() == QEvent::MouseButtonPress)
@@ -291,14 +303,11 @@ namespace qmapcontrol
             // Is this a left-click event?
             if(mouse_event->button() == Qt::LeftButton)
             {
-                /// @TODO expose the fuzzy factor as a setting.
-                const qreal fuzzy_factor_px = 5.0;
-
                 // Calculate the mouse press world point in pixels.
                 const PointWorldPx mouse_point_px(projection::get().toPointWorldPx(mouse_point_coord, controller_zoom));
 
                 // Calculate a rect around the mouse point with a 'fuzzy-factor' around it in pixels.
-                const RectWorldPx mouse_rect_px(PointWorldPx(mouse_point_px.x() - fuzzy_factor_px, mouse_point_px.y() - fuzzy_factor_px), PointWorldPx(mouse_point_px.x() + fuzzy_factor_px, mouse_point_px.y() + fuzzy_factor_px));
+                const RectWorldPx mouse_rect_px(PointWorldPx(mouse_point_px.x() - mFuzzyFactorPx, mouse_point_px.y() - mFuzzyFactorPx), PointWorldPx(mouse_point_px.x() + mFuzzyFactorPx, mouse_point_px.y() + mFuzzyFactorPx));
 
                 // Calculate a rect around the mouse point with a 'fuzzy-factor' around it in coordinates.
                 const RectWorldCoord mouse_rect_coord(projection::get().toPointWorldCoord(mouse_rect_px.topLeftPx(), controller_zoom), projection::get().toPointWorldCoord(mouse_rect_px.bottomRightPx(), controller_zoom));
@@ -314,10 +323,13 @@ namespace qmapcontrol
                     {
                         // Emit that the geometry has been clicked.
                         emit geometryClicked(geometry.get());
+                        return true;
                     }
                 }
             }
         }
+
+        return false;
     }
 
     void LayerGeometry::draw(QPainter& painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const
@@ -356,5 +368,15 @@ namespace qmapcontrol
             }
         }
     }
+    qreal LayerGeometry::getFuzzyFactorPx() const
+    {
+        return mFuzzyFactorPx;
+    }
+
+    void LayerGeometry::setFuzzyFactorPx(const qreal &value)
+    {
+        mFuzzyFactorPx = value;
+    }
+
 
 }

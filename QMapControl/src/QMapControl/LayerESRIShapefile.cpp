@@ -114,9 +114,10 @@ namespace qmapcontrol
         }
     }
 
-    void LayerESRIShapefile::mousePressEvent(const QMouseEvent* /*mouse_event*/, const PointWorldCoord& /*mouse_point_coord*/, const int& /*controller_zoom*/) const
+    bool LayerESRIShapefile::mousePressEvent(const QMouseEvent* /*mouse_event*/, const PointWorldCoord& /*mouse_point_coord*/, const int& /*controller_zoom*/) const
     {
-        // Do nothing.
+        // Do Nothing...
+        return false;
     }
 
     void LayerESRIShapefile::draw(QPainter& painter, const RectWorldPx& backbuffer_rect_px, const int& controller_zoom) const
@@ -140,5 +141,11 @@ namespace qmapcontrol
                 painter.restore();
             }
         }
+    }
+
+    std::shared_ptr<ESRIShapefile> LayerESRIShapefile::getShapefile(int idx) const
+    {
+        QReadLocker lock(&m_esri_shapefiles_mutex);
+        return m_esri_shapefiles[idx];
     }
 }

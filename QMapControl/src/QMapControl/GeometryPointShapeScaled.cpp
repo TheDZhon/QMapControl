@@ -11,6 +11,7 @@ namespace qmapcontrol
     GeometryPointShapeScaled::GeometryPointShapeScaled(const qreal& longitude, const qreal& latitude, const QSizeF& base_size_px, const int& base_zoom, const int& zoom_minimum, const int& zoom_maximum)
         : GeometryPointShape(PointWorldCoord(longitude, latitude), base_size_px, zoom_minimum, zoom_maximum),
           m_base_zoom(base_zoom),
+          m_nonlinear_zoom(1.0),
           m_draw_minimum_px(-1.0, -1.0),
           m_draw_maximum_px(-1.0, -1.0)
     {
@@ -20,6 +21,7 @@ namespace qmapcontrol
     GeometryPointShapeScaled::GeometryPointShapeScaled(const PointWorldCoord& point_coord, const QSizeF& base_size_px, const int& base_zoom, const int& zoom_minimum, const int& zoom_maximum)
         : GeometryPointShape(point_coord, base_size_px, zoom_minimum, zoom_maximum),
           m_base_zoom(base_zoom),
+          m_nonlinear_zoom(1.0),
           m_draw_minimum_px(-1.0, -1.0),
           m_draw_maximum_px(-1.0, -1.0)
     {
@@ -39,6 +41,16 @@ namespace qmapcontrol
 
         // Update the shape.
         updateShape();
+    }
+
+    void GeometryPointShapeScaled::setNonlinearZoomFactor(double factor)
+    {
+        m_nonlinear_zoom = factor;
+    }
+
+    double GeometryPointShapeScaled::getNonlinearZoomFactor() const
+    {
+        return m_nonlinear_zoom;
     }
 
     const QSizeF& GeometryPointShapeScaled::drawMinimumPx() const
@@ -87,6 +99,45 @@ namespace qmapcontrol
 
         // Return the converted coord points.
         return RectWorldCoord(projection::get().toPointWorldCoord(top_left_point_px, controller_zoom), projection::get().toPointWorldCoord(bottom_right_point_px, controller_zoom));
+    }
+
+    void GeometryPointShapeScaled::draw(QPainter &painter, const RectWorldCoord &backbuffer_rect_coord, const int &controller_zoom)
+    {
+        // Check the geometry is visible.
+        if(isVisible(controller_zoom))
+        {
+            // Check if the bounding boxes intersect.
+            const RectWorldCoord pixmap_rect_coord(boundingBox(controller_zoom));
+            if(backbuffer_rect_coord.rawRect().intersects(pixmap_rect_coord.rawRect()))
+            {
+                // Calculate the pixmap rect to draw within.
+                const RectWorldPx pixmap_rect_px(projection::get().toPointWorldPx(pixmap_rect_coord.topLeftCoord(), controller_zoom), projection::get().toPointWorldPx(pixmap_rect_coord.bottomRightCoord(), controller_zoom));
+
+
+                qreal scale = pow(2.0, m_nonlinear_zoom * (controller_zoom - baseZoom()));
+
+                // Translate to center point with required rotation.
+                painter.translate(pixmap_rect_px.centerPx().rawPoint());
+                painter.rotate(rotation());
+                painter.scale(scale, scale);
+
+                drawShape(painter, pixmap_rect_px);
+
+                // Un-translate.
+                painter.scale(1.0/scale, 1.0/scale);
+                painter.rotate(-rotation());
+                painter.translate(-pixmap_rect_px.centerPx().rawPoint());
+
+                // Do we have a meta-data value and should we display it at this zoom?
+                if(controller_zoom >= m_metadata_displayed_zoom_minimum && metadata(m_metadata_displayed_key).isNull() == false)
+                {
+                    /// @todo calculate correct alignment for metadata displayed offset.
+
+                    // Draw the text next to the point with an offset.
+                    painter.drawText(pixmap_rect_px.rawRect().topRight() + PointPx(m_metadata_displayed_alignment_offset_px, -m_metadata_displayed_alignment_offset_px).rawPoint(), metadata(m_metadata_displayed_key).toString());
+                }
+            }
+        }
     }
 
     const QSizeF GeometryPointShapeScaled::calculateGeometrySizePx(const int& controller_zoom) const
