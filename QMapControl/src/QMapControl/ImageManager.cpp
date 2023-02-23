@@ -65,8 +65,8 @@ namespace qmapcontrol
         : QObject(parent),
           m_tile_size_px(tile_size_px),
           m_pixmap_loading(),
-          m_persistent_cache(false),
-          m_persistent_cache_expiry(0)
+          m_persistent_cache(true),
+          m_persistent_cache_expiry(30)
     {
         // Setup a loading pixmap.
         setupLoadingPixmap();

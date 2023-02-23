@@ -77,7 +77,7 @@ namespace qmapcontrol
           m_primary_screen(size_px.toSize() * 2),
           m_primary_screen_map_focus_point_px(0.0, 0.0),
           m_primary_screen_backbuffer_rect_px(PointWorldPx(0.0, 0.0), PointWorldPx(0.0, 0.0)),
-          m_primary_screen_scaled_enabled(false),
+          m_primary_screen_scaled_enabled(true),
           m_primary_screen_scaled(size_px.toSize() * 2),
           m_primary_screen_scaled_offset(0.0, 0.0),
           m_zoom_control_align_left(true),
