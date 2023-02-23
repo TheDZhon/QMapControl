@@ -79,8 +79,6 @@ namespace qmapcontrol
           m_primary_screen_backbuffer_rect_px(PointWorldPx(0.0, 0.0), PointWorldPx(0.0, 0.0)),
           m_primary_screen_scaled_enabled(true),
           m_primary_screen_scaled(size_px.toSize() * 2),
-          m_primary_screen_scaled_offset(0.0, 0.0),
-          m_primary_screen_scaled_zoom(0),
           m_primary_screen_scaled_focus_point_world_coor(0.0, 0.0),
           m_zoom_control_align_left(true),
           m_zoom_control_button_in("+", this),
@@ -381,7 +379,6 @@ namespace qmapcontrol
         m_primary_screen.fill(Qt::transparent);
         m_primary_screen_scaled = QPixmap(m_viewport_size_px.toSize() * 2);
         m_primary_screen_scaled.fill(Qt::transparent);
-        m_primary_screen_scaled_offset = PointPx(0.0, 0.0);
 
         // Force the primary screen to be redrawn.
         redrawPrimaryScreen(true);
@@ -907,10 +904,6 @@ namespace qmapcontrol
                 const PointWorldCoord wheel_coord(toPointWorldCoord(wheel_px));
                 const PointPx wheel_delta(mapFocusPointWorldPx() - toPointWorldPx(wheel_px));
 
-                // Update the scaled offset with the current wheel_delta.
-                /// @TODO should this add to the offset?
-                m_primary_screen_scaled_offset = wheel_delta;
-
                 // Zoom in.
                 zoomIn();
 
@@ -938,11 +931,6 @@ namespace qmapcontrol
                 const PointViewportPx wheel_px(wheel_event->posF().x(), wheel_event->posF().y());
                 const PointWorldCoord wheel_coord(toPointWorldCoord(wheel_px));
                 const PointPx wheel_delta(mapFocusPointWorldPx() - toPointWorldPx(wheel_px));
-
-                // Update the scaled offset with the current wheel_delta.
-                /// @TODO should this add to the offset?
-                /// @TODO not sure if this is correct delta to apply on zoom out!
-                m_primary_screen_scaled_offset = wheel_delta;
 
                 // Zoom out.
                 zoomOut();
@@ -1042,7 +1030,6 @@ namespace qmapcontrol
 
                 // Store the new scaled primary screen.
                 m_primary_screen_scaled = new_primary_screen_scaled;
-                m_primary_screen_scaled_zoom = m_current_zoom;
                 m_primary_screen_scaled_focus_point_world_coor = m_map_focus_coord;
             }
 
@@ -1085,7 +1072,6 @@ namespace qmapcontrol
 
                 // Store the new scaled primary screen.
                 m_primary_screen_scaled = new_primary_screen_scaled;
-                m_primary_screen_scaled_zoom = m_current_zoom;
                 m_primary_screen_scaled_focus_point_world_coor = m_map_focus_coord;
             }
 
@@ -1481,22 +1467,14 @@ namespace qmapcontrol
         // Is the primary screen scaled enabled?
         if(m_primary_screen_scaled_enabled)
         {
+            // For that `m_primary_screen` and `m_primary_screen_scaled` are of the same size,
+            // we can track only the coordinates(lon/lat) of scaled printscreen to paste it
+            // correctly into the renewed viewport.
             auto scaled_focus_world_px = projection::get().toPointWorldPx(
                 m_primary_screen_scaled_focus_point_world_coor, m_current_zoom);
-            // Draw the current scaled primary screem image to the pixmap with wheel event
-            // offset. Note: m_viewport_center_px is the same as (m_viewport_size_px / 2)
-            painter->drawPixmap(-(m_viewport_center_px + mapFocusPointWorldPx()
-                                  - scaled_focus_world_px)
-                                     .rawPoint(),
-                                m_primary_screen_scaled);
-
-            /*
-            painter->drawPixmap(-(m_viewport_center_px + mapFocusPointWorldPx()
-                                  - m_primary_screen_map_focus_point_px
-                                  - m_primary_screen_scaled_offset)
-                                     .rawPoint(),
-                                m_primary_screen_scaled);
-            */
+            painter->drawPixmap(
+                -(m_viewport_center_px + mapFocusPointWorldPx() - scaled_focus_world_px).rawPoint(),
+                m_primary_screen_scaled);
         }
 
         // Draws the primary screen image to the pixmap.
@@ -1678,9 +1656,6 @@ namespace qmapcontrol
     {
         // Remove the scaled image, as all new images have been loaded.
         m_primary_screen_scaled.fill(Qt::transparent);
-
-        // Reset the scaled image offset.
-        m_primary_screen_scaled_offset = PointPx(0.0, 0.0);
 
         // Request the primary screen to be redrawn.
         redrawPrimaryScreen();

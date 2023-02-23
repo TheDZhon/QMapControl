@@ -721,9 +721,6 @@ namespace qmapcontrol
         /// Primary screen scaled pixmap (zoom in/out).
         QPixmap m_primary_screen_scaled;
 
-        /// Primary screen scaled zoom level
-        int m_primary_screen_scaled_zoom;
-
         /// Primary screen scaled
         PointWorldCoord m_primary_screen_scaled_focus_point_world_coor;
 
